@@ -14,6 +14,36 @@ class DefaultConfiguration:
         self.activation = 'sigmoid'
         self.node_aggregation = 'sum'
 
+        # node genes configuration
+        self.bias_init_mean = 0.0
+        self.bias_init_stdev = 1.0
+        self.bias_max_value = 30.0
+        self.bias_min_value = -30.0
+        self.bias_mutate_power = 0.5
+        self.bias_mutate_rate = 0.7
+        self.bias_replace_rate = 0.1
+
+        # TODO: THIS IS REDUNDANT AND INNECESARY BECAUSE IT DOES NOT CHANGE
+        self.response_init_mean = 1.0
+        self.response_init_stdev = 0.0
+        self.response_max_value = 30.0
+        self.response_min_value = -30.0
+        self.response_mutate_power = 0.0
+        self.response_mutate_rate = 0.0
+        self.response_replace_rate = 0.00
+
+        # Connection Genes Configuration
+
+        self.weight_mean_init_mean = 1
+        self.weight_mean_init_std = 1
+        self.weight_mean_max_value = 10
+        self.weight_mean_min_value = -10
+
+        self.weight_std_init_mean = 1
+        self.weight_std_init_std = 0
+        self.weight_std_max_value = 2
+        self.weight_std_min_value = 0
+
     def get_configuration(self):
         configuration = {}
         for attr_name in dir(self):
