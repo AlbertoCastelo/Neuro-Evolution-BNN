@@ -1,4 +1,4 @@
-from neat.populationengine import EvolutionEngine
+from neat.population_engine import EvolutionEngine
 from neat.configuration import get_configuration
 
 

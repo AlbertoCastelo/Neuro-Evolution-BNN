@@ -4,6 +4,16 @@ from neat.configuration import get_configuration
 from neat.gene import NodeGene, ConnectionGene
 
 
+class GenomeSample:
+    def __init__(self, key, n_output, n_input, node_genes, connection_genes):
+        self.key = key
+        self.n_output = n_output
+        self.n_input = n_input
+        self.node_genes = node_genes
+        self.connection_genes = connection_genes
+        self.fitness = None
+
+
 class Genome:
 
     def __init__(self, key, ):
@@ -28,6 +38,18 @@ class Genome:
 
         # initialize connections
         self._initialize_connections()
+
+    def get_genome_sample(self):
+        '''
+        Takes a sample of the network to be analyzed. This translates in taking a sample of each connection distribution
+        '''
+        connection_genes_sample = {}
+        for key, connection_gene in self.connection_genes.items():
+            connection_genes_sample[key] = connection_gene.take_sample()
+
+        return GenomeSample(key=self.key, n_input=self.n_input, n_output=self.n_output,
+                            node_genes=self.node_genes,
+                            connection_genes=connection_genes_sample)
 
     def _initialize_connections(self):
         # initialize fully connected network with no recurrent connections

@@ -44,6 +44,9 @@ class ConnectionGene(Gene):
                              a_max=self.weight_configuration.weight_std_max_value)
         self.weight_std = weight_std
 
+    def take_sample(self):
+        return np.random.normal(loc=self.weight_mean, scale=self.weight_std)
+
 
 
 class NodeGene(Gene):
