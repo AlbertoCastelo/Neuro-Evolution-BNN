@@ -4,25 +4,38 @@ from neat.configuration import get_configuration
 from neat.genome import Genome
 
 
-class Evolution:
+class EvaluationEngine:
+    def __init__(self):
+        self.config = get_configuration()
+
+    def evaluate(self, population: dict):
+        for key, genome in population.items():
+            pass
+
+        return population
+
+
+
+
+class EvolutionEngine:
 
     def __init__(self):
-        self.population = Population()
+        self.population_engine = PopulationEngine()
+        self.evaluation_engine = EvaluationEngine()
         self.evolution_configuration = get_configuration()
         self.n_generations = self.evolution_configuration.n_generations
 
     def run(self):
         # initialize population
-        pop = self.population.initialize_population()
+        population = self.population_engine.initialize_population()
 
-        pop = self.evalu
+        population = self.evaluation_engine.evaluate(population=population)
 
         for generation in range(self.n_generations):
             pass
 
 
-
-class Population:
+class PopulationEngine:
     def __init__(self):
         self.config = get_configuration()
         self.pop_size = self.config.pop_size
@@ -40,4 +53,3 @@ class Population:
             population[key] = genome
             self.ancestors[key] = tuple()
         return population
-

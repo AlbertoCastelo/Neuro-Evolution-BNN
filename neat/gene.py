@@ -32,7 +32,7 @@ class ConnectionGene(Gene):
         weight_mean = np.random.normal(loc=weight_mean_mean, scale=weight_mean_std)
         weight_mean = np.clip(weight_mean,
                               a_min=self.weight_configuration.weight_mean_min_value,
-                              a_max=self.weight_configuration.weight_mean_min_value)
+                              a_max=self.weight_configuration.weight_mean_max_value)
         self.weight_mean = weight_mean
 
         weight_std_mean = self.weight_configuration.weight_std_init_mean
@@ -41,7 +41,7 @@ class ConnectionGene(Gene):
         weight_std = np.random.normal(loc=weight_std_mean, scale=weight_std_std)
         weight_std = np.clip(weight_std,
                              a_min=self.weight_configuration.weight_std_min_value,
-                             a_max=self.weight_configuration.weight_std_min_value)
+                             a_max=self.weight_configuration.weight_std_max_value)
         self.weight_std = weight_std
 
 
@@ -84,13 +84,13 @@ class BiasConfig:
 class WeightConfig:
     def __init__(self):
         config = get_configuration()
-        self.weight_mean_init_mean = config.weight_init_mean
-        self.weight_mean_init_std = config.weight_init_std
+        self.weight_mean_init_mean = config.weight_mean_init_mean
+        self.weight_mean_init_std = config.weight_mean_init_std
         self.weight_mean_max_value = config.weight_mean_max_value
         self.weight_mean_min_value = config.weight_mean_min_value
 
-        self.weight_std_init_mean = config.weight_init_mean
-        self.weight_std_init_std = config.weight_init_std
+        self.weight_std_init_mean = config.weight_std_init_mean
+        self.weight_std_init_std = config.weight_std_init_std
         self.weight_std_max_value = config.weight_std_max_value
         self.weight_std_min_value = config.weight_std_min_value
 

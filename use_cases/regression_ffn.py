@@ -1,4 +1,4 @@
-from neat.Population import Evolution
+from neat.populationengine import EvolutionEngine
 from neat.configuration import get_configuration
 
 
@@ -7,7 +7,7 @@ def run():
     config = get_configuration()
 
     # setup evolution
-    evolution = Evolution()
+    evolution = EvolutionEngine()
     evolution.run()
 
 

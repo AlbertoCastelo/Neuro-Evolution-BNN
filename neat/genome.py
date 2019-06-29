@@ -73,7 +73,7 @@ class Genome:
         return range(self.n_output)
 
     def _get_hidden_nodes(self):
-        return self.node_genes.keys()[self.n_output:]
+        return list(self.node_genes.keys())[self.n_output:]
 
     def _initialize_input_nodes(self):
         # input nodes only contain keys (they cannot be evolved)
