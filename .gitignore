@@ -103,5 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# pycharm
+.idea/
+
 # env variables
 .env_engine
