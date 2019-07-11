@@ -1,4 +1,6 @@
+import torch
 from torch import nn
+from torch.autograd import Variable
 
 from neat.genome import GenomeSample
 
@@ -43,7 +45,8 @@ class Network(nn.Module):
 
         layers = self._get_network_layers(n_input=n_input,
                                           n_output=n_output,
-                                          hidden_node_keys=hidden_node_keys)
+                                          nodes=nodes,
+                                          connections=connections)
 
         self.layers = layers
         for i, layer in enumerate(layers):
@@ -52,11 +55,20 @@ class Network(nn.Module):
         self._set_network_weights(nodes=nodes, connections=connections)
 
     def _set_network_weights(self, nodes, connections):
-        pass
 
-    def _get_network_layers(self, hidden_node_keys, n_input, n_output):
+        # logger.debug('Setting Network weights')
+        print('Setting Network weights')
+        # https://discuss.pytorch.org/t/over-writing-weights-of-a-pre-trained-network-like-alexnet/11912
+        state_dict = self.state_dict()
+        # state_dict["layer_0.bias"] = torch.tensor([nodes[0].bias, nodes[1].bias])
+        state_dict["layer_0.bias"] = torch.tensor([0.0, 0.0])
+        state_dict["layer_0.weight"] = torch.tensor([[connections[(-1, 0)], connections[(-2, 0)]],
+                                                     [connections[(-1, 1)], connections[(-2, 1)]]])
+        self.load_state_dict(state_dict)
+
+    def _get_network_layers(self, n_input, n_output, nodes: dict, connections: dict):
         layers = []
-        if hidden_node_keys:
+        if self._has_hidden_layers(nodes=nodes):
             pass
         else:
             layers.append(nn.Linear(n_input, n_output, bias=True))
@@ -64,7 +76,11 @@ class Network(nn.Module):
         return layers
 
     def forward(self, x):
+        # TODO: do not use
         for i, layer in enumerate(self.layers):
             x = getattr(self, f'layer_{i}')(x)
 
         return x
+
+    def _has_hidden_layers(self, nodes):
+        return False
