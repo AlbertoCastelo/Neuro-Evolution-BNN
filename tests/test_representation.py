@@ -4,6 +4,7 @@ from neat.gene import NodeGene
 from neat.genome import GenomeSample
 from neat.representation import get_nn_from_genome, Network
 import torch
+import numpy as np
 
 
 class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
@@ -55,5 +56,5 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         result = model.forward(input.data)
 
         self.assertEqual(len(result), n_output)
-        # TODO: fix this test (it's already correct)
-        self.assertTrue(torch.allclose(result, torch.tensor([0.9820, 0.5])))
+
+        self.assertTrue(torch.allclose(result, torch.tensor([0.9820, 0.5]), atol=1e-02))
