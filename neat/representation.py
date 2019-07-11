@@ -60,8 +60,7 @@ class Network(nn.Module):
         print('Setting Network weights')
         # https://discuss.pytorch.org/t/over-writing-weights-of-a-pre-trained-network-like-alexnet/11912
         state_dict = self.state_dict()
-        # state_dict["layer_0.bias"] = torch.tensor([nodes[0].bias, nodes[1].bias])
-        state_dict["layer_0.bias"] = torch.tensor([0.0, 0.0])
+        state_dict["layer_0.bias"] = torch.tensor([nodes[0].bias, nodes[1].bias])
         state_dict["layer_0.weight"] = torch.tensor([[connections[(-1, 0)], connections[(-2, 0)]],
                                                      [connections[(-1, 1)], connections[(-2, 1)]]])
         self.load_state_dict(state_dict)
