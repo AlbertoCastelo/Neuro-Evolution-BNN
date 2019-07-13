@@ -59,8 +59,10 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
     def test_weights_are_correctly_set(self):
         node_0 = NodeGene(key=0)
         node_0.random_initialization()
+        node_0.bias = 0.0
         node_1 = NodeGene(key=1)
         node_1.random_initialization()
+        node_1.bias = 0.0
 
         node_genes = {0: node_0, 1: node_1}
 
@@ -120,8 +122,12 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
         result = model.forward(input.data)
 
         self.assertEqual(len(result), genome_sample.n_output)
+        self.assertEqual(model.n_layers, 2)
+        self.assertTrue(torch.allclose(result, torch.tensor([0.7128, 0.7311]), atol=1e-02))
 
-        self.assertTrue(torch.allclose(result, torch.tensor([0.9820, 0.5]), atol=1e-02))
+    def test_weights_are_located_correctly(self):
+        # TODO
+        pass
 
 
 def generate_feedforward_with_one_hidden_unit():
@@ -143,7 +149,7 @@ def generate_feedforward_with_one_hidden_unit():
     node_3.random_initialization()
     node_3.bias = -1.0
 
-    node_genes = {0: node_0, 1: node_1}
+    node_genes = {0: node_0, 1: node_1, 2: node_2, 3: node_3}
 
     connection_genes = {(-1, 2): 1.5,
                         (-2, 2): 2.5,

@@ -41,56 +41,70 @@ class Network(nn.Module):
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
 
-        hidden_node_keys = _get_hidden_nodes(nodes=self.nodes, n_output=self.n_output)
+        layers_dict = self._transform_genome_to_layers(nodes=self.nodes,
+                                                       connections=self.connections,
+                                                       n_output=self.n_output)
+        self.n_layers = len(layers_dict)
+        self._set_network_layers(layers=layers_dict)
 
-        layers = self._get_network_layers(n_input=self.n_input,
-                                          n_output=self.n_output,
-                                          nodes=self.nodes,
-                                          connections=self.connections)
-
-        self.layers = layers
-        for i, layer in enumerate(layers):
-            setattr(self, f'layer_{i}', layer)
-
-        self._set_network_weights(nodes=self.nodes, connections=self.connections)
+        self._set_network_weights(layers=layers_dict)
 
     def forward(self, x):
-        # TODO: do not use
-        for i, layer in enumerate(self.layers):
+        start_index = self.n_layers - 1
+        for i in range(start_index, -1, -1):
             x = getattr(self, f'layer_{i}')(x)
-
+            x = getattr(self, f'activation_{i}')(x)
         return x
 
-    def _set_network_weights(self, nodes, connections):
+    def _set_network_layers(self, layers: dict):
+        # layers_list = list(layers.keys())
+        for layer_key in layers:
+            layer = layers[layer_key]
+            setattr(self, f'layer_{layer_key}', nn.Linear(layer['n_input'], layer['n_output'], bias=True))
+            setattr(self, f'activation_{layer_key}', nn.Sigmoid())
 
+    def _set_network_weights(self, layers: dict):
         # logger.debug('Setting Network weights')
         print('Setting Network weights')
         # https://discuss.pytorch.org/t/over-writing-weights-of-a-pre-trained-network-like-alexnet/11912
         state_dict = self.state_dict()
-        state_dict["layer_0.bias"] = torch.tensor([nodes[0].bias, nodes[1].bias])
-        state_dict["layer_0.weight"] = torch.tensor([[connections[(-1, 0)], connections[(-2, 0)]],
-                                                     [connections[(-1, 1)], connections[(-2, 1)]]])
+        for layer_key in layers:
+            layer = layers[layer_key]
+
+            state_dict[f'layer_{layer_key}.bias'] = layer['bias']
+            state_dict[f'layer_{layer_key}.weight'] = layer['weights']
+
         self.load_state_dict(state_dict)
 
-    def _get_network_layers(self, n_input, n_output, nodes: dict, connections: dict):
+    def _transform_genome_to_layers(self, n_output, nodes: dict, connections: dict) -> dict:
         layers = dict()
 
         output_node_keys = list(nodes.keys())[:n_output]
-        output_layer = _get_layer_definition(nodes=nodes,
-                                             connections=connections,
-                                             layer_node_keys=output_node_keys)
-        layers['output'] = output_layer
-        # recursively get layers
-        hidden_nodes = len(nodes.keys()) - n_output
-        while hidden_nodes > 0:
-            pass
 
-        if self._has_hidden_layers(nodes=nodes):
-            pass
-        else:
-            layers.append(nn.Linear(n_input, n_output, bias=True))
-            layers.append(nn.Sigmoid())
+        layer_node_keys = output_node_keys
+
+        layer_counter = 0
+        is_not_finished = True
+        while is_not_finished:
+            layer = _get_layer_definition(nodes=nodes,
+                                          connections=connections,
+                                          layer_node_keys=layer_node_keys)
+            layer_node_keys = layer['input_keys']
+            layers[layer_counter] = layer
+            layer_counter += 1
+            if self._is_next_layer_input(layer_node_keys):
+                is_not_finished = False
         return layers
+
+    @staticmethod
+    def _is_next_layer_input(layer_node_keys):
+        '''
+        Given all the keys in a layer will return True if all the keys are negative.
+        '''
+        is_negative = True
+        for key in layer_node_keys:
+            is_negative *= True if key < 0 else False
+        return is_negative
 
     def _has_hidden_layers(self, nodes):
         if len(nodes) > self.n_output:
@@ -118,6 +132,7 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
             input_node_keys = input_node_keys.union({key[0]})
             layer_connections[key] = connections[key]
 
+    input_node_keys = list(input_node_keys)
     n_input = len(input_node_keys)
 
     key_index_mapping_input = dict()
@@ -132,10 +147,12 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     for key in layer_connections:
         weights[key_index_mapping_input[key[0]], key_index_mapping_output[key[1]]] = \
             layer_connections[key]
+
+    # weights = torch.transpose(weights)
     layer['n_input'] = n_input
     layer['n_output'] = n_output
     layer['input_keys'] = input_node_keys
     layer['output_keys'] = layer_node_keys
     layer['bias'] = bias
-    layer['weights'] = weights
+    layer['weights'] = weights.transpose(dim0=0, dim1=1)
     return layer
