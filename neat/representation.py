@@ -49,6 +49,9 @@ class Network(nn.Module):
         self.load_state_dict(state_dict)
 
     def _transform_genome_to_layers(self, n_output, nodes: dict, connections: dict) -> dict:
+        '''
+        Layers are assigned an integer key, starting with the output layer (0) towards the hidden layers (1, 2, ...)
+        '''
         layers = dict()
 
         output_node_keys = list(nodes.keys())[:n_output]
