@@ -118,9 +118,9 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     for output_index, output_key in enumerate(layer_node_keys):
         key_index_mapping_output[output_key] = output_index
 
-    weights = torch.zeros([n_input, n_output])
+    weights = torch.zeros([n_output, n_input])
     for key in layer_connections:
-        weights[key_index_mapping_input[key[0]], key_index_mapping_output[key[1]]] = \
+        weights[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
             layer_connections[key]
 
     # weights = torch.transpose(weights)
@@ -129,5 +129,5 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     layer['input_keys'] = input_node_keys
     layer['output_keys'] = layer_node_keys
     layer['bias'] = bias
-    layer['weights'] = weights.transpose(dim0=0, dim1=1)
+    layer['weights'] = weights
     return layer
