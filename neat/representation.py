@@ -61,9 +61,9 @@ class Network(nn.Module):
         layer_counter = 0
         is_not_finished = True
         while is_not_finished:
-            layer = _get_layer_definition(nodes=nodes,
-                                          connections=connections,
-                                          layer_node_keys=layer_node_keys)
+            layer = self._get_layer_definition(nodes=nodes,
+                                               connections=connections,
+                                               layer_node_keys=layer_node_keys)
             layer_node_keys = layer['input_keys']
             layers[layer_counter] = layer
             layer_counter += 1
@@ -81,53 +81,54 @@ class Network(nn.Module):
             is_negative *= True if key < 0 else False
         return is_negative
 
+    @staticmethod
+    def _get_layer_definition(nodes, connections, layer_node_keys):
+        '''
+        It only works for feed-forward neural networks without multihop connections.
+        That is, there is no recurrent connection neigther connections between layer{i} and layer{i+2}
+        '''
+        layer = dict()
+        n_output = len(layer_node_keys)
+
+        # get bias
+        layer_node_keys.sort()
+        bias_values = [nodes[key].bias for key in layer_node_keys]
+        bias = torch.tensor(bias_values)
+
+        layer_connections = dict()
+        input_node_keys = set({})
+        for key in connections:
+            output_node = key[1]
+            if output_node in layer_node_keys:
+                input_node_keys = input_node_keys.union({key[0]})
+                layer_connections[key] = connections[key]
+
+        input_node_keys = list(input_node_keys)
+        n_input = len(input_node_keys)
+
+        key_index_mapping_input = dict()
+        for input_index, input_key in enumerate(input_node_keys):
+            key_index_mapping_input[input_key] = input_index
+
+        key_index_mapping_output = dict()
+        for output_index, output_key in enumerate(layer_node_keys):
+            key_index_mapping_output[output_key] = output_index
+
+        weights = torch.zeros([n_output, n_input])
+        for key in layer_connections:
+            weights[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
+                layer_connections[key]
+
+        # weights = torch.transpose(weights)
+        layer['n_input'] = n_input
+        layer['n_output'] = n_output
+        layer['input_keys'] = input_node_keys
+        layer['output_keys'] = layer_node_keys
+        layer['bias'] = bias
+        layer['weights'] = weights
+        return layer
+
     def _has_hidden_layers(self, nodes):
         if len(nodes) > self.n_output:
             return True
         return False
-
-def _get_layer_definition(nodes, connections, layer_node_keys):
-    '''
-    It only works for feed-forward neural networks without multihop connections.
-    That is, there is no recurrent connection neigther connections between layer{i} and layer{i+2}
-    '''
-    layer = dict()
-    n_output = len(layer_node_keys)
-
-    # get bias
-    layer_node_keys.sort()
-    bias_values = [nodes[key].bias for key in layer_node_keys]
-    bias = torch.tensor(bias_values)
-
-    layer_connections = dict()
-    input_node_keys = set({})
-    for key in connections:
-        output_node = key[1]
-        if output_node in layer_node_keys:
-            input_node_keys = input_node_keys.union({key[0]})
-            layer_connections[key] = connections[key]
-
-    input_node_keys = list(input_node_keys)
-    n_input = len(input_node_keys)
-
-    key_index_mapping_input = dict()
-    for input_index, input_key in enumerate(input_node_keys):
-        key_index_mapping_input[input_key] = input_index
-
-    key_index_mapping_output = dict()
-    for output_index, output_key in enumerate(layer_node_keys):
-        key_index_mapping_output[output_key] = output_index
-
-    weights = torch.zeros([n_output, n_input])
-    for key in layer_connections:
-        weights[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            layer_connections[key]
-
-    # weights = torch.transpose(weights)
-    layer['n_input'] = n_input
-    layer['n_output'] = n_output
-    layer['input_keys'] = input_node_keys
-    layer['output_keys'] = layer_node_keys
-    layer['bias'] = bias
-    layer['weights'] = weights
-    return layer

@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from neat.gene import NodeGene
 from neat.genome import GenomeSample
@@ -186,3 +186,23 @@ def generate_feedforward_with_one_hidden_unit():
                                  node_genes=node_genes,
                                  connection_genes=connection_genes)
     return genome_sample
+
+
+class TestRepresentationFeedForwardWithJumpingConnections(TestCase):
+
+    @skip('Not there yet')
+    def test_network_structure(self):
+        genome_sample = generate_feedforward_with_jumping_connections()
+
+        model = Network(genome=genome_sample)
+
+        input = torch.tensor([1.0, -1.0])
+        result = model.forward(input.data)
+
+        self.assertEqual(len(result), genome_sample.n_output)
+        self.assertEqual(model.n_layers, 2)
+        self.assertTrue(torch.allclose(result, torch.tensor([0.9173, 0.7311]), atol=1e-02))
+
+
+def generate_feedforward_with_jumping_connections():
+    pass
