@@ -123,11 +123,27 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
 
         self.assertEqual(len(result), genome_sample.n_output)
         self.assertEqual(model.n_layers, 2)
-        self.assertTrue(torch.allclose(result, torch.tensor([0.7128, 0.7311]), atol=1e-02))
+        self.assertTrue(torch.allclose(result, torch.tensor([0.9173, 0.7311]), atol=1e-02))
 
     def test_weights_are_located_correctly(self):
-        # TODO
-        pass
+        genome_sample = generate_feedforward_with_one_hidden_unit()
+
+        model = Network(genome=genome_sample)
+
+        expected_bias_layer_0 = torch.tensor([1.0, 1.0])
+        self.assertTrue(torch.allclose(model.layer_0.bias, expected_bias_layer_0))
+
+        expected_bias_layer_1 = torch.tensor([1.0, -1.0, 0.0])
+        self.assertTrue(torch.allclose(model.layer_1.bias, expected_bias_layer_1))
+
+        expected_weight_layer_0 = torch.tensor([[0.0, -0.5, 1.5],
+                                                [0.0, 0.0, 0.0]])
+        self.assertTrue(torch.allclose(model.layer_0.weight, expected_weight_layer_0))
+
+        expected_weight_layer_1 = torch.tensor([[1.5, 2.5],
+                                                [-0.5, 0.0],
+                                                [5.5, -1]])
+        self.assertTrue(torch.allclose(model.layer_1.weight, expected_weight_layer_1))
 
 
 def generate_feedforward_with_one_hidden_unit():
@@ -149,14 +165,21 @@ def generate_feedforward_with_one_hidden_unit():
     node_3.random_initialization()
     node_3.bias = -1.0
 
-    node_genes = {0: node_0, 1: node_1, 2: node_2, 3: node_3}
+    node_4 = NodeGene(key=4)
+    node_4.random_initialization()
+    node_4.bias = 0.0
+
+    node_genes = {0: node_0, 1: node_1, 2: node_2, 3: node_3, 4: node_4}
 
     connection_genes = {(-1, 2): 1.5,
                         (-2, 2): 2.5,
                         (-1, 3): -0.5,
                         (-2, 3): 0.0,
+                        (-1, 4): 5.5,
+                        (-2, 4): -1,
                         (3, 0): -0.5,
-                        (2, 1): 0.0}
+                        (2, 1): 0.0,
+                        (4, 0): 1.5}
 
     n_output = 2
     genome_sample = GenomeSample(key=None, n_input=2, n_output=n_output,
