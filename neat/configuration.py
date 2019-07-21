@@ -7,6 +7,9 @@ class DefaultConfiguration:
         self.pop_size = 150
         self.n_generations = 200
 
+        # execution
+        self.is_gpu = False
+
         # network parameters
         self.n_input = 5
         self.n_output = 1
@@ -15,10 +18,16 @@ class DefaultConfiguration:
         self.node_aggregation = 'sum'
 
         # node genes configuration
-        self.bias_init_mean = 0.0
-        self.bias_init_std = 1.0
-        self.bias_max_value = 30.0
-        self.bias_min_value = -30.0
+        self.bias_mean_init_mean = 0.0
+        self.bias_mean_init_std = 1.0
+        self.bias_std_init_mean = 1.0
+        self.bias_std_init_std = 0.0
+
+        self.bias_mean_max_value = 30.0
+        self.bias_mean_min_value = -30.0
+        self.bias_std_max_value = 2
+        self.bias_std_min_value = 0
+
         self.bias_mutate_power = 0.5
         self.bias_mutate_rate = 0.7
         self.bias_replace_rate = 0.1
@@ -35,7 +44,7 @@ class DefaultConfiguration:
         self.response_replace_rate = 0.00
 
         # Connection Genes Configuration
-        self.weight_mean_init_mean = 1
+        self.weight_mean_init_mean = 0
         self.weight_mean_init_std = 1
         self.weight_mean_max_value = 10
         self.weight_mean_min_value = -10
@@ -45,6 +54,12 @@ class DefaultConfiguration:
         self.weight_std_init_std = 0
         self.weight_std_max_value = 2
         self.weight_std_min_value = 0
+
+        # PRIORS
+        self.weight_mean_prior = 0.0
+        self.weight_std_prior = 1.0
+        self.bias_mean_prior = 0.0
+        self.bias_std_prior = 1.0
 
     def get_configuration(self):
         configuration = {}
@@ -78,3 +93,4 @@ def get_configuration(filename=None):
     if _Configuration._instance is None:
         _Configuration(filename=filename)
     return _Configuration._instance
+
