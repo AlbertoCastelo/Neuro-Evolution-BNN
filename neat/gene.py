@@ -60,25 +60,47 @@ class NodeGene(Gene):
         self.aggregation = self.config.node_aggregation
 
         self.bias_configuration = BiasConfig()
-        self.bias = None
+        self.bias_mean = None
+        self.bias_std = None
 
     def random_initialization(self):
-        mean = self.bias_configuration.bias_init_mean
-        std = self.bias_configuration.bias_init_std
+        mean = self.bias_configuration.bias_mean_init_mean
+        std = self.bias_configuration.bias_mean_init_std
         bias = np.random.normal(loc=mean, scale=std)
         bias = np.clip(bias,
-                       a_min=self.bias_configuration.bias_min_value,
-                       a_max=self.bias_configuration.bias_max_value)
-        self.bias = bias
+                       a_min=self.bias_configuration.bias_mean_min_value,
+                       a_max=self.bias_configuration.bias_mean_max_value)
+        self.bias_mean = bias
+
+        bias_std_mean = self.bias_configuration.bias_std_init_mean
+        bias_std_std = self.bias_configuration.bias_std_init_std
+
+        bias_std = np.random.normal(loc=bias_std_mean, scale=bias_std_std)
+        bias_std = np.clip(bias_std,
+                           a_min=self.bias_configuration.bias_std_min_value,
+                           a_max=self.bias_configuration.bias_std_max_value)
+        self.bias_std = bias_std
+
+    def take_sample(self):
+        return np.random.normal(loc=self.bias_mean, scale=self.bias_std)
+
 
 class BiasConfig:
 
     def __init__(self):
         config = get_configuration()
-        self.bias_init_mean = config.bias_init_mean
-        self.bias_init_std = config.bias_init_std
-        self.bias_max_value = config.bias_max_value
-        self.bias_min_value = config.bias_min_value
+        self.bias_mean_init_mean = config.bias_mean_init_mean
+        self.bias_mean_init_std = config.bias_mean_init_std
+
+        self.bias_std_init_mean = config.bias_std_init_mean
+        self.bias_std_init_std = config.bias_std_init_std
+
+        self.bias_mean_max_value = config.bias_mean_max_value
+        self.bias_mean_min_value = config.bias_mean_min_value
+
+        self.bias_std_max_value = config.bias_std_max_value
+        self.bias_std_min_value = config.bias_std_min_value
+
         self.bias_mutate_power = config.bias_mutate_power
         self.bias_mutate_rate = config.bias_mutate_rate
         self.bias_replace_rate = config.bias_replace_rate

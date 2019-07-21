@@ -47,8 +47,12 @@ class Genome:
         for key, connection_gene in self.connection_genes.items():
             connection_genes_sample[key] = connection_gene.take_sample()
 
+        node_genes_sample = {}
+        for key, node_gene in self.node_genes.items():
+            node_genes_sample[key] = node_gene.take_sample()
+
         return GenomeSample(key=self.key, n_input=self.n_input, n_output=self.n_output,
-                            node_genes=self.node_genes,
+                            node_genes=node_genes_sample,
                             connection_genes=connection_genes_sample)
 
     def _initialize_connections(self):
