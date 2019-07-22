@@ -1,3 +1,6 @@
+import json
+
+
 class ConfigError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -7,7 +10,7 @@ class BaseConfiguration:
     pass
 
 
-class DefaultConfiguration:
+class DefaultConfiguration(BaseConfiguration):
     def __init__(self):
         # problem definition
         self.dataset_name = 'regression_example_1'
@@ -77,13 +80,17 @@ class DefaultConfiguration:
         # loss weighting factor
         self.beta = 'Standard'
 
-    def get_configuration(self):
+    def _get_configuration(self):
         configuration = {}
         for attr_name in dir(self):
-            if '__' in attr_name:
+            if attr_name[0] == '_':
                 continue
             configuration[attr_name] = getattr(self, attr_name)
         return configuration
+
+    def _write_to_json(self, filename):
+        config = self._get_configuration()
+        write_json_file_from_dict(data=config, filename=filename)
 
 
 class _Configuration:
@@ -92,7 +99,7 @@ class _Configuration:
     def __init__(self, filename):
         configuration = self.read_configuration_from_file(filename)
         if configuration is None:
-            configuration = DefaultConfiguration().get_configuration()
+            configuration = DefaultConfiguration()._get_configuration()
 
         assert isinstance(configuration, dict)
         config = BaseConfiguration()
@@ -102,7 +109,19 @@ class _Configuration:
         _Configuration._instance = config
 
     def read_configuration_from_file(self, filename):
-        return None
+        configuration = self.read_json_file(filename)
+        return configuration
+
+
+def read_json_file_to_dict(filename) -> dict:
+    with open(filename, 'rb') as file:
+        data = json.loads(file)
+    return data
+
+
+def write_json_file_from_dict(data: dict, filename):
+    with open(filename, 'w') as file:
+        json.dump(data, file)
 
 
 def get_configuration(filename=None):
