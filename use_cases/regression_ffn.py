@@ -3,7 +3,7 @@ from neat.configuration import get_configuration
 
 
 def run():
-    # load configuration
+    # initialize configuration
     config = get_configuration()
 
     # setup evolution

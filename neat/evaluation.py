@@ -50,6 +50,7 @@ class EvaluationEngine:
 
             # calculate Data log-likelihood (p(y*|x*,D))
             for batch_ids, (x_batch, y_batch) in enumerate(self.data_loader):
+                # TODO: be careful with this reshape when dimensions increase!!!!!
                 x_batch = x_batch.reshape((-1, genome.n_input))
                 if is_gpu:
                     x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
