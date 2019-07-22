@@ -4,7 +4,6 @@ import numpy as np
 
 
 class RegressionExample1Dataset(Dataset):
-    """Histo-Pathologic Cancer Dataset with binary labeling: Finding/No-Finding"""
 
     def __init__(self, dataset_type='train', is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
