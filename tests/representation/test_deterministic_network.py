@@ -1,8 +1,7 @@
 from unittest import TestCase, skip
 
-from neat.gene import NodeGene
 from neat.genome import GenomeSample
-from neat.representation import DeterministicNetwork
+from neat.representation.deterministic_network import DeterministicNetwork
 import torch
 
 
