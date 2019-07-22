@@ -9,16 +9,8 @@ import torch
 class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
 
     def test_network_structure(self):
-        node_0 = NodeGene(key=0)
-        node_0.random_initialization()
-        node_0.random_initialization()
-        node_0.bias = node_0.take_sample()
-        node_1 = NodeGene(key=1)
-        node_1.random_initialization()
-        node_1.random_initialization()
-        node_1.bias = node_1.take_sample()
-
-        node_genes = {0: node_0, 1: node_1}
+        node_genes = {0: 1.0,
+                      1: 0.0}
 
         connection_genes = {(-1, 0): 1.5,
                             (-2, 0): 2.5,
@@ -37,14 +29,8 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         self.assertEqual(len(result), n_output)
 
     def test_connection_is_not_specified_assumes_0(self):
-        node_0 = NodeGene(key=0)
-        node_0.random_initialization()
-        node_0.random_initialization()
-        node_0.bias = node_0.take_sample()
-        node_1 = NodeGene(key=1)
-        node_1.random_initialization()
-        node_1.bias = node_1.take_sample()
-        node_genes = {0: node_0, 1: node_1}
+        node_genes = {0: 1.0,
+                      1: 0.0}
 
         connection_genes = {(-1, 0): 1.5,
                             (-2, 0): 2.5,
@@ -63,14 +49,8 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         self.assertEqual(len(result), n_output)
 
     def test_weights_are_correctly_set(self):
-        node_0 = NodeGene(key=0)
-        node_0.random_initialization()
-        node_0.bias = 0.0
-        node_1 = NodeGene(key=1)
-        node_1.random_initialization()
-        node_1.bias = 0.0
-
-        node_genes = {0: node_0, 1: node_1}
+        node_genes = {0: 0.0,
+                      1: 0.0}
 
         connection_genes = {(-1, 0): 1.5,
                             (-2, 0): 2.5,
@@ -91,13 +71,8 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         self.assertTrue(torch.allclose(result, torch.tensor([0.9820, 0.5]), atol=1e-02))
 
     def test_bias_are_correctly_set(self):
-        node_0 = NodeGene(key=0)
-        node_0.random_initialization()
-        node_0.bias = 1.0
-        node_1 = NodeGene(key=1)
-        node_1.random_initialization()
-        node_1.bias = 0.0
-        node_genes = {0: node_0, 1: node_1}
+        node_genes = {0: 1.0,
+                      1: 0.0}
 
         connection_genes = {(-1, 0): 0.0,
                             (-2, 0): 0.0,
@@ -153,29 +128,11 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
 
 
 def generate_feedforward_with_one_hidden_unit():
-    # output nodes
-    node_0 = NodeGene(key=0)
-    node_0.random_initialization()
-    node_0.bias = 1.0
-
-    node_1 = NodeGene(key=1)
-    node_1.random_initialization()
-    node_1.bias = 1.0
-
-    # hidden nodes
-    node_2 = NodeGene(key=2)
-    node_2.random_initialization()
-    node_2.bias = 1.0
-
-    node_3 = NodeGene(key=3)
-    node_3.random_initialization()
-    node_3.bias = -1.0
-
-    node_4 = NodeGene(key=4)
-    node_4.random_initialization()
-    node_4.bias = 0.0
-
-    node_genes = {0: node_0, 1: node_1, 2: node_2, 3: node_3, 4: node_4}
+    node_genes = {0: 1.0,
+                  1: 1.0,
+                  2: 1.0,
+                  3: -1.0,
+                  4: 0}
 
     connection_genes = {(-1, 2): 1.5,
                         (-2, 2): 2.5,

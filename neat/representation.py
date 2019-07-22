@@ -104,7 +104,7 @@ class DeterministicNetwork(nn.Module):
 
         # get bias
         layer_node_keys.sort()
-        bias_values = [nodes[key].bias for key in layer_node_keys]
+        bias_values = [nodes[key] for key in layer_node_keys]
         bias = torch.tensor(bias_values)
 
         layer_connections = dict()
