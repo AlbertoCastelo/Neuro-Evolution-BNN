@@ -11,8 +11,12 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
     def test_network_structure(self):
         node_0 = NodeGene(key=0)
         node_0.random_initialization()
+        node_0.random_initialization()
+        node_0.bias = node_0.take_sample()
         node_1 = NodeGene(key=1)
         node_1.random_initialization()
+        node_1.random_initialization()
+        node_1.bias = node_1.take_sample()
 
         node_genes = {0: node_0, 1: node_1}
 
@@ -35,9 +39,11 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
     def test_connection_is_not_specified_assumes_0(self):
         node_0 = NodeGene(key=0)
         node_0.random_initialization()
+        node_0.random_initialization()
+        node_0.bias = node_0.take_sample()
         node_1 = NodeGene(key=1)
         node_1.random_initialization()
-
+        node_1.bias = node_1.take_sample()
         node_genes = {0: node_0, 1: node_1}
 
         connection_genes = {(-1, 0): 1.5,
