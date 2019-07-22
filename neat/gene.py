@@ -19,6 +19,8 @@ class ConnectionGene(Gene):
         '''
         key: must be a tuple of nodes' keys (key-origin-node, key-destiny-node)
         '''
+        if not isinstance(key, tuple):
+            raise ValueError('Key needs to be a tuple')
         super().__init__(key=key, type=CONNECTION_TYPE)
         self.key = key
         self.enabled = True
