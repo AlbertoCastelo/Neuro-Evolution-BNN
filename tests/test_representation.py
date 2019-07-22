@@ -2,7 +2,7 @@ from unittest import TestCase, skip
 
 from neat.gene import NodeGene
 from neat.genome import GenomeSample
-from neat.representation import Network
+from neat.representation import DeterministicNetwork
 import torch
 
 
@@ -25,7 +25,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
                                      node_genes=node_genes,
                                      connection_genes=connection_genes)
 
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
         result = model.forward(input.data)
@@ -48,7 +48,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
                                      node_genes=node_genes,
                                      connection_genes=connection_genes)
 
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
         result = model.forward(input.data)
@@ -76,7 +76,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
                                      connection_genes=connection_genes)
 
         # model = get_nn_from_genome(genome=genome_sample)
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
         input = torch.tensor([1.0, 1.0])
         result = model.forward(input.data)
 
@@ -103,7 +103,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
                                      connection_genes=connection_genes)
 
         # model = get_nn_from_genome(genome=genome_sample)
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
         input = torch.tensor([1.0, 1.0])
         result = model.forward(input.data)
 
@@ -116,7 +116,7 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
     def test_network_structure(self):
         genome_sample = generate_feedforward_with_one_hidden_unit()
 
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
         result = model.forward(input.data)
@@ -128,7 +128,7 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
     def test_weights_are_located_correctly(self):
         genome_sample = generate_feedforward_with_one_hidden_unit()
 
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
 
         expected_bias_layer_0 = torch.tensor([1.0, 1.0])
         self.assertTrue(torch.allclose(model.layer_0.bias, expected_bias_layer_0))
@@ -194,7 +194,7 @@ class TestRepresentationFeedForwardWithJumpingConnections(TestCase):
     def test_network_structure(self):
         genome_sample = generate_feedforward_with_jumping_connections()
 
-        model = Network(genome=genome_sample)
+        model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
         result = model.forward(input.data)
