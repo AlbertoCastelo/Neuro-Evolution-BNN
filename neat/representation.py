@@ -1,13 +1,25 @@
 import torch
 from torch import nn
 
-from neat.genome import GenomeSample
+from neat.genome import GenomeSample, Genome
 
 
-class Network(nn.Module):
+class StochasticNetwork(nn.Module):
+    def __init__(self, genome: Genome):
+        super(StochasticNetwork, self).__init__()
+        self.n_output = genome.n_output
+        self.n_input = genome.n_input
+        self.nodes = genome.node_genes
+        self.connections = genome.connection_genes
+
+    def forward(self, x):
+        pass
+
+
+class DeterministicNetwork(nn.Module):
 
     def __init__(self, genome: GenomeSample):
-        super(Network, self).__init__()
+        super(DeterministicNetwork, self).__init__()
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
