@@ -128,4 +128,3 @@ def get_configuration(filename=None):
     if _Configuration._instance is None:
         _Configuration(filename=filename)
     return _Configuration._instance
-
