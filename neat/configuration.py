@@ -1,8 +1,21 @@
+class ConfigError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class BaseConfiguration:
     pass
 
+
 class DefaultConfiguration:
     def __init__(self):
+        # problem definition
+        self.dataset_name = 'regression_example_1'
+        self.problem_type = 'regression'
+
+        # evaluation parameters
+        self.batch_size = 10000
+
         # evolution parameters
         self.pop_size = 150
         self.n_generations = 200
@@ -60,6 +73,9 @@ class DefaultConfiguration:
         self.weight_std_prior = 1.0
         self.bias_mean_prior = 0.0
         self.bias_std_prior = 1.0
+
+        # loss weighting factor
+        self.beta = 'Standard'
 
     def get_configuration(self):
         configuration = {}
