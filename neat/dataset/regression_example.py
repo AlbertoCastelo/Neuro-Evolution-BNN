@@ -48,6 +48,6 @@ class RegressionExample1Dataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = torch.from_numpy(self.x[idx])
-        y = torch.from_numpy(self.y[idx])
+        x = torch.tensor(self.x[idx])
+        y = torch.tensor(self.y[idx])
         return x, y
