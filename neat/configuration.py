@@ -125,6 +125,6 @@ def write_json_file_from_dict(data: dict, filename):
 
 
 def get_configuration(filename=None):
-    if _Configuration._instance is None:
+    if _Configuration._instance is None or filename is not None:
         _Configuration(filename=filename)
     return _Configuration._instance
