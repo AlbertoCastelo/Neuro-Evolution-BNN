@@ -1,20 +1,8 @@
 from itertools import count
 
 from neat.configuration import get_configuration
+from neat.evaluation import EvaluationEngine
 from neat.genome import Genome
-
-
-class EvaluationEngine:
-    def __init__(self):
-        self.config = get_configuration()
-
-    def evaluate(self, population: dict):
-        for key, genome in population.items():
-            pass
-
-        return population
-
-
 
 
 class EvolutionEngine:
