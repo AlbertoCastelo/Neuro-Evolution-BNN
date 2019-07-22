@@ -16,6 +16,9 @@ class Gene:
 class ConnectionGene(Gene):
 
     def __init__(self, key):
+        '''
+        key: must be a tuple of nodes' keys (key-origin-node, key-destiny-node)
+        '''
         super().__init__(key=key, type=CONNECTION_TYPE)
         self.key = key
         self.enabled = True
