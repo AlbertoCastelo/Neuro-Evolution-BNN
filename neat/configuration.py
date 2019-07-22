@@ -109,13 +109,13 @@ class _Configuration:
         _Configuration._instance = config
 
     def read_configuration_from_file(self, filename):
-        configuration = self.read_json_file(filename)
+        configuration = read_json_file_to_dict(filename)
         return configuration
 
 
 def read_json_file_to_dict(filename) -> dict:
     with open(filename, 'rb') as file:
-        data = json.loads(file)
+        data = json.load(file)
     return data
 
 
