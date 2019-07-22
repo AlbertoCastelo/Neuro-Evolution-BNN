@@ -3,11 +3,12 @@ import torch
 from torch.utils.data import DataLoader
 
 from neat.configuration import ConfigError, get_configuration
-from neat.dataset.regression_example import RegressionExample1Dataset
+from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss_alternative
-from neat.representation import DeterministicNetwork, StochasticNetwork
+from neat.representation.deterministic_network import DeterministicNetwork
+from neat.representation.stochastic_network import StochasticNetwork
 
 
 class EvaluationEngine:
@@ -52,6 +53,7 @@ class EvaluationEngine:
             for batch_ids, (x_batch, y_batch) in enumerate(self.data_loader):
                 # TODO: be careful with this reshape when dimensions increase!!!!!
                 x_batch = x_batch.reshape((-1, genome.n_input))
+                x_batch = x_batch.float()
                 if is_gpu:
                     x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
@@ -86,7 +88,10 @@ class EvaluationEngine:
         # calculate Data log-likelihood (p(y*|x*,D))
         for x_batch, y_batch in self.data_loader:
             x_batch = x_batch.view(-1, 1).repeat(n_samples, 1)
+            x_batch = x_batch.float()
+
             y_batch = y_batch.repeat(n_samples)
+            y_batch = y_batch.float()
             if is_gpu:
                 x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
@@ -113,6 +118,8 @@ class EvaluationEngine:
 def get_dataset(dataset_name):
     if dataset_name == 'regression_example_1':
         return RegressionExample1Dataset()
+    elif dataset_name == 'regression_example_2':
+        return RegressionExample2Dataset()
 
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset_name}')

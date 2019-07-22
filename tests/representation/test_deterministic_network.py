@@ -23,9 +23,32 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
-        result = model.forward(input.data)
+        result = model(input.data)
 
         self.assertEqual(len(result), n_output)
+
+    def test_network_structure_with_batch_size(self):
+        node_genes = {0: 1.0,
+                      1: 0.0}
+
+        connection_genes = {(-1, 0): 1.5,
+                            (-2, 0): 2.5,
+                            (-1, 1): -0.5,
+                            (-2, 1): 0.0}
+        n_output = 2
+        genome_sample = GenomeSample(key=None, n_input=2, n_output=n_output,
+                                     node_genes=node_genes,
+                                     connection_genes=connection_genes)
+
+        model = DeterministicNetwork(genome=genome_sample)
+
+        input = torch.tensor([[1.0, -1.0],
+                              [0.5, 0],
+                              [0, 2.5]])
+        result = model(input.data)
+
+        self.assertEqual(result.shape[0], 3)
+        self.assertEqual(result.shape[1], n_output)
 
     def test_connection_is_not_specified_assumes_0(self):
         node_genes = {0: 1.0,
@@ -42,7 +65,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
-        result = model.forward(input.data)
+        result = model(input.data)
         missing_weight = model.state_dict()['layer_0.weight'].data[1, 1]
         self.assertEqual(0.0, missing_weight)
         self.assertEqual(len(result), n_output)
@@ -63,7 +86,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         # model = get_nn_from_genome(genome=genome_sample)
         model = DeterministicNetwork(genome=genome_sample)
         input = torch.tensor([1.0, 1.0])
-        result = model.forward(input.data)
+        result = model(input.data)
 
         self.assertEqual(len(result), n_output)
 
@@ -85,7 +108,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
         # model = get_nn_from_genome(genome=genome_sample)
         model = DeterministicNetwork(genome=genome_sample)
         input = torch.tensor([1.0, 1.0])
-        result = model.forward(input.data)
+        result = model(input.data)
 
         self.assertEqual(len(result), n_output)
         self.assertTrue(torch.allclose(result, torch.tensor([0.7310, 0.5]), atol=1e-03))
@@ -99,7 +122,7 @@ class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
         model = DeterministicNetwork(genome=genome_sample)
 
         input = torch.tensor([1.0, -1.0])
-        result = model.forward(input.data)
+        result = model(input.data)
 
         self.assertEqual(len(result), genome_sample.n_output)
         self.assertEqual(model.n_layers, 2)

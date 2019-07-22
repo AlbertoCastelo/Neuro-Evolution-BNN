@@ -19,7 +19,6 @@ class TestEvaluationAlternative(TestCase):
 
         self.assertEqual(type(loss), float)
 
-    @skip('Skipping')
     def test_happy_path_miso(self):
         # Multiple-Input Single-Output
         self.config = create_configuration(filename='/miso.json')
