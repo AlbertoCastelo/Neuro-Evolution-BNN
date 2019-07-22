@@ -16,7 +16,7 @@ class GenomeSample:
 
 class Genome:
 
-    def __init__(self, key, ):
+    def __init__(self, key):
         self.key = key
         self.id = uuid.uuid4()
 
@@ -26,11 +26,10 @@ class Genome:
 
         self.connection_genes = {}
         self.node_genes = {}
-        self.input_keys = None
+        self.input_keys = self._initialize_input_nodes()
         self.fitness = None
 
     def create_random_genome(self):
-        self._initialize_input_nodes()
         self._initialize_output_nodes()
 
         # initialize hidden units
@@ -103,7 +102,7 @@ class Genome:
 
     def _initialize_input_nodes(self):
         # input nodes only contain keys (they cannot be evolved)
-        self.input_keys = list(range(-1, -self.n_input-1, -1))
+        return list(range(-1, -self.n_input-1, -1))
 
 
 
