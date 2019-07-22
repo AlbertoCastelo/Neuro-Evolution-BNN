@@ -49,7 +49,8 @@ class EvaluationEngine:
             network.eval()
 
             # calculate Data log-likelihood (p(y*|x*,D))
-            for x_batch, y_batch in self.data_loader:
+            for batch_ids, (x_batch, y_batch) in enumerate(self.data_loader):
+                x_batch = x_batch.reshape((-1, genome.n_input))
                 if is_gpu:
                     x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
@@ -57,9 +58,12 @@ class EvaluationEngine:
                     # forward pass
                     output = network(x_batch)
                     # log_py += self.loss(logits=output, y=y_batch, kl=kl_qw_pw, beta=self.get_beta())
-                    log_py += self.loss(logits=output, y=y_batch)
+                    log_py += self.loss(y_pred=output, y_true=y_batch)
+        if is_gpu:
+            log_py = log_py.cpu()
         kl_posterior = self.loss.compute_complete_loss(logpy=log_py, kl_qw_pw=kl_qw_pw)
-        return kl_posterior
+
+        return kl_posterior.item()
 
     def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False):
         '''
