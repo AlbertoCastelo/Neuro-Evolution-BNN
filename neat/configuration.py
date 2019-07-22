@@ -24,7 +24,7 @@ class DefaultConfiguration:
         self.is_gpu = False
 
         # network parameters
-        self.n_input = 5
+        self.n_input = 1
         self.n_output = 1
 
         self.node_activation = 'sigmoid'
