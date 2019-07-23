@@ -81,7 +81,7 @@ class RegressionExample2Dataset(Dataset):
             0.3 * np.sin(4 * np.pi * (x_2 + np.random.normal(noise[0], noise[1], self.dataset_size))) + \
             np.random.normal(noise[0], noise[1], self.dataset_size)
 
-        self.x = np.array(list(zip(x_1,x_2)))
+        self.x = np.array(list(zip(x_1, x_2)))
         self.y = y
         if is_debug:
             self.x = self.x[:512]
