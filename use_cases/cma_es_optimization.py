@@ -7,7 +7,7 @@ from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 config = create_configuration(filename='/siso.json')
-N_SAMPLES = 10
+N_SAMPLES = 100
 
 
 def regression_problem(x):
@@ -49,6 +49,13 @@ def main():
     es = CMAEvolutionStrategy(x0, sigma0)
     optSol = es.optimize(regression_problem)
     print(optSol)
+
+    sol = [-3.18979598e-02,  1.21945777e+00,  3.80408518e-02,
+            7.99747577e-01,  9.51714572e-02,  8.10528673e-01, -5.97132372e-02,
+            1.04204663e+00,  1.74305244e-02,  9.93532532e-01, -8.67464165e-02,
+            9.51615254e-01, -3.77311791e-02,  9.97444596e-01, -5.84591048e-03,
+            1.08793924e+00, -5.59697903e-02,  9.51347690e-01,  3.33323542e-02,
+            1.00693954e+00]
 
 def example_cma():
     def yangs4(x):
