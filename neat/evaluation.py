@@ -50,7 +50,7 @@ class EvaluationEngine:
         # calculate Data log-likelihood (p(y*|x*,D))
         for x_batch, y_batch in self.data_loader:
             x_batch = x_batch.reshape((-1, genome.n_input))
-            x_batch = x_batch.view(-1, 1).repeat(n_samples, 1)
+            x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
             x_batch = x_batch.float()
 
             y_batch = y_batch.repeat(n_samples)
