@@ -11,19 +11,19 @@ class RegressionExample1Dataset(Dataset):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
+        self.dataset_size = 500
         self.dataset_type = dataset_type
         if dataset_type == 'train':
-            is_training = True
-        self.is_debug = is_debug
-
-        if is_training:
             range_ = [0.0, 0.7]
             noise = [0.0, 0.02]
+            x = np.random.uniform(range_[0], range_[1], self.dataset_size)
+        elif dataset_type == 'test':
+            x = np.linspace(-0.5, 1.5, self.dataset_size)
+            noise = [0.00, 0.00]
+        self.is_debug = is_debug
 
-        self.dataset_size = 500
-        x = np.random.uniform(range_[0], range_[1], self.dataset_size)
         y = x + 0.3*np.sin(2*np.pi*(x+np.random.normal(noise[0], noise[1], self.dataset_size))) + \
-            0.3 * np.sin(4 * np.pi * (x + np.random.normal(noise[0], noise[1], self.dataset_size)))+ \
+            0.3 * np.sin(4 * np.pi * (x + np.random.normal(noise[0], noise[1], self.dataset_size))) + \
             np.random.normal(noise[0], noise[1], self.dataset_size)
 
         self.x = x
@@ -63,18 +63,20 @@ class RegressionExample2Dataset(Dataset):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
+        self.dataset_size = 500
         self.dataset_type = dataset_type
         if dataset_type == 'train':
-            is_training = True
-        self.is_debug = is_debug
-
-        if is_training:
             range_ = [0.0, 0.7]
             noise = [0.0, 0.02]
+            x_1 = np.random.uniform(range_[0], range_[1], self.dataset_size)
+            x_2 = np.random.uniform(range_[0], range_[1], self.dataset_size)
+        elif dataset_type == 'test':
+            x_1 = np.linspace(-0.5, 1.5, self.dataset_size)
+            x_2 = np.linspace(-0.5, 1.5, self.dataset_size)
+            noise = [0.00, 0.00]
 
-        self.dataset_size = 500
-        x_1 = np.random.uniform(range_[0], range_[1], self.dataset_size)
-        x_2 = np.random.uniform(range_[0], range_[1], self.dataset_size)
+        self.is_debug = is_debug
+
         y = x_1 + 0.3*np.sin(2*np.pi*(x_1+np.random.normal(noise[0], noise[1], self.dataset_size))) + \
             0.3 * np.sin(4 * np.pi * (x_2 + np.random.normal(noise[0], noise[1], self.dataset_size))) + \
             np.random.normal(noise[0], noise[1], self.dataset_size)
