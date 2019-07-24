@@ -53,7 +53,6 @@ class ConnectionGene(Gene):
         return np.random.normal(loc=self.weight_mean, scale=self.weight_std)
 
 
-
 class NodeGene(Gene):
 
     def __init__(self, key):

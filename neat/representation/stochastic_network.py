@@ -3,6 +3,7 @@ from torch import nn
 from torch.distributions import Normal
 
 from neat.genome import Genome
+from neat.representation.utils import get_activation
 
 
 class StochasticNetwork(nn.Module):
@@ -13,6 +14,7 @@ class StochasticNetwork(nn.Module):
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
 
+        self.activation = get_activation()
         layers_dict = self._transform_genome_to_layers(nodes=self.nodes,
                                                        connections=self.connections,
                                                        n_output=self.n_output)
@@ -76,7 +78,7 @@ class StochasticNetwork(nn.Module):
             layer.weight_mean = layer_dict['weight_mean']
             layer.weight_std = layer_dict['weight_std']
             setattr(self, f'layer_{layer_key}', layer)
-            setattr(self, f'activation_{layer_key}', nn.Sigmoid())
+            setattr(self, f'activation_{layer_key}', self.activation)
 
     @staticmethod
     def _is_next_layer_input(layer_node_keys):

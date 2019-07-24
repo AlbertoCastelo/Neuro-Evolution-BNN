@@ -1,18 +1,21 @@
 import torch
 from torch import nn
 
+from neat.configuration import get_configuration
 from neat.genome import GenomeSample, Genome
+from neat.representation.utils import get_activation
 
 
 class DeterministicNetwork(nn.Module):
 
     def __init__(self, genome: GenomeSample):
         super(DeterministicNetwork, self).__init__()
+
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
-
+        self.activation = get_activation()
         layers_dict = self._transform_genome_to_layers(nodes=self.nodes,
                                                        connections=self.connections,
                                                        n_output=self.n_output)
@@ -33,7 +36,7 @@ class DeterministicNetwork(nn.Module):
         for layer_key in layers:
             layer = layers[layer_key]
             setattr(self, f'layer_{layer_key}', nn.Linear(layer['n_input'], layer['n_output'], bias=True))
-            setattr(self, f'activation_{layer_key}', nn.Sigmoid())
+            setattr(self, f'activation_{layer_key}', self.activation)
 
     def _set_network_weights(self, layers: dict):
         # logger.debug('Setting Network weights')
