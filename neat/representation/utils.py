@@ -13,5 +13,7 @@ def get_activation():
         return nn.ReLU()
     elif activation == 'leaky_relu':
         return nn.LeakyReLU()
+    elif activation == 'tanh':
+        return nn.Tanh()
     else:
         raise ConfigError(f'Activation function is incorrect: {activation}')
