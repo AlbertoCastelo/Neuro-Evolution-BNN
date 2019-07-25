@@ -12,9 +12,9 @@ from neat.representation.stochastic_network import StochasticNetwork
 
 
 class EvaluationEngine:
-    def __init__(self, testing=False):
+    def __init__(self, testing=False, batch_size=None):
         self.config = get_configuration()
-        self.batch_size = self.config.batch_size
+        self.batch_size = batch_size if batch_size is not None else self.config.batch_size
 
         self.dataset = get_dataset(self.config.dataset_name, testing=testing)
         self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
