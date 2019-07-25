@@ -1,9 +1,7 @@
 import torch
 import numpy as np
-from torch.utils.data import DataLoader
 
-from deep_learning.feed_forward import FeedForward
-from neat.dataset.regression_example import RegressionExample1Dataset
+from tests_non_automated.deep_learning.feed_forward import FeedForward
 from neat.evaluation import EvaluationEngine
 from neat.representation.stochastic_network import StochasticNetwork
 from tests.config_files.config_files import create_configuration
@@ -21,7 +19,7 @@ def regression_problem_learn_from_nn():
     network = FeedForward(n_input=config.n_input, n_output=config.n_output,
                           n_neurons_per_layer=n_neurons_per_layer,
                           n_hidden_layers=1)
-    parameters = torch.load('./../deep_learning/models/network.pt')
+    parameters = torch.load('./deep_learning/models/network.pt')
     network.load_state_dict(parameters)
 
     genome = prepare_genome(parameters)
@@ -37,36 +35,6 @@ def regression_problem_learn_from_nn():
     x, y_true, y_pred, kl_posterior, kl_qw_pw = \
         evaluation_engine.evaluate_genome(genome, n_samples=10, is_gpu=False, return_all=True)
 
-
-    # # calculate Data log-likelihood (p(y*|x*,D))
-    # mses = []
-    # xs = []
-    # y_preds = []
-    # y_trues = []
-    # for i in range(N_SAMPLES):
-    #     for x_batch, y_batch in data_loader:
-    #         x_batch = x_batch.reshape((-1, genome.n_input))
-    #         x_batch = x_batch.float()
-    #         y_batch = y_batch.float()
-    #
-    #         with torch.no_grad():
-    #             # forward pass
-    #             output = network(x_batch)
-    #
-    #             mse = loss(y_pred=output, y_true=y_batch, kl_qw_pw=0, beta=evaluation_engine.get_beta())
-    #             mses.append(mse)
-    #         x = x_batch.numpy().reshape(-1)
-    #
-    #         y_true_unnormalized = dataset.unnormalize_output(y_pred=y_batch)
-    #         y_true = y_true_unnormalized.numpy()
-    #         output_unnormalized = dataset.unnormalize_output(y_pred=output)
-    #         y_pred = output_unnormalized.numpy().reshape(-1)
-    #         xs.append(x)
-    #         y_trues.append(y_true)
-    #         y_preds.append(y_pred)
-    # x = np.concatenate(xs)
-    # y_true = np.concatenate(y_trues)
-    # y_pred = np.concatenate(y_preds)
     plt.figure(figsize=(20, 20))
     plt.plot(x.numpy().reshape(-1), y_true.numpy().reshape(-1), 'b*')
     plt.plot(x.numpy().reshape(-1), y_pred.numpy().reshape(-1), 'r*')

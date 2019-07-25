@@ -8,21 +8,30 @@ from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 100
+n_neurons_per_layer = 10
+
+total_neurons = n_neurons_per_layer + 1
+total_biases = total_neurons
+total_bias_params = total_biases * 2
+
+total_weights = config.n_input * n_neurons_per_layer + n_neurons_per_layer * config.n_output
 
 
 def regression_problem(x):
-    bias = x[:8]
-    weight = x[8:]
+
+    bias = x[:total_bias_params]
+    weight = x[total_bias_params:]
 
     genome = generate_genome_with_hidden_units(n_input=config.n_input,
-                                               n_output=config.n_output)
+                                               n_output=config.n_output,
+                                               n_hidden=n_neurons_per_layer)
     nodes = genome.node_genes
     connections = genome.connection_genes
 
     i = 0
     for key, node in nodes.items():
         node.bias_mean = bias[i]
-        nodes[0].bias_std = bias[i+1]
+        node.bias_std = bias[i+1]
         i += 2
 
     i = 0
@@ -39,11 +48,11 @@ def regression_problem(x):
 
 def main():
 
-    bias0 = [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
-    weight0 = [0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
+    bias0 = [0.0, 1.0] * total_biases
+    weight0 = [0.0, 1.0] * total_weights
     x0 = bias0
     x0.extend(weight0)
-    assert(len(x0) == 20)
+    assert(len(x0) == 62)
     sigma0 = 0.1
     # evolution strategy
     es = CMAEvolutionStrategy(x0, sigma0)
@@ -56,6 +65,7 @@ def main():
             9.51615254e-01, -3.77311791e-02,  9.97444596e-01, -5.84591048e-03,
             1.08793924e+00, -5.59697903e-02,  9.51347690e-01,  3.33323542e-02,
             1.00693954e+00]
+
 
 def example_cma():
     def yangs4(x):
@@ -71,6 +81,7 @@ def example_cma():
     # evolution strategy
     es = CMAEvolutionStrategy(x0, sigma0)
     optSol = es.optimize(yangs4)
+
 
 if __name__ == '__main__':
     main()

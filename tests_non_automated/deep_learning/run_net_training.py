@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from deep_learning.feed_forward import FeedForward
+from tests_non_automated.deep_learning.feed_forward import FeedForward
 from neat.dataset.regression_example import RegressionExample1Dataset
 from tests.config_files.config_files import create_configuration
 import matplotlib.pyplot as plt
