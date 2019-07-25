@@ -53,7 +53,7 @@ class EvaluationEngine:
             x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
             x_batch = x_batch.float()
 
-            y_batch = y_batch.repeat(n_samples)
+            y_batch = y_batch.repeat(n_samples, 1)
             y_batch = y_batch.float()
             if is_gpu:
                 x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
@@ -120,6 +120,7 @@ class EvaluationAlternativeEngine:
                 # TODO: be careful with this reshape when dimensions increase!!!!!
                 x_batch = x_batch.reshape((-1, genome.n_input))
                 x_batch = x_batch.float()
+                y_batch = y_batch.float()
                 if is_gpu:
                     x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 

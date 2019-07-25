@@ -8,8 +8,8 @@ class RegressionExample1Dataset(Dataset):
     '''
     Dataset with 1 input variables and 1 output
     '''
-    TRAIN_SIZE = 500
-    TEST_SIZE = 500
+    TRAIN_SIZE = 5000
+    TEST_SIZE = 5000
 
     def __init__(self, dataset_type='train', is_debug=False):
         self.is_debug = is_debug
@@ -38,8 +38,10 @@ class RegressionExample1Dataset(Dataset):
 
         self.x_original = x
         self.y_original = y
+        # self.x = x
+        # self.y = y.unsqueeze(y, dim=1)
         self.x = self.input_scaler.transform(x)
-        self.y = self.output_scaler.transform(y).reshape(-1)
+        self.y = self.output_scaler.transform(y).reshape((-1, 1))
 
         if is_debug:
             self.x = x[:512]
@@ -61,11 +63,17 @@ class RegressionExample1Dataset(Dataset):
 
     def _get_x_y(self, x, noise):
         dataset_size = x.shape[0]
-
+        # y = 0.1 + 0.5 * (x + np.random.normal(noise[0], noise[1], dataset_size)) + \
+        #     0.3 * np.square(x + np.random.normal(noise[0], noise[1], dataset_size))
         y = x + 0.3 * np.sin(2 * np.pi * (x + np.random.normal(noise[0], noise[1], dataset_size))) + \
             0.3 * np.sin(4 * np.pi * (x + np.random.normal(noise[0], noise[1], dataset_size))) + \
-            np.random.normal(noise[0], noise[1], )
+            np.random.normal(noise[0], noise[1], dataset_size)
         return x.reshape((-1, 1)), y.reshape((-1, 1))
+
+    def unnormalize_output(self, y_pred: torch.Tensor) -> torch.Tensor:
+        y_pred = y_pred.numpy().reshape((-1, 1))
+        y_pred_unnormalized = self.output_scaler.inverse_transform(y_pred).reshape(-1)
+        return torch.Tensor(y_pred_unnormalized)
 
     def __len__(self):
         return len(self.x)
@@ -108,8 +116,11 @@ class RegressionExample2Dataset(Dataset):
 
         self.x_original = x
         self.y_original = y
+        # self.x = x
+        # self.y = y.reshape((-1, 1))
         self.x = self.input_scaler.transform(x)
-        self.y = self.output_scaler.transform(y).reshape(-1)
+        self.y = self.output_scaler.transform(y).reshape((-1, 1))
+
         if is_debug:
             self.x = self.x[:512]
             self.y = self.y[:512]
