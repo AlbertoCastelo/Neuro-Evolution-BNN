@@ -16,6 +16,7 @@ n_neurons_per_layer = 10
 
 def regression_problem_learn_from_nn():
 
+    # standard network
     network = FeedForward(n_input=config.n_input, n_output=config.n_output,
                           n_neurons_per_layer=n_neurons_per_layer,
                           n_hidden_layers=1)
@@ -25,9 +26,7 @@ def regression_problem_learn_from_nn():
     genome = prepare_genome(parameters)
     print(genome)
     evaluation_engine = EvaluationEngine(testing=False, batch_size=1)
-    # dataset = evaluation_engine.dataset
-    # data_loader = evaluation_engine.data_loader
-    # loss = evaluation_engine.loss
+
     # setup network
     network = StochasticNetwork(genome=genome)
     network.eval()
