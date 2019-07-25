@@ -1,5 +1,9 @@
 import torch
 import numpy as np
+from torch.utils.data import DataLoader
+
+from deep_learning.feed_forward import FeedForward
+from neat.dataset.regression_example import RegressionExample1Dataset
 from neat.evaluation import EvaluationEngine
 from neat.representation.stochastic_network import StochasticNetwork
 from tests.config_files.config_files import create_configuration
@@ -7,31 +11,24 @@ from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
 
 config = create_configuration(filename='/siso.json')
-N_SAMPLES = 100
+N_SAMPLES = 50
+std = 0.02
+n_neurons_per_layer = 10
 
 
-def regression_problem(x):
-    bias = x[:8]
-    weight = x[8:]
+def regression_problem_learn_from_nn():
 
-    genome = generate_genome_with_hidden_units(n_input=config.n_input,
-                                               n_output=config.n_output)
-    # nodes = genome.node_genes
-    # connections = genome.connection_genes
-    #
-    # i = 0
-    # for key, node in nodes.items():
-    #     node.bias_mean = bias[i]
-    #     nodes[0].bias_std = bias[i+1]
-    #     i += 2
-    #
-    # i = 0
-    # for key, connection in connections.items():
-    #     connection.weight_mean = weight[i]
-    #     connection.weight_std = weight[i + 1]
-    #     i += 2
+    network = FeedForward(n_input=config.n_input, n_output=config.n_output,
+                          n_neurons_per_layer=n_neurons_per_layer,
+                          n_hidden_layers=1)
+    parameters = torch.load('./../deep_learning/models/network.pt')
+    network.load_state_dict(parameters)
 
+    genome = prepare_genome(parameters)
+    print(genome)
     evaluation_engine = EvaluationEngine(testing=True)
+    evaluation_engine.batch_size = 1
+    dataset = evaluation_engine.dataset
     data_loader = evaluation_engine.data_loader
     loss = evaluation_engine.loss
     # setup network
@@ -55,12 +52,120 @@ def regression_problem(x):
 
                 mse = loss(y_pred=output, y_true=y_batch, kl_qw_pw=0, beta=evaluation_engine.get_beta())
                 mses.append(mse)
-        x = x_batch.numpy().reshape(-1)
-        y_true = y_batch.numpy()
-        y_pred = output.numpy().reshape(-1)
-        xs.append(x)
-        y_trues.append(y_true)
-        y_preds.append(y_pred)
+            x = x_batch.numpy().reshape(-1)
+            y_true_unnormalized = dataset.unnormalize_output(y_pred=y_batch)
+            y_true = y_true_unnormalized.numpy()
+            output_unnormalized = dataset.unnormalize_output(y_pred=output)
+            y_pred = output_unnormalized.numpy().reshape(-1)
+            xs.append(x)
+            y_trues.append(y_true)
+            y_preds.append(y_pred)
+    x = np.concatenate(xs)
+    y_true = np.concatenate(y_trues)
+    y_pred = np.concatenate(y_preds)
+    plt.figure(figsize=(20, 20))
+    plt.plot(x, y_true, 'b*')
+    plt.plot(x, y_pred, 'r*')
+    plt.show()
+    print(mse)
+
+
+def prepare_genome(parameters):
+    genome = generate_genome_with_hidden_units(n_input=config.n_input,
+                                               n_output=config.n_output,
+                                               n_hidden=n_neurons_per_layer)
+    nodes = genome.node_genes
+    connections = genome.connection_genes
+
+    # output nodes
+    output_nodes = [0]
+    for output_key in output_nodes:
+        nodes[output_key].bias_mean = float(parameters['layer_0.bias'].numpy()[output_key])
+        nodes[output_key].bias_std = std
+
+    # hidden nodes
+    i = 0
+    bias_1 = parameters['layer_1.bias'].numpy()
+    for key, node in nodes.items():
+        if key in output_nodes:
+            continue
+        node.bias_mean = float(bias_1[i])
+        node.bias_std = std
+        i += 1
+
+    # WEIGHTS
+    hidden_neurons = list(range(1, 11))
+    # layer 1 (input-> hidden)
+    weights_1 = parameters['layer_1.weight'].numpy()
+    for key, connection in connections.items():
+        if key[1] not in hidden_neurons:
+            continue
+        connection.weight_mean = float(weights_1[key[1] - 1, 0])
+        connection.weight_std = std
+
+    weights_0 = parameters['layer_0.weight'].numpy()
+    for key, connection in connections.items():
+        if key[0] not in hidden_neurons:
+            continue
+        connection.weight_mean = float(weights_0[0, key[0] - 1])
+        connection.weight_std = std
+    return genome
+
+
+def regression_problem(x):
+    bias = x[:8]
+    weight = x[8:]
+
+    genome = generate_genome_with_hidden_units(n_input=config.n_input,
+                                               n_output=config.n_output)
+    nodes = genome.node_genes
+    connections = genome.connection_genes
+
+    i = 0
+    for key, node in nodes.items():
+        node.bias_mean = bias[i]
+        node.bias_std = bias[i+1]
+        i += 2
+
+    i = 0
+    for key, connection in connections.items():
+        connection.weight_mean = weight[i]
+        connection.weight_std = weight[i + 1]
+        i += 2
+
+    evaluation_engine = EvaluationEngine(testing=True)
+    dataset = evaluation_engine.dataset
+    data_loader = evaluation_engine.data_loader
+    loss = evaluation_engine.loss
+    # setup network
+    network = StochasticNetwork(genome=genome)
+    network.eval()
+
+    # calculate Data log-likelihood (p(y*|x*,D))
+    mses = []
+    xs = []
+    y_preds = []
+    y_trues = []
+    for i in range(N_SAMPLES):
+        for x_batch, y_batch in data_loader:
+            x_batch = x_batch.reshape((-1, genome.n_input))
+            x_batch = x_batch.float()
+            y_batch = y_batch.float()
+
+            with torch.no_grad():
+                # forward pass
+                output = network(x_batch)
+
+                mse = loss(y_pred=output, y_true=y_batch, kl_qw_pw=0, beta=evaluation_engine.get_beta())
+                mses.append(mse)
+            x = x_batch.numpy().reshape(-1)
+            y_true_unnormalized = dataset.unnormalize_output(y_pred=y_batch)
+            y_true = y_true_unnormalized.numpy()
+            output_unnormalized = dataset.unnormalize_output(y_pred=output)
+            y_pred = output_unnormalized.numpy().reshape(-1)
+            xs.append(x)
+            y_trues.append(y_true)
+            y_preds.append(y_pred)
     x = np.concatenate(xs)
     y_true = np.concatenate(y_trues)
     y_pred = np.concatenate(y_preds)
@@ -79,9 +184,13 @@ def main():
        1.08793924e+00, -5.59697903e-02, 9.51347690e-01, 3.33323542e-02,
        1.00693954e+00]
 
-    loss = regression_problem(x)
+    x_pymc3 = [0.647056, 0.002242, 0.005813, 0.277180, 2.153285, 0.056461, 0.005075, 0.186190,
+               -0.011444, 0.302296, 0.003719, 0.057393, -0.006722, 0.201250,
+               -0.001349, 0.008320, -0.665375, 0.002420, 0.003374, 0.011338]
+
+    loss = regression_problem(x_pymc3)
     print(loss)
 
 
 if __name__ == '__main__':
-    main()
+    regression_problem_learn_from_nn()
