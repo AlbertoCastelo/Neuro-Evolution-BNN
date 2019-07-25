@@ -24,9 +24,12 @@ class Genome:
         self.n_input = self.genome_config.n_input
         self.n_output = self.genome_config.n_output
 
+        self.output_nodes_keys = list(range(0, self.n_output))
+        self.input_nodes_keys = self._initialize_input_nodes()
+
         self.connection_genes = {}
         self.node_genes = {}
-        self.input_keys = self._initialize_input_nodes()
+
         self.fitness = None
 
     def create_random_genome(self):
@@ -66,14 +69,14 @@ class Genome:
         connections = []
         hidden_nodes = self._get_hidden_nodes()
         if hidden_nodes:
-            for input_id in self.input_keys:
+            for input_id in self.input_nodes_keys:
                 for h in hidden_nodes:
                     connections.append((input_id, h))
             for h in hidden_nodes:
-                for output_id in self._get_output_node_keys():
+                for output_id in self.output_nodes_keys:
                     connections.append((h, output_id))
-        for input_id in self.input_keys:
-            for output_id in self._get_output_node_keys():
+        for input_id in self.input_nodes_keys:
+            for output_id in self.output_nodes_keys:
                 connections.append((input_id, output_id))
         # TODO: include recurrent connections if configured
         return connections
@@ -86,16 +89,10 @@ class Genome:
             pass
 
     def _initialize_output_nodes(self):
-        for key in self._get_output_node_keys():
+        for key in self.output_nodes_keys:
             node = NodeGene(key=key)
             node.random_initialization()
             self.node_genes[key] = node
-
-    def _get_output_node_keys(self):
-        '''
-        Output nodes have keys: 0, ..
-        '''
-        return range(self.n_output)
 
     def _get_hidden_nodes(self):
         return list(self.node_genes.keys())[self.n_output:]
@@ -104,5 +101,22 @@ class Genome:
         # input nodes only contain keys (they cannot be evolved)
         return list(range(-1, -self.n_input-1, -1))
 
+    def __str__(self):
+        bias_data = []
+        bias_data.append(''.join(['Node Key | Mean  | Std \n']))
+        for key, node in self.node_genes.items():
+            bias_data.append(''.join([str(key), ':     ', str(round(node.bias_mean, 4)), '  |  ',
+                                      str(round(node.bias_std, 4)), ' \n']))
+        bias_str = ''.join(bias_data)
+
+        weights_data = []
+        weights_data.append(''.join(['Connection Key | Mean  | Std \n']))
+        for key, connection in self.connection_genes.items():
+            weights_data.append(''.join([str(key), ': ', str(round(connection.weight_mean, 4)), '  |  ',
+                                      str(round(connection.weight_std, 4)), ' \n']))
+        weight_str = ''.join(weights_data)
+
+        genome_str = ''.join([bias_str, '\n', weight_str])
+        return genome_str
 
 
