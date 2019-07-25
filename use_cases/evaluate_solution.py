@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 50
-std = 0.02
+std = 0.2
 n_neurons_per_layer = 10
 
 
@@ -26,48 +26,54 @@ def regression_problem_learn_from_nn():
 
     genome = prepare_genome(parameters)
     print(genome)
-    evaluation_engine = EvaluationEngine(testing=True)
-    evaluation_engine.batch_size = 1
-    dataset = evaluation_engine.dataset
-    data_loader = evaluation_engine.data_loader
-    loss = evaluation_engine.loss
+    evaluation_engine = EvaluationEngine(testing=False, batch_size=1)
+    # dataset = evaluation_engine.dataset
+    # data_loader = evaluation_engine.data_loader
+    # loss = evaluation_engine.loss
     # setup network
     network = StochasticNetwork(genome=genome)
     network.eval()
 
-    # calculate Data log-likelihood (p(y*|x*,D))
-    mses = []
-    xs = []
-    y_preds = []
-    y_trues = []
-    for i in range(N_SAMPLES):
-        for x_batch, y_batch in data_loader:
-            x_batch = x_batch.reshape((-1, genome.n_input))
-            x_batch = x_batch.float()
-            y_batch = y_batch.float()
+    x, y_true, y_pred, kl_posterior, kl_qw_pw = \
+        evaluation_engine.evaluate_genome(genome, n_samples=10, is_gpu=False, return_all=True)
 
-            with torch.no_grad():
-                # forward pass
-                output = network(x_batch)
 
-                mse = loss(y_pred=output, y_true=y_batch, kl_qw_pw=0, beta=evaluation_engine.get_beta())
-                mses.append(mse)
-            x = x_batch.numpy().reshape(-1)
-            y_true_unnormalized = dataset.unnormalize_output(y_pred=y_batch)
-            y_true = y_true_unnormalized.numpy()
-            output_unnormalized = dataset.unnormalize_output(y_pred=output)
-            y_pred = output_unnormalized.numpy().reshape(-1)
-            xs.append(x)
-            y_trues.append(y_true)
-            y_preds.append(y_pred)
-    x = np.concatenate(xs)
-    y_true = np.concatenate(y_trues)
-    y_pred = np.concatenate(y_preds)
+    # # calculate Data log-likelihood (p(y*|x*,D))
+    # mses = []
+    # xs = []
+    # y_preds = []
+    # y_trues = []
+    # for i in range(N_SAMPLES):
+    #     for x_batch, y_batch in data_loader:
+    #         x_batch = x_batch.reshape((-1, genome.n_input))
+    #         x_batch = x_batch.float()
+    #         y_batch = y_batch.float()
+    #
+    #         with torch.no_grad():
+    #             # forward pass
+    #             output = network(x_batch)
+    #
+    #             mse = loss(y_pred=output, y_true=y_batch, kl_qw_pw=0, beta=evaluation_engine.get_beta())
+    #             mses.append(mse)
+    #         x = x_batch.numpy().reshape(-1)
+    #
+    #         y_true_unnormalized = dataset.unnormalize_output(y_pred=y_batch)
+    #         y_true = y_true_unnormalized.numpy()
+    #         output_unnormalized = dataset.unnormalize_output(y_pred=output)
+    #         y_pred = output_unnormalized.numpy().reshape(-1)
+    #         xs.append(x)
+    #         y_trues.append(y_true)
+    #         y_preds.append(y_pred)
+    # x = np.concatenate(xs)
+    # y_true = np.concatenate(y_trues)
+    # y_pred = np.concatenate(y_preds)
     plt.figure(figsize=(20, 20))
-    plt.plot(x, y_true, 'b*')
-    plt.plot(x, y_pred, 'r*')
+    plt.plot(x.numpy().reshape(-1), y_true.numpy().reshape(-1), 'b*')
+    plt.plot(x.numpy().reshape(-1), y_pred.numpy().reshape(-1), 'r*')
     plt.show()
-    print(mse)
+    print(f'KL Div - Posterior: {kl_posterior}')
+    print(f'KL Div - Prior: {kl_qw_pw}')
+    print(f'MSE: {kl_posterior - kl_qw_pw}')
 
 
 def prepare_genome(parameters):

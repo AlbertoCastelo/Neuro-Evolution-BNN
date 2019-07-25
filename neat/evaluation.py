@@ -32,7 +32,7 @@ class EvaluationEngine:
 
         return population
 
-    def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False):
+    def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False, return_all=False):
         '''
         Calculates: KL-Div(q(w)||p(w|D))
         Uses the VariationalInferenceLoss class (not the alternative)
@@ -48,8 +48,9 @@ class EvaluationEngine:
         network.eval()
 
         # calculate Data log-likelihood (p(y*|x*,D))
-        chunks_output = []
-        chunks_y_batch = []
+        chunks_x = []
+        chunks_y_pred = []
+        chunks_y_true = []
         for i in range(n_samples):
             for x_batch, y_batch in self.data_loader:
                 x_batch = x_batch.reshape((-1, genome.n_input))
@@ -62,11 +63,15 @@ class EvaluationEngine:
                 with torch.no_grad():
                     # forward pass
                     output = network(x_batch)
-                    chunks_output.append(output)
-                    chunks_y_batch.append(y_batch)
-        output = torch.cat(chunks_output, dim=0)
-        y_batch = torch.cat(chunks_y_batch, dim=0)
-        kl_posterior = self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.get_beta())
+                    chunks_x.append(x_batch)
+                    chunks_y_pred.append(output)
+                    chunks_y_true.append(y_batch)
+        x = torch.cat(chunks_x, dim=0)
+        y_pred = torch.cat(chunks_y_pred, dim=0)
+        y_true = torch.cat(chunks_y_true, dim=0)
+        kl_posterior = self.loss(y_pred=y_pred, y_true=y_true, kl_qw_pw=kl_qw_pw, beta=self.get_beta())
+        if return_all:
+            return x, y_true, y_pred, kl_posterior.item(), kl_qw_pw
         return kl_posterior.item()
 
     def get_beta(self):
