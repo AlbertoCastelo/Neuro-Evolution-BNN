@@ -19,23 +19,22 @@ def generate_genome_without_hidden_units():
     return genome
 
 
-def generate_genome_with_hidden_units(n_input, n_output):
-    N_HIDDEN = 3
+def generate_genome_with_hidden_units(n_input, n_output, n_hidden=3):
     # nodes
     node_genes = {}
-    for i in range(n_output + N_HIDDEN):
+    for i in range(n_output + n_hidden):
         node_genes = add_node(node_genes, key=i)
 
     # connections
     # input to hidden
     connection_genes = {}
     input_hidden_tuples = list(product(list(range(-1, -n_input-1, -1)),
-                                       list(range(n_output, n_output+N_HIDDEN))))
+                                       list(range(n_output, n_output+n_hidden))))
     for tuple_ in input_hidden_tuples:
         connection_genes = add_connection(connection_genes, key=tuple_)
 
     # hidden to output
-    hidden_output_tuples = list(product(list(range(n_output, n_output + N_HIDDEN)),
+    hidden_output_tuples = list(product(list(range(n_output, n_output + n_hidden)),
                                         list(range(0, n_output))))
     for tuple_ in hidden_output_tuples:
         connection_genes = add_connection(connection_genes, key=tuple_)
