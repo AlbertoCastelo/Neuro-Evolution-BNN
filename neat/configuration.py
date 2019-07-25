@@ -97,9 +97,10 @@ class _Configuration:
     _instance = None
 
     def __init__(self, filename):
-        configuration = self.read_configuration_from_file(filename)
-        if configuration is None:
+        if filename is None:
             configuration = DefaultConfiguration()._get_configuration()
+        else:
+            configuration = self.read_configuration_from_file(filename)
 
         assert isinstance(configuration, dict)
         config = BaseConfiguration()
