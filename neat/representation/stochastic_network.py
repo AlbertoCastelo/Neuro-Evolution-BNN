@@ -23,12 +23,12 @@ class StochasticNetwork(nn.Module):
 
     def forward(self, x):
         start_index = self.n_layers - 1
-        for i in range(start_index, 0, -1):
+        for i in range(start_index, -1, -1):
             sampled_layer_i = self._sample_layer(layer=getattr(self, f'layer_{i}'))
-
             x = sampled_layer_i(x)
-            x = getattr(self, f'activation_{i}')(x)
-        x = self.layer_0(x)
+            if i > 0:
+                x = getattr(self, f'activation_{i}')(x)
+
         return x
 
     @staticmethod
