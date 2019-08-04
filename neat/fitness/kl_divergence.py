@@ -1,8 +1,22 @@
 import torch
-from torch.distributions import kl_divergence, Distribution, MultivariateNormal
+from torch.distributions import kl_divergence, Distribution, MultivariateNormal, Normal
 
 from neat.configuration import get_configuration
 from neat.genome import Genome
+
+
+def compute_kl_qw_pw(genome: Genome):
+    '''
+    https://pytorch.org/docs/stable/distributions.html#module-torch.distributions.kl
+    '''
+    pw = get_pw(genome)
+
+    qw = get_qw(genome)
+
+    kl_qw_pw = kl_divergence(qw, pw)
+    # TODO: remove division by 100
+    # return kl_qw_pw / 100
+    return kl_qw_pw
 
 
 def get_pw(genome: Genome) -> Distribution:
@@ -41,13 +55,19 @@ def get_qw(genome: Genome) -> Distribution:
     return MultivariateNormal(loc=mu, covariance_matrix=cov_matrix)
 
 
-def compute_kl_qw_pw(genome: Genome):
-    '''
-    https://pytorch.org/docs/stable/distributions.html#module-torch.distributions.kl
-    '''
-    pw = get_pw(genome)
+# TODO: this equation is wrong!!
+def compute_kl_qw_pw_by_product(genome: Genome):
+    # get prior configuration
+    config = get_configuration()
+    kl_qw_pw = torch.Tensor([1.0])
 
-    qw = get_qw(genome)
+    for key, node in genome.node_genes.items():
+        qw = Normal(loc=config.bias_mean_prior, scale=config.bias_std_prior)
+        pw = Normal(loc=node.bias_mean, scale=node.bias_std)
+        kl_qw_pw *= kl_divergence(qw, pw)
 
-    kl_qw_pw = kl_divergence(qw, pw)
+    for key, connection in genome.connection_genes.items():
+        qw = Normal(loc=config.weight_mean_prior, scale=config.weight_std_prior)
+        pw = Normal(loc=connection.weight_mean, scale=connection.weight_std)
+        kl_qw_pw *= kl_divergence(qw, pw)
     return kl_qw_pw
