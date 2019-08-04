@@ -68,7 +68,7 @@ def construct_2_hidden_nn(x, y, config):
     '''
     Follows Twiecki post: https://twiecki.io/blog/2016/06/01/bayesian-deep-learning/
     '''
-    n_hidden = 3
+    n_hidden = 10
 
     # Initialize random weights between each layer
     w_1_init = np.random.randn(config.n_input, n_hidden).astype(theano.config.floatX)
@@ -77,8 +77,8 @@ def construct_2_hidden_nn(x, y, config):
     w_2_init = np.random.randn(n_hidden, n_hidden).astype(theano.config.floatX)
     b_2_init = np.random.randn(n_hidden).astype(theano.config.floatX)
 
-    w_3_init = np.random.randn(n_hidden, config.n_output).astype(theano.config.floatX)
-    b_3_init = np.random.randn(config.n_output).astype(theano.config.floatX)
+    # w_3_init = np.random.randn(n_hidden, config.n_output).astype(theano.config.floatX)
+    # b_3_init = np.random.randn(config.n_output).astype(theano.config.floatX)
 
     with pm.Model() as neural_network:
         # Weights from input to hidden layer
@@ -101,14 +101,14 @@ def construct_2_hidden_nn(x, y, config):
                               shape=n_hidden,
                               testval=b_2_init)
 
-        weights_2_3 = pm.Normal('w_2_3', 0, sd=1,
-                                shape=(n_hidden, config.n_output),
-                                testval=w_3_init)
-
-        # Bias from 1st to 2nd layer
-        bias_3 = pm.Normal('b_3', 0, sd=1,
-                           shape=config.n_output,
-                           testval=b_3_init)
+        # weights_2_3 = pm.Normal('w_2_3', 0, sd=1,
+        #                         shape=(n_hidden, config.n_output),
+        #                         testval=w_3_init)
+        #
+        # # Bias from 1st to 2nd layer
+        # bias_3 = pm.Normal('b_3', 0, sd=1,
+        #                    shape=config.n_output,
+        #                    testval=b_3_init)
 
         # # Weights from hidden layer to output
         # weights_2_out = pm.Normal('w_2_out', 0, sd=1,
@@ -122,11 +122,11 @@ def construct_2_hidden_nn(x, y, config):
         x_2 = pm.math.dot(act_1, weights_1_2) + bias_2
         act_2 = pm.math.tanh(x_2)
 
-        x_3 = pm.math.dot(act_2, weights_2_3) + bias_3
-        act_3 = pm.math.tanh(x_3)
+        # x_3 = pm.math.dot(act_2, weights_2_3) + bias_3
+        # act_3 = pm.math.tanh(x_3)
 
         # Regression -> Normal likelihood
-        out = pm.Normal('out', act_3, observed=y,
+        out = pm.Normal('out', act_2, observed=y,
                         total_size=x.shape[0]  # IMPORTANT for minibatches
                         )
     return neural_network
