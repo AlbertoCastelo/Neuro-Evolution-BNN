@@ -1,6 +1,7 @@
 import cma
 from cma import CMAEvolutionStrategy
 import numpy as np
+import matplotlib.pyplot as plt
 
 from neat.evaluation import EvaluationEngine
 from tests.config_files.config_files import create_configuration
@@ -15,6 +16,7 @@ total_biases = total_neurons
 total_bias_params = total_biases * 2
 
 total_weights = config.n_input * n_neurons_per_layer + n_neurons_per_layer * config.n_output
+iteration = 0
 
 
 def regression_problem(x):
@@ -40,9 +42,16 @@ def regression_problem(x):
         connection.weight_std = weight[i + 1]
         i += 2
 
-    evaluation_engine = EvaluationEngine()
+    evaluation_engine = EvaluationEngine(batch_size=50000)
 
-    loss = evaluation_engine.evaluate_genome(genome=genome, n_samples=N_SAMPLES)
+    x, y_true, y_pred, loss, kl_qw_pw = \
+        evaluation_engine.evaluate_genome(genome=genome, n_samples=N_SAMPLES, return_all=True)
+
+    # if iteration % 50 == 0:
+    #     plt.figure(figsize=(20, 20))
+    #     plt.plot(x.numpy().reshape(-1), y_true.numpy().reshape(-1), 'b*')
+    #     plt.plot(x.numpy().reshape(-1), y_pred.numpy().reshape(-1), 'r*')
+    #     plt.show()
     return loss
 
 
