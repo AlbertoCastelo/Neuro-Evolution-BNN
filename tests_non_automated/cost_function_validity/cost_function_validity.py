@@ -3,7 +3,7 @@ import torch
 from neat.fitness.kl_divergence import compute_kl_qw_pw, compute_kl_qw_pw_by_product
 from tests_non_automated.deep_learning.feed_forward import FeedForward
 from neat.evaluation import EvaluationEngine
-from neat.representation.stochastic_network_old import StochasticNetwork
+from neat.representation.stochastic_network_old import StochasticNetworkOld
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
@@ -40,7 +40,7 @@ def main():
     evaluation_engine = EvaluationEngine(testing=False, batch_size=1)
 
     # setup network
-    network = StochasticNetwork(genome=genome)
+    network = StochasticNetworkOld(genome=genome)
     network.eval()
 
     x, y_true, y_pred, kl_posterior, kl_qw_pw = \

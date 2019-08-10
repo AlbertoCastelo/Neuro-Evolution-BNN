@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 import torch
-from neat.representation.stochastic_network_old import StochasticNetwork
+
+from neat.representation.stochastic_network import StochasticNetworkOld
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
@@ -13,7 +14,7 @@ class TestStochasticFeedForwardWithoutHiddenLayers(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        model = StochasticNetwork(genome=genome)
+        model = StochasticNetworkOld(genome=genome)
 
         input = torch.tensor([1.0, -1.0])
         result = model(input.data)
@@ -25,7 +26,7 @@ class TestStochasticFeedForwardWithoutHiddenLayers(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        model = StochasticNetwork(genome=genome)
+        model = StochasticNetworkOld(genome=genome)
 
         input = torch.tensor([1.0])
         result = model(input.data)
@@ -37,7 +38,7 @@ class TestStochasticFeedForwardWithoutHiddenLayers(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        model = StochasticNetwork(genome=genome)
+        model = StochasticNetworkOld(genome=genome)
 
         input = torch.tensor([[1.0],
                              [1.0],
@@ -52,7 +53,7 @@ class TestStochasticFeedForwardWithoutHiddenLayers(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        model = StochasticNetwork(genome=genome)
+        model = StochasticNetworkOld(genome=genome)
 
         input = torch.tensor([[1.0]])
         result_1 = model(input.data)

@@ -8,7 +8,7 @@ from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss_alternative, get_loss
 from neat.representation.deterministic_network import DeterministicNetwork
-from neat.representation.stochastic_network_old import StochasticNetwork
+from neat.representation.stochastic_network import StochasticNetworkOld, StochasticNetwork
 
 
 class EvaluationEngine:
@@ -42,7 +42,7 @@ class EvaluationEngine:
         kl_qw_pw = compute_kl_qw_pw(genome=genome)
 
         # setup network
-        network = StochasticNetwork(genome=genome)
+        network = StochasticNetworkOld(genome=genome)
         if is_gpu:
             network.cuda()
         network.eval()
