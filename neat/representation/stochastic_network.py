@@ -251,8 +251,10 @@ class StochasticLinear(nn.Module):
         x_mu_w = F.linear(input=x, weight=self.qw_mean)
         x_log_var_w = F.linear(input=x, weight=torch.exp(1.0 + self.qw_logvar))
 
-        mu_b = self.qb_mean
-        log_var_b = torch.exp(1.0 + self.qw_logvar)
+        batch_size = x.shape[0]
+
+        mu_b = self.qb_mean.repeat(batch_size, 1)
+        log_var_b = torch.exp(1.0 + self.qb_logvar).repeat(batch_size, 1)
 
         output_size = x_mu_w.size()
         output = x_mu_w + x_log_var_w * torch.randn(output_size) + \

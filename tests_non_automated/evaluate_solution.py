@@ -1,9 +1,9 @@
 import torch
 import numpy as np
 
+from neat.representation.stochastic_network import StochasticNetworkOld
 from tests_non_automated.deep_learning.feed_forward import FeedForward
 from neat.evaluation import EvaluationEngine
-from neat.representation.stochastic_network_old import StochasticNetwork
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ def regression_problem_learn_from_nn():
     evaluation_engine = EvaluationEngine(testing=False, batch_size=1)
 
     # setup network
-    network = StochasticNetwork(genome=genome)
+    network = StochasticNetworkOld(genome=genome)
     network.eval()
 
     x, y_true, y_pred, kl_posterior, kl_qw_pw = \
@@ -111,7 +111,7 @@ def regression_problem(x):
     data_loader = evaluation_engine.data_loader
     loss = evaluation_engine.loss
     # setup network
-    network = StochasticNetwork(genome=genome)
+    network = StochasticNetworkOld(genome=genome)
     network.eval()
 
     # calculate Data log-likelihood (p(y*|x*,D))
