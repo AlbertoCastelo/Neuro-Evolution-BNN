@@ -29,6 +29,7 @@ class ConnectionGene(Gene):
 
         self.weight_mean = None
         self.weight_std = None
+        self.weight_log_var = None
 
     def random_initialization(self):
         weight_mean_mean = self.weight_configuration.weight_mean_init_mean
@@ -66,6 +67,7 @@ class NodeGene(Gene):
         self.bias_configuration = BiasConfig()
         self.bias_mean = None
         self.bias_std = None
+        self.bias_log_var = None
 
     def random_initialization(self):
         mean = self.bias_configuration.bias_mean_init_mean

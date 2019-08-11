@@ -1,16 +1,17 @@
 import torch
 import numpy as np
 
-from neat.representation.stochastic_network import StochasticNetworkOld
+from neat.representation.stochastic_network import StochasticNetworkOld, StochasticNetwork
 from tests_non_automated.deep_learning.feed_forward import FeedForward
-from neat.evaluation import EvaluationEngine
+from neat.evaluation import EvaluationEngine, EvaluationStochasticGoodEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
 
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 50
-std = 0.2
+# std = -2.57
+std = 0.0001
 n_neurons_per_layer = 10
 
 
@@ -25,10 +26,10 @@ def regression_problem_learn_from_nn():
 
     genome = prepare_genome(parameters)
     print(genome)
-    evaluation_engine = EvaluationEngine(testing=False, batch_size=1)
+    evaluation_engine = EvaluationStochasticGoodEngine(testing=False, batch_size=100000)
 
     # setup network
-    network = StochasticNetworkOld(genome=genome)
+    network = StochasticNetwork(genome=genome)
     network.eval()
 
     x, y_true, y_pred, kl_posterior, kl_qw_pw = \
