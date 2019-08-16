@@ -109,14 +109,15 @@ class EvaluationStochasticGoodEngine:
 
         return population
 
-    def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False):
+    def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False, return_all=False):
         '''
         Calculates: KL-Div(q(w)||p(w|D))
         Uses the VariationalInferenceLoss class (not the alternative)
         '''
         kl_posterior = 0
 
-        kl_qw_pw = compute_kl_qw_pw(genome=genome)
+        # kl_qw_pw = compute_kl_qw_pw(genome=genome)
+        kl_qw_pw = 0
 
         # setup network
         network = StochasticNetwork(genome=genome)
@@ -124,6 +125,9 @@ class EvaluationStochasticGoodEngine:
             network.cuda()
         network.eval()
 
+        chunks_x = []
+        chunks_y_pred = []
+        chunks_y_true = []
         # calculate Data log-likelihood (p(y*|x*,D))
         for x_batch, y_batch in self.data_loader:
             x_batch = x_batch.reshape((-1, genome.n_input))
@@ -139,7 +143,20 @@ class EvaluationStochasticGoodEngine:
                 # forward pass
                 output = network(x_batch)
                 kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.get_beta())
-        return kl_posterior.item()
+                if return_all:
+                    chunks_x.append(x_batch)
+                    chunks_y_pred.append(output)
+                    chunks_y_true.append(y_batch)
+
+        loss_value = kl_posterior.item()
+
+        if return_all:
+            x = torch.cat(chunks_x, dim=0)
+            y_pred = torch.cat(chunks_y_pred, dim=0)
+            y_true = torch.cat(chunks_y_true, dim=0)
+            return x, y_true, y_pred, loss_value
+        return loss_value
+
 
     def get_beta(self):
 

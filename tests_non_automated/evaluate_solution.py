@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 50
 # std = -2.57
-std = 0.0001
+std = -4.0
 n_neurons_per_layer = 10
 
 
@@ -26,22 +26,18 @@ def regression_problem_learn_from_nn():
 
     genome = prepare_genome(parameters)
     print(genome)
-    evaluation_engine = EvaluationStochasticGoodEngine(testing=False, batch_size=100000)
+    evaluation_engine = EvaluationStochasticGoodEngine(testing=False, batch_size=None)
 
-    # setup network
-    network = StochasticNetwork(genome=genome)
-    network.eval()
-
-    x, y_true, y_pred, kl_posterior, kl_qw_pw = \
-        evaluation_engine.evaluate_genome(genome, n_samples=10, is_gpu=False, return_all=True)
+    x, y_true, y_pred, kl_posterior = \
+        evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)
 
     plt.figure(figsize=(20, 20))
     plt.plot(x.numpy().reshape(-1), y_true.numpy().reshape(-1), 'b*')
     plt.plot(x.numpy().reshape(-1), y_pred.numpy().reshape(-1), 'r*')
     plt.show()
     print(f'KL Div - Posterior: {kl_posterior}')
-    print(f'KL Div - Prior: {kl_qw_pw}')
-    print(f'MSE: {kl_posterior - kl_qw_pw}')
+    # print(f'KL Div - Prior: {kl_qw_pw}')
+    # print(f'MSE: {kl_posterior - kl_qw_pw}')
 
 
 def prepare_genome(parameters):

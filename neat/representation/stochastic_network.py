@@ -245,13 +245,10 @@ class StochasticLinear(nn.Module):
         self.log_alpha.data.uniform_(-stdv, stdv)
 
     def forward(self, x):
-        # weights = self.qw_mean + torch.exp(1.0 + self.qw_logvar)
-        # bias = self.qb_mean + torch.exp(1.0 + self.qb_logvar)
+        batch_size = x.shape[0]
 
         x_mu_w = F.linear(input=x, weight=self.qw_mean)
         x_log_var_w = F.linear(input=x, weight=torch.exp(1.0 + self.qw_logvar))
-
-        batch_size = x.shape[0]
 
         mu_b = self.qb_mean.repeat(batch_size, 1)
         log_var_b = torch.exp(1.0 + self.qb_logvar).repeat(batch_size, 1)
@@ -260,18 +257,24 @@ class StochasticLinear(nn.Module):
         output = x_mu_w + x_log_var_w * torch.randn(output_size) + \
                  mu_b + log_var_b * torch.randn(output_size)
 
-        # # combining mean for bias and weights
-        # fc_q_mean = F.linear(input=input, weight=self.qw_mean, bias=self.qb_mean)
+        # output_size = (batch_size, self.out_features)
+        # weight_size = (batch_size, self.out_features, self.in_features)
+        # bias_size = output_size
         #
-        # # log std for weighs
-        # fc_qw_si = torch.sqrt(1e-8 + F.linear(input=input.pow(2),
-        #                                       weight=torch.exp(self.log_alpha) * self.qw_mean.pow(2)))
+        # weights_samples = self.qw_mean.repeat(batch_size, 1, 1) + \
+        #                   torch.exp(1.0 + self.qw_logvar).repeat(batch_size, 1, 1) * \
+        #                   torch.randn(weight_size)
         #
-        # # log std for bias
-        # fc_qb_si = torch.sqrt(1e-8 + F.linear(input=input.pow(2),
-        #                                       weight=torch.exp(self.log_alpha) * self.qb_mean.pow(2)))
+        # bias_samples = self.qb_mean.repeat(batch_size, 1) + \
+        #                torch.exp(1.0 + self.qb_logvar).repeat(batch_size, 1) * \
+        #                torch.randn(bias_size)
         #
-        # output = fc_q_mean + fc_qw_si * (torch.randn(fc_q_mean.size())) + fc_qb_si * (torch.randn(fc_q_mean.size()))
+        # # y = x·W_trans + b
+        # x_w_trans = x.matmul(weights_samples.t())
+        #
+        # y = x_w_trans + bias_samples
+        # return y
+
         return output
 
     def __repr__(self):
