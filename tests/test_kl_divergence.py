@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import torch
-from torch.distributions import MultivariateNormal, kl_divergence
+from torch.distributions import MultivariateNormal, kl_divergence, Normal
 
 from neat.configuration import get_configuration
 from neat.fitness.kl_divergence import get_qw, get_pw, compute_kl_qw_pw, compute_kl_qw_pw_by_sum
@@ -22,11 +22,11 @@ class TestPriorKLDivergence(TestCase):
 
     def test_get_qw_from_genome(self):
         qw = get_qw(genome=self.genome)
-        self.assertEqual(type(qw), MultivariateNormal)
+        self.assertEqual(type(qw), Normal)
 
     def test_get_pw_from_genome(self):
         pw = get_pw(genome=self.genome)
-        self.assertEqual(type(pw), MultivariateNormal)
+        self.assertEqual(type(pw), Normal)
 
     def test_kl_from_genome(self):
         kl_qw_pw = compute_kl_qw_pw(genome=self.genome)
@@ -38,6 +38,7 @@ class TestPriorKLDivergence(TestCase):
         kl_qw_pw_2 = compute_kl_qw_pw_by_sum(self.genome)
 
         self.assertEqual(kl_qw_pw, kl_qw_pw_2)
+
 
 class TestKLSameDistribution(TestCase):
     def test_kl_when_same_distribution(self):
