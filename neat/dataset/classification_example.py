@@ -23,8 +23,11 @@ class ClassificationExample1Dataset(NeatTestingDataset):
     '''
     TRAIN_SIZE = 5000
     TEST_SIZE = 5000
-    X_MIN = -5
-    X_MAX = 5
+    X1_MIN = -1.0
+    X1_MAX = 1.0
+    X2_MIN = -2.0
+    X2_MAX = 2.0
+
 
     def __init__(self, dataset_type='train', is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
@@ -44,7 +47,9 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.input_scaler = StandardScaler()
         self.output_transformer = MultiLabelBinarizer()
 
-        x_train = np.random.uniform(self.X_MIN, self.X_MAX, size=(self.TRAIN_SIZE, 2))
+        x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.TRAIN_SIZE, 1))
+        x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.TRAIN_SIZE, 1))
+        x_train = np.concatenate((x1, x2), axis=1)
         x_train, y_train = self._get_x_y(x=x_train)
 
         self.input_scaler.fit(x_train)
@@ -54,7 +59,9 @@ class ClassificationExample1Dataset(NeatTestingDataset):
             x = x_train
             y = y_train
         elif self.dataset_type == 'test':
-            x_test = np.random.uniform(self.X_MIN, self.X_MAX, size=(self.TEST_SIZE, 2))
+            x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.TEST_SIZE, 1))
+            x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.TEST_SIZE, 1))
+            x_test = np.concatenate((x1, x2), axis=1)
             x, y = self._get_x_y(x=x_test)
 
         self.x_original = x
@@ -94,7 +101,7 @@ class ClassificationExample1Dataset(NeatTestingDataset):
 
     def unnormalize_output(self, y_pred: torch.Tensor) -> torch.Tensor:
         y_pred = y_pred.numpy().reshape((-1, 1))
-        y_pred_unnormalized = self.output_scaler.inverse_transform(y_pred).reshape(-1)
+        y_pred_unnormalized = self.output_transformer.inverse_transform(y_pred).reshape(-1)
         return torch.Tensor(y_pred_unnormalized)
 
     def __len__(self):
