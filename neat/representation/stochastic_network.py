@@ -1,18 +1,17 @@
-import math
-
 import torch
 from torch import nn
 from torch.distributions import Normal
-from torch.nn import Parameter
-import torch.nn.functional as F
 
 from neat.genome import Genome
+from neat.representation.layers import StochasticLinear, StochasticLinearParameters
 from neat.representation.utils import get_activation
 
 
 class StochasticNetwork(nn.Module):
-    def __init__(self, genome: Genome):
+    def __init__(self, genome: Genome, n_samples):
         super(StochasticNetwork, self).__init__()
+        self.n_samples = n_samples
+
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
@@ -28,7 +27,7 @@ class StochasticNetwork(nn.Module):
     def forward(self, x):
         start_index = self.n_layers - 1
         for i in range(start_index, -1, -1):
-            x = getattr(self, f'layer_{i}')(x)
+            x, kl = getattr(self, f'layer_{i}')(x)
             if i > 0:
                 x = getattr(self, f'activation_{i}')(x)
         return x
@@ -37,13 +36,19 @@ class StochasticNetwork(nn.Module):
         # layers_list = list(layers.keys())
         for layer_key in layers:
             layer_dict = layers[layer_key]
-            parameters = {'qw_mean': layer_dict['weight_mean'],
-                          'qw_logvar': layer_dict['weight_std'],
-                          'qb_mean': layer_dict['bias_mean'],
-                          'qb_logvar': layer_dict['bias_std']}
+            # parameters = {'qw_mean': layer_dict['weight_mean'],
+            #               'qw_logvar': layer_dict['weight_std'],
+            #               'qb_mean': layer_dict['bias_mean'],
+            #               'qb_logvar': layer_dict['bias_std']}
+            parameters = StochasticLinearParameters.create(qw_mean=layer_dict['weight_mean'],
+                                                           qw_logvar=layer_dict['weight_std'],
+                                                           qb_mean=layer_dict['bias_mean'],
+                                                           qb_logvar=layer_dict['bias_std'])
+
             layer = StochasticLinear(in_features=layer_dict['n_input'],
                                      out_features=layer_dict['n_output'],
-                                     parameters=parameters)
+                                     parameters=parameters,
+                                     n_samples=self.n_samples)
 
             setattr(self, f'layer_{layer_key}', layer)
             setattr(self, f'activation_{layer_key}', self.activation)
@@ -188,96 +193,3 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     layer['weight_mean'] = weight_mean
     layer['weight_std'] = weight_std
     return layer
-
-
-class StochasticLinear(nn.Module):
-
-    def __init__(self, in_features, out_features, parameters=None, q_logvar_init=-5):
-        # p_logvar_init, p_pi can be either
-        # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
-        # float: Gussian distribution
-        # q_logvar_init: float, the approximate posterior is currently always a factorized gaussian
-        super(StochasticLinear, self).__init__()
-
-        self.in_features = in_features
-        self.out_features = out_features
-        self.q_logvar_init = q_logvar_init
-
-        self.qw_mean = None
-        self.qw_logvar = None
-        self.qb_mean = None
-        self.qb_logvar = None
-        self.log_alpha = None
-
-        if parameters is None:
-            # Approximate posterior weights and biases
-            self.qw_mean = Parameter(torch.Tensor(out_features, in_features))
-            self.qw_logvar = Parameter(torch.Tensor(out_features, in_features))
-
-            # optionally add bias
-            self.qb_mean = Parameter(torch.Tensor(out_features))
-            self.qb_logvar = Parameter(torch.Tensor(out_features))
-
-            self.log_alpha = Parameter(torch.Tensor(1, 1))
-
-            # initialize all paramaters
-            self.reset_parameters()
-        else:
-            # this parameters are known
-            self.qw_mean = parameters['qw_mean']
-            self.qw_logvar = parameters['qw_logvar']
-
-            self.qb_mean = parameters['qb_mean']
-            self.qb_logvar = parameters['qb_logvar']
-
-            if 'log_alpha' in parameters:
-                self.log_alpha = parameters['log_alpha']
-
-    def reset_parameters(self):
-        # initialize (trainable) approximate posterior parameters
-        stdv = 10. / math.sqrt(self.in_features)
-        self.qw_mean.data.uniform_(-stdv, stdv)
-        self.qw_logvar.data.uniform_(-stdv, stdv).add_(self.q_logvar_init)
-        self.qb_mean.data.uniform_(-stdv, stdv)
-        self.qb_logvar.data.uniform_(-stdv, stdv).add_(self.q_logvar_init)
-
-        # assumes 1 sigma for all weights per layer.
-        self.log_alpha.data.uniform_(-stdv, stdv)
-
-    def forward(self, x):
-        batch_size = x.shape[0]
-
-        x_mu_w = F.linear(input=x, weight=self.qw_mean)
-        x_log_var_w = F.linear(input=x, weight=torch.exp(1.0 + self.qw_logvar))
-
-        mu_b = self.qb_mean.repeat(batch_size, 1)
-        log_var_b = torch.exp(1.0 + self.qb_logvar).repeat(batch_size, 1)
-
-        output_size = x_mu_w.size()
-        output = x_mu_w + x_log_var_w * torch.randn(output_size) + \
-                 mu_b + log_var_b * torch.randn(output_size)
-
-        # output_size = (batch_size, self.out_features)
-        # weight_size = (batch_size, self.out_features, self.in_features)
-        # bias_size = output_size
-        #
-        # weights_samples = self.qw_mean.repeat(batch_size, 1, 1) + \
-        #                   torch.exp(1.0 + self.qw_logvar).repeat(batch_size, 1, 1) * \
-        #                   torch.randn(weight_size)
-        #
-        # bias_samples = self.qb_mean.repeat(batch_size, 1) + \
-        #                torch.exp(1.0 + self.qb_logvar).repeat(batch_size, 1) * \
-        #                torch.randn(bias_size)
-        #
-        # # y = x·W_trans + b
-        # x_w_trans = x.matmul(weights_samples.t())
-        #
-        # y = x_w_trans + bias_samples
-        # return y
-
-        return output
-
-    def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
