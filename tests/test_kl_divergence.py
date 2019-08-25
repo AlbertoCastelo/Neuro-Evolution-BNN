@@ -4,7 +4,7 @@ import torch
 from torch.distributions import MultivariateNormal, kl_divergence
 
 from neat.configuration import get_configuration
-from neat.fitness.kl_divergence import get_qw, get_pw, compute_kl_qw_pw
+from neat.fitness.kl_divergence import get_qw, get_pw, compute_kl_qw_pw, compute_kl_qw_pw_by_sum
 from tests.config_files.config_files import get_config_files_path
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
@@ -30,8 +30,14 @@ class TestPriorKLDivergence(TestCase):
 
     def test_kl_from_genome(self):
         kl_qw_pw = compute_kl_qw_pw(genome=self.genome)
+
         self.assertEqual(type(kl_qw_pw.item()), float)
 
+    def test_both_methods_give_same_result(self):
+        kl_qw_pw = compute_kl_qw_pw(genome=self.genome)
+        kl_qw_pw_2 = compute_kl_qw_pw_by_sum(self.genome)
+
+        self.assertEqual(kl_qw_pw, kl_qw_pw_2)
 
 class TestKLSameDistribution(TestCase):
     def test_kl_when_same_distribution(self):

@@ -13,13 +13,14 @@ def compute_kl_qw_pw(genome: Genome):
 
     qw = get_qw(genome)
 
-    kl_qw_pw = kl_divergence(qw, pw)
+    kl_qw_pw = kl_divergence(qw, pw).sum()
     # TODO: remove division by 100
     # return kl_qw_pw / 100
     return kl_qw_pw
 
 
 def get_pw(genome: Genome) -> Distribution:
+
     # get prior configuration
     config = get_configuration()
     means = []
@@ -33,9 +34,8 @@ def get_pw(genome: Genome) -> Distribution:
         stds.append(config.weight_std_prior)
 
     mu = torch.Tensor(means)
-    sigma_diag = torch.Tensor(stds)
-    cov_matrix = torch.diag(sigma_diag)
-    return MultivariateNormal(loc=mu, covariance_matrix=cov_matrix)
+    sigma = torch.Tensor(stds)
+    return Normal(loc=mu, scale=sigma)
 
 
 def get_qw(genome: Genome) -> Distribution:
@@ -50,24 +50,23 @@ def get_qw(genome: Genome) -> Distribution:
         stds.append(connection.weight_std)
 
     mu = torch.Tensor(means)
-    sigma_diag = torch.Tensor(stds)
-    cov_matrix = torch.diag(sigma_diag)
-    return MultivariateNormal(loc=mu, covariance_matrix=cov_matrix)
+    sigma = torch.Tensor(stds)
+    return Normal(loc=mu, scale=sigma)
 
 
 # TODO: this equation is wrong!!
-def compute_kl_qw_pw_by_product(genome: Genome):
+def compute_kl_qw_pw_by_sum(genome: Genome):
     # get prior configuration
     config = get_configuration()
-    kl_qw_pw = torch.Tensor([1.0])
+    kl_qw_pw = 0.0
 
     for key, node in genome.node_genes.items():
         qw = Normal(loc=config.bias_mean_prior, scale=config.bias_std_prior)
         pw = Normal(loc=node.bias_mean, scale=node.bias_std)
-        kl_qw_pw *= kl_divergence(qw, pw)
+        kl_qw_pw += kl_divergence(qw, pw)
 
     for key, connection in genome.connection_genes.items():
         qw = Normal(loc=config.weight_mean_prior, scale=config.weight_std_prior)
         pw = Normal(loc=connection.weight_mean, scale=connection.weight_std)
-        kl_qw_pw *= kl_divergence(qw, pw)
+        kl_qw_pw += kl_divergence(qw, pw)
     return kl_qw_pw
