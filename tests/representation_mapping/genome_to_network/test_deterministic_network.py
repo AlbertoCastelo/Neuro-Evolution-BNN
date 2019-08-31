@@ -1,7 +1,7 @@
 from unittest import TestCase, skip
 
 from neat.genome import GenomeSample
-from neat.representation.deterministic_network import DeterministicNetwork
+from neat.representation_mapping.genome_to_network.deterministic_network import DeterministicNetwork
 import torch
 
 

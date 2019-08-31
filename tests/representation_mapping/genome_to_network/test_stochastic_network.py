@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import torch
 
-from neat.representation.stochastic_network import StochasticNetworkOld
+from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 

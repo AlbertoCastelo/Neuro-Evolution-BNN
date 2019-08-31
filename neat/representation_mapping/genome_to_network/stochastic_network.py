@@ -3,8 +3,8 @@ from torch import nn
 from torch.distributions import Normal
 
 from neat.genome import Genome
-from neat.representation.layers import StochasticLinear, StochasticLinearParameters
-from neat.representation.utils import get_activation
+from neat.representation_mapping.genome_to_network.layers import StochasticLinear, StochasticLinearParameters
+from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
 class StochasticNetwork(nn.Module):
@@ -178,9 +178,9 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     weight_std = torch.zeros([n_output, n_input])
     for key in layer_connections:
         weight_mean[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            layer_connections[key].weight_mean
+            float(layer_connections[key].weight_mean)
         weight_std[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            layer_connections[key].weight_std
+            float(layer_connections[key].weight_std)
 
     # weights = torch.transpose(weights)
     layer['n_input'] = n_input

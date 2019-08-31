@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import torch
 
-from neat.representation.layers import StochasticLinearParameters, StochasticLinear
+from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, StochasticLinear
 
 
 class TestStochasticLayer(TestCase):

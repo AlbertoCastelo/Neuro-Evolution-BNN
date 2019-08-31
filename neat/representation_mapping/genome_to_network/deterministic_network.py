@@ -1,9 +1,8 @@
 import torch
 from torch import nn
 
-from neat.configuration import get_configuration
-from neat.genome import GenomeSample, Genome
-from neat.representation.utils import get_activation
+from neat.genome import GenomeSample
+from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
 class DeterministicNetwork(nn.Module):
