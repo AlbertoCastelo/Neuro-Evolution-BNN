@@ -30,4 +30,5 @@ class TestClassificationExample1Dataset(TestCase):
         self.assertEqual(type(x), torch.Tensor)
         self.assertEqual(type(y), torch.Tensor)
         self.assertEqual(len(x), len(y))
+        self.assertEqual(y.shape, (len(y),))
 
