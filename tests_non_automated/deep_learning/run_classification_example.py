@@ -18,7 +18,7 @@ is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 30
+n_epochs = 1000
 
 
 batch_size = 50000
@@ -28,8 +28,8 @@ evaluator = EvaluateStandardDL(dataset=dataset,
                                lr=lr,
                                weight_decay=weight_decay,
                                n_epochs=n_epochs,
-                               n_neurons_per_layer=5,
-                               n_hidden_layers=2,
+                               n_neurons_per_layer=10,
+                               n_hidden_layers=1,
                                is_cuda=is_cuda)
 evaluator.run()
 
@@ -41,11 +41,12 @@ y_true = dataset.y
 y_pred = evaluator.predict(x_test)
 
 x_test = dataset.input_scaler.inverse_transform(x_test)
-# y_pred = dataset.output_transformer.inverse_transform(y_pred)
+y_true =y_true.numpy()
 
 # plot results
+y_pred = np.argmax(y_pred.numpy(), 1)
 df = pd.DataFrame(x_test, columns=['x1', 'x2'])
-df['y'] = np.argmax(y_pred.numpy(), 1)
+df['y'] = y_pred
 
 x1_limit, x2_limit = dataset.get_separation_line()
 
@@ -54,3 +55,8 @@ ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
 ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
 plt.show()
 
+from sklearn.metrics import confusion_matrix, accuracy_score
+print('Confusion Matrix:')
+print(confusion_matrix(y_true, y_pred))
+
+print(f'Accuracy: {accuracy_score(y_true, y_pred)*100} %')

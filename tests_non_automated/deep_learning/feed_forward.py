@@ -1,6 +1,5 @@
 from torch import nn
-
-from neat.representation.utils import get_activation
+from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
 class FeedForward(nn.Module):
@@ -22,7 +21,6 @@ class FeedForward(nn.Module):
         # output layer
         layer = nn.Linear(in_features=in_features, out_features=n_output)
         setattr(self, f'layer_0', layer)
-        # setattr(self, f'activation_{output_layer}', self.activation)
 
     def forward(self, x):
         for i in range(self.n_layers, 0, -1):
