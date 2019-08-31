@@ -1,12 +1,10 @@
-import torch
 import pandas as pd
 import numpy as np
 from neat.dataset.classification_example import ClassificationExample1Dataset
-from neat.dataset.regression_example import RegressionExample1Dataset
 import seaborn as sns
 from tests.config_files.config_files import create_configuration
 import matplotlib.pyplot as plt
-from tests_non_automated.deep_learning.train_eval import EvaluateStandardDL
+from deep_learning.train_eval import EvaluateStandardDL
 
 
 config_file = '/classification-miso.json'

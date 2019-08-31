@@ -1,17 +1,11 @@
 import torch
-from torch import nn
-import numpy as np
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_squared_error
 from neat.evaluation import EvaluationStochasticGoodEngine
-from neat.genome import Genome
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
-from tests.utils.generate_genome import generate_genome_with_hidden_units
-from tests_non_automated.deep_learning.feed_forward import FeedForward
+from deep_learning.feed_forward import FeedForward
 
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 50

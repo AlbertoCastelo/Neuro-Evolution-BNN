@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 from neat.configuration import get_configuration
 from neat.loss.vi_loss import _get_loss_by_problem
-from tests_non_automated.deep_learning.feed_forward import FeedForward
+from deep_learning.feed_forward import FeedForward
 
 
 class EvaluateStandardDL:

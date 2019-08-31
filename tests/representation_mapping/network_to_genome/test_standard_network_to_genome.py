@@ -1,12 +1,11 @@
 from unittest import TestCase
 
 import torch
-import os
 from neat.genome import Genome
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
-from tests_non_automated.deep_learning.feed_forward import FeedForward
+from deep_learning.feed_forward import FeedForward
 
 
 class TestNetwork2Genome(TestCase):
