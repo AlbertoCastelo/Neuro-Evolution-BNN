@@ -45,7 +45,7 @@ class ClassificationExample1Dataset(NeatTestingDataset):
 
     def generate_data(self):
         self.input_scaler = StandardScaler()
-        self.output_transformer = MultiLabelBinarizer()
+        self.output_transformer = LabelBinarizer()
 
         x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.TRAIN_SIZE, 1))
         x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.TRAIN_SIZE, 1))
@@ -68,7 +68,7 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.y_original = y
 
         self.x = self.input_scaler.transform(x)
-        self.y = self.output_transformer.transform(y)
+        self.y = self.output_transformer.transform(y).squeeze()
 
         if self.is_debug:
             self.x = x[:512]
@@ -76,6 +76,11 @@ class ClassificationExample1Dataset(NeatTestingDataset):
 
         self.x = torch.tensor(self.x)
         self.y = torch.tensor(self.y)
+
+    def get_separation_line(self):
+        x1 = np.linspace(self.X1_MIN, self.X1_MAX, 200)
+        x2 = self._get_x2_limit(x1)
+        return x1, x2
 
     def _get_x_y(self, x):
         independent_cols = ['x1', 'x2']
