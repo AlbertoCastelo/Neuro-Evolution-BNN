@@ -25,21 +25,20 @@ class StochasticNetwork(nn.Module):
         self._set_network_layers(layers=layers_dict)
 
     def forward(self, x):
+        kl_qw_pw = 0.0
         start_index = self.n_layers - 1
         for i in range(start_index, -1, -1):
-            x, kl = getattr(self, f'layer_{i}')(x)
+            x, kl_layer = getattr(self, f'layer_{i}')(x)
+            kl_qw_pw += kl_layer
             if i > 0:
                 x = getattr(self, f'activation_{i}')(x)
-        return x
+
+        return x, kl_qw_pw
 
     def _set_network_layers(self, layers: dict):
-        # layers_list = list(layers.keys())
         for layer_key in layers:
             layer_dict = layers[layer_key]
-            # parameters = {'qw_mean': layer_dict['weight_mean'],
-            #               'qw_logvar': layer_dict['weight_std'],
-            #               'qb_mean': layer_dict['bias_mean'],
-            #               'qb_logvar': layer_dict['bias_std']}
+
             parameters = StochasticLinearParameters.create(qw_mean=layer_dict['weight_mean'],
                                                            qw_logvar=layer_dict['weight_std'],
                                                            qb_mean=layer_dict['bias_mean'],
