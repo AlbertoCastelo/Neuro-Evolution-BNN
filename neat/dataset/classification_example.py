@@ -4,17 +4,7 @@ from sklearn.preprocessing import StandardScaler, LabelBinarizer, MultiLabelBina
 from torch.utils.data import Dataset
 import numpy as np
 
-
-class NeatTestingDataset(Dataset):
-
-    def generate_data(self):
-        raise NotImplementedError
-
-    def __len__(self):
-        raise NotImplementedError
-
-    def __getitem__(self, idx):
-        raise NotImplementedError
+from neat.dataset.abstract import NeatTestingDataset
 
 
 class ClassificationExample1Dataset(NeatTestingDataset):
@@ -74,8 +64,8 @@ class ClassificationExample1Dataset(NeatTestingDataset):
             self.x = x[:512]
             self.y = y[:512]
 
-        self.x = torch.tensor(self.x)
-        self.y = torch.tensor(self.y)
+        self.x = torch.tensor(self.x).float()
+        self.y = torch.tensor(self.y).long()
 
     def get_separation_line(self):
         x1 = np.linspace(self.X1_MIN, self.X1_MAX, 200)

@@ -3,8 +3,10 @@ from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset
 import numpy as np
 
+from neat.dataset.abstract import NeatTestingDataset
 
-class RegressionExample1Dataset(Dataset):
+
+class RegressionExample1Dataset(NeatTestingDataset):
     '''
     Dataset with 1 input variables and 1 output
     '''
@@ -13,13 +15,14 @@ class RegressionExample1Dataset(Dataset):
 
     def __init__(self, dataset_type='train', is_debug=False):
         self.is_debug = is_debug
-
+        self.dataset_type = dataset_type
         self.input_scaler = StandardScaler()
         self.output_scaler = StandardScaler()
 
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
+    def generate_data(self):
         range_ = [0.0, 0.7]
         noise = [0.0, 0.02]
         x_train = np.random.uniform(range_[0], range_[1], self.TRAIN_SIZE)
@@ -28,10 +31,10 @@ class RegressionExample1Dataset(Dataset):
         self.input_scaler.fit(x_train)
         self.output_scaler.fit(y_train)
 
-        if dataset_type == 'train':
+        if self.dataset_type == 'train':
             x = x_train
             y = y_train
-        if dataset_type == 'test':
+        if self.dataset_type == 'test':
             x_test = np.linspace(-0.5, 1.5, self.TEST_SIZE)
             noise = [0.00, 0.00]
             x, y = self._get_x_y(x=x_test, noise=noise)
@@ -43,23 +46,9 @@ class RegressionExample1Dataset(Dataset):
         self.x = self.input_scaler.transform(x)
         self.y = self.output_scaler.transform(y).reshape((-1, 1))
 
-        if is_debug:
+        if self.is_debug:
             self.x = x[:512]
             self.y = y[:512]
-
-        # create training/validation set
-        # train, validation_and_test = train_test_split(self.df_data, random_state=42, shuffle=True, test_size=0.4)
-        # validation, test = train_test_split(validation_and_test, random_state=42, shuffle=True, test_size=0.5)
-        #
-        # self.df_data
-        # if self.dataset_type == 'train':
-        #     self.df_data = train
-        # elif self.dataset_type == 'validation':
-        #     self.df_data = validation
-        # elif self.dataset_type == 'test':
-        #     self.df_data = test
-        # else:
-        #     raise ValueError
 
     def _get_x_y(self, x, noise):
         dataset_size = x.shape[0]
@@ -79,23 +68,26 @@ class RegressionExample1Dataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.x[idx])
-        y = torch.tensor(self.y[idx])
+        x = torch.tensor(self.x[idx]).float()
+        y = torch.tensor(self.y[idx]).float()
         return x, y
 
 
-class RegressionExample2Dataset(Dataset):
+class RegressionExample2Dataset(NeatTestingDataset):
     TRAIN_SIZE = 500
     TEST_SIZE = 500
     '''
     Dataset with 2 input variables and 1 output
     '''
     def __init__(self, dataset_type='train', is_debug=False):
+        self.is_debug = is_debug
+        self.dataset_type = dataset_type
         self.input_scaler = StandardScaler()
         self.output_scaler = StandardScaler()
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
+    def generate_data(self):
         range_ = [0.0, 0.7]
         noise = [0.0, 0.02]
         x_1_train = np.random.uniform(range_[0], range_[1], self.TRAIN_SIZE)
@@ -105,10 +97,10 @@ class RegressionExample2Dataset(Dataset):
         self.input_scaler.fit(x_train)
         self.output_scaler.fit(y_train)
 
-        if dataset_type == 'train':
+        if self.dataset_type == 'train':
             x = x_train
             y = y_train
-        if dataset_type == 'test':
+        if self.dataset_type == 'test':
             x_1_test = np.linspace(-0.5, 1.5, self.TEST_SIZE)
             x_2_test = np.linspace(-0.5, 1.5, self.TEST_SIZE)
             noise = [0.00, 0.00]
@@ -121,23 +113,9 @@ class RegressionExample2Dataset(Dataset):
         self.x = self.input_scaler.transform(x)
         self.y = self.output_scaler.transform(y).reshape((-1, 1))
 
-        if is_debug:
+        if self.is_debug:
             self.x = self.x[:512]
             self.y = self.y[:512]
-
-        # create training/validation set
-        # train, validation_and_test = train_test_split(self.df_data, random_state=42, shuffle=True, test_size=0.4)
-        # validation, test = train_test_split(validation_and_test, random_state=42, shuffle=True, test_size=0.5)
-        #
-        # self.df_data
-        # if self.dataset_type == 'train':
-        #     self.df_data = train
-        # elif self.dataset_type == 'validation':
-        #     self.df_data = validation
-        # elif self.dataset_type == 'test':
-        #     self.df_data = test
-        # else:
-        #     raise ValueError
 
     def _get_x_y(self, x_1, x_2, noise):
         x = np.array(list(zip(x_1, x_2)))
@@ -156,6 +134,6 @@ class RegressionExample2Dataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.x[idx])
-        y = torch.tensor(self.y[idx])
+        x = torch.tensor(self.x[idx]).float()
+        y = torch.tensor(self.y[idx]).float()
         return x, y
