@@ -160,11 +160,12 @@ class StochasticLinear(nn.Module):
         kl_qw_pw /= self.n_samples
 
         # 2nd alternative to calculate kl divergence
+        # The Kullback–Leibler divergence is additive for independent distributions
         kl_w_qw_pw = kl_divergence(qw, pw).sum()
         kl_b_qw_pw = kl_divergence(qb, pb).sum()
         kl_qw_pw_2 = kl_b_qw_pw + kl_w_qw_pw
-        print(kl_qw_pw_2)
-        print(kl_qw_pw)
+        # print(f'kl_qw_pw on distribution: {kl_qw_pw_2}')
+        # print(f'kl_qw_pw on samples: {kl_qw_pw}')
         return kl_qw_pw
 
     def _compute_log(self, mean, std, samples):

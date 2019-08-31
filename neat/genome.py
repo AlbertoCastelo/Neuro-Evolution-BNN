@@ -1,6 +1,8 @@
 import uuid
 
-from neat.configuration import get_configuration
+import jsons
+
+from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict
 from neat.gene import NodeGene, ConnectionGene
 
 
@@ -40,6 +42,18 @@ class Genome:
 
         # initialize connections
         self._initialize_connections()
+
+    def add_node(self, key, mean=None, std=None):
+        node = NodeGene(key=key)
+        node.bias_mean = mean
+        node.bias_std = std
+        self.node_genes[key] = node
+
+    def add_connection(self, key, mean=None, std=None):
+        connection = ConnectionGene(key=key)
+        connection.weight_mean = mean
+        connection.weight_std = std
+        self.connection_genes[key] = connection
 
     def get_genome_sample(self):
         '''
@@ -119,4 +133,20 @@ class Genome:
         genome_str = ''.join([bias_str, '\n', weight_str])
         return genome_str
 
+    def to_dict(self):
+        return jsons.dump(self)
+
+    def save_genome(self, filename=None):
+        filename = ''.join([str(uuid.uuid4()), '.json']) if filename is None else filename
+
+        write_json_file_from_dict(data=self.to_dict(), filename=filename)
+
+    @staticmethod
+    def from_dict(genome_dict):
+        return jsons.load(genome_dict, Genome)
+
+    @staticmethod
+    def create_from_file(filename):
+        genome_dict = read_json_file_to_dict(filename)
+        return Genome.from_dict(genome_dict)
 

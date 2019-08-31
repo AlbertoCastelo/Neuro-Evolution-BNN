@@ -37,10 +37,14 @@ class VariationalInferenceLoss(nn.Module):
     def forward(self, y_pred, y_true, kl_qw_pw, beta):
         # log likelihood
         logpy = -self.loss(y_pred, y_true)
-
+        # print(f'kl_qw_pw: {kl_qw_pw}')
+        # print(f'logpy: {logpy}')
+        # TODO: figure out BETA
+        beta = 0
         ll = logpy - beta * kl_qw_pw  # ELBO
+        # print(f'ELBO: {ll}')
         loss = -ll
-
+        # print(f'loss: {loss}')
         return loss
 
 

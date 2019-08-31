@@ -107,7 +107,16 @@ class _Configuration:
         for key in configuration:
             setattr(config, key, configuration[key])
 
+        # self.process_configuration()
+
         _Configuration._instance = config
+
+    # def process_configuration(self):
+    #     self.is_classification = True
+    #     if self.problem_type == 'regression':
+    #         self.is_classification = False
+    #     else:
+    #         raise ConfigError(f'Problem Type is incorrect: {self.problem_type}')
 
     def read_configuration_from_file(self, filename):
         configuration = read_json_file_to_dict(filename)

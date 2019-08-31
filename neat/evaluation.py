@@ -3,12 +3,13 @@ import torch
 from torch.utils.data import DataLoader
 
 from neat.configuration import ConfigError, get_configuration
+from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
-from neat.fitness.kl_divergence import compute_kl_qw_pw
+from neat.fitness.kl_divergence import compute_kl_qw_pw, compute_kl_qw_pw_by_sum
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss_alternative, get_loss
-from neat.representation.deterministic_network import DeterministicNetwork
-from neat.representation.stochastic_network import StochasticNetworkOld, StochasticNetwork
+from neat.representation_mapping.genome_to_network.deterministic_network import DeterministicNetwork
+from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld, StochasticNetwork
 
 
 class EvaluationEngine:
@@ -94,6 +95,7 @@ class EvaluationStochasticGoodEngine:
         self.batch_size = batch_size if batch_size is not None else self.config.batch_size
 
         self.dataset = get_dataset(self.config.dataset_name, testing=testing)
+        self.dataset.generate_data()
         self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
         self.m = math.ceil(len(self.data_loader) / self.batch_size)
 
@@ -116,11 +118,12 @@ class EvaluationStochasticGoodEngine:
         '''
         kl_posterior = 0
 
-        # kl_qw_pw = compute_kl_qw_pw(genome=genome)
-        kl_qw_pw = 0
+        kl_qw_pw = compute_kl_qw_pw(genome=genome)
+        # print(kl_qw_pw)
+        # print(f'kl_prior by sum: {compute_kl_qw_pw_by_sum(genome)}')
 
         # setup network
-        network = StochasticNetwork(genome=genome)
+        network = StochasticNetwork(genome=genome, n_samples=n_samples)
         if is_gpu:
             network.cuda()
         network.eval()
@@ -128,20 +131,20 @@ class EvaluationStochasticGoodEngine:
         chunks_x = []
         chunks_y_pred = []
         chunks_y_true = []
+
         # calculate Data log-likelihood (p(y*|x*,D))
         for x_batch, y_batch in self.data_loader:
             x_batch = x_batch.reshape((-1, genome.n_input))
             x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
-            x_batch = x_batch.float()
 
-            y_batch = y_batch.repeat(n_samples, 1)
-            y_batch = y_batch.float()
+            y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
             if is_gpu:
                 x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
             with torch.no_grad():
                 # forward pass
-                output = network(x_batch)
+                output, _ = network(x_batch)
+
                 kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.get_beta())
                 if return_all:
                     chunks_x.append(x_batch)
@@ -237,9 +240,16 @@ def get_dataset(dataset_name, testing=False):
         dataset_type = 'train'
 
     if dataset_name == 'regression_example_1':
-        return RegressionExample1Dataset(dataset_type=dataset_type)
+        dataset = RegressionExample1Dataset(dataset_type=dataset_type)
+        dataset.generate_data()
+        return dataset
     elif dataset_name == 'regression_example_2':
-        return RegressionExample2Dataset(dataset_type=dataset_type)
-
+        dataset = RegressionExample2Dataset(dataset_type=dataset_type)
+        dataset.generate_data()
+        return dataset
+    elif dataset_name == 'classification_example_1':
+        dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
+        dataset.generate_data()
+        return dataset
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset_name}')

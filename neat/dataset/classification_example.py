@@ -11,12 +11,11 @@ class ClassificationExample1Dataset(NeatTestingDataset):
     '''
     Dataset with 1 input variables and 1 output
     '''
-    TRAIN_SIZE = 5000
-    TEST_SIZE = 5000
+    SIZE = 50000
     X1_MIN = -1.0
     X1_MAX = 1.0
-    X2_MIN = -2.0
-    X2_MAX = 2.0
+    X2_MIN = -1.0
+    X2_MAX = 1.0
 
 
     def __init__(self, dataset_type='train', is_debug=False):
@@ -37,8 +36,8 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.input_scaler = StandardScaler()
         self.output_transformer = LabelBinarizer()
 
-        x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.TRAIN_SIZE, 1))
-        x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.TRAIN_SIZE, 1))
+        x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.SIZE, 1))
+        x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.SIZE, 1))
         x_train = np.concatenate((x1, x2), axis=1)
         x_train, y_train = self._get_x_y(x=x_train)
 
@@ -49,8 +48,8 @@ class ClassificationExample1Dataset(NeatTestingDataset):
             x = x_train
             y = y_train
         elif self.dataset_type == 'test':
-            x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.TEST_SIZE, 1))
-            x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.TEST_SIZE, 1))
+            x1 = np.random.uniform(self.X1_MIN, self.X1_MAX, size=(self.SIZE, 1))
+            x2 = np.random.uniform(self.X2_MIN, self.X2_MAX, size=(self.SIZE, 1))
             x_test = np.concatenate((x1, x2), axis=1)
             x, y = self._get_x_y(x=x_test)
 
