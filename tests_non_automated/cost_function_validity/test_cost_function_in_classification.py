@@ -37,33 +37,30 @@ def main():
     x, y_true, y_pred, kl_posterior = \
         evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)
 
-    x, y_true, y_pred, kl_posterior = \
-        evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)
-
     print()
     print(f'KL Posterior: {kl_posterior}')
 
-    # x = x.numpy()
-    # x = evaluation_engine.dataset.input_scaler.inverse_transform(x)
-    # y_true = y_true.numpy()
-    #
-    # # plot results
-    # y_pred = np.argmax(y_pred.numpy(), 1)
-    # df = pd.DataFrame(x, columns=['x1', 'x2'])
-    # df['y'] = y_pred
-    #
-    # x1_limit, x2_limit = evaluation_engine.dataset.get_separation_line()
-    #
-    # plt.figure()
-    # ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
-    # ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
-    # plt.show()
-    #
-    #
-    # print('Confusion Matrix:')
-    # print(confusion_matrix(y_true, y_pred))
-    #
-    # print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
+    x = x.numpy()
+    x = evaluation_engine.dataset.input_scaler.inverse_transform(x)
+    y_true = y_true.numpy()
+
+    # plot results
+    y_pred = np.argmax(y_pred.numpy(), 1)
+    df = pd.DataFrame(x, columns=['x1', 'x2'])
+    df['y'] = y_pred
+
+    x1_limit, x2_limit = evaluation_engine.dataset.get_separation_line()
+
+    plt.figure()
+    ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
+    ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
+    plt.show()
+
+
+    print('Confusion Matrix:')
+    print(confusion_matrix(y_true, y_pred))
+
+    print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
 
 if __name__ == '__main__':
     main()

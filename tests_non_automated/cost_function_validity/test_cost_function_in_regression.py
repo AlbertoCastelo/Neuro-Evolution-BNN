@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from neat.evaluation import EvaluationStochasticGoodEngine
 from neat.genome import Genome
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
@@ -27,15 +27,11 @@ def main():
     parameters = torch.load(f'./../deep_learning/models/{model_filename}')
     network.load_state_dict(parameters)
 
-    std = -2.1
+    std = -3.1
     genome = get_genome_from_standard_network(network, std=std)
-
-    genome = generate_genome_with_hidden_units(1, 1, n_hidden=1)
 
     evaluation_engine = EvaluationStochasticGoodEngine(testing=False)
 
-    x, y_true, y_pred, kl_posterior = \
-        evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)
 
     x, y_true, y_pred, kl_posterior = \
         evaluation_engine.evaluate_genome(genome, n_samples=1, is_gpu=False, return_all=True)
@@ -43,27 +39,19 @@ def main():
     print()
     print(f'KL Posterior: {kl_posterior}')
 
-    # x = x.numpy()
-    # x = evaluation_engine.dataset.input_scaler.inverse_transform(x)
-    # y_true = y_true.numpy()
-    #
-    # # plot results
-    # y_pred = np.argmax(y_pred.numpy(), 1)
-    # df = pd.DataFrame(x, columns=['x1', 'x2'])
-    # df['y'] = y_pred
-    #
-    # x1_limit, x2_limit = evaluation_engine.dataset.get_separation_line()
-    #
-    # plt.figure()
-    # ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
-    # ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
-    # plt.show()
-    #
-    #
-    # print('Confusion Matrix:')
-    # print(confusion_matrix(y_true, y_pred))
-    #
-    # print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
+
+    x = x.numpy()
+    x = evaluation_engine.dataset.input_scaler.inverse_transform(x)
+    y_pred = evaluation_engine.dataset.output_scaler.inverse_transform(y_pred.numpy())
+    y_true = evaluation_engine.dataset.output_scaler.inverse_transform(y_true.numpy())
+
+    # plot results
+    plt.figure(figsize=(20, 20))
+    plt.plot(x, y_true, 'r*')
+    plt.plot(x, y_pred, 'b*')
+    plt.show()
+
+    print(f'MSE: {mean_squared_error(y_true, y_pred) * 100} %')
 
 if __name__ == '__main__':
     main()

@@ -9,14 +9,13 @@ from neat.dataset.abstract import NeatTestingDataset
 
 class ClassificationExample1Dataset(NeatTestingDataset):
     '''
-    Dataset with 1 input variables and 1 output
+    Dataset with 2 input variables and 2 classes
     '''
-    SIZE = 50000
+    SIZE = 5000
     X1_MIN = -1.0
     X1_MAX = 1.0
     X2_MIN = -1.0
     X2_MAX = 1.0
-
 
     def __init__(self, dataset_type='train', is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
