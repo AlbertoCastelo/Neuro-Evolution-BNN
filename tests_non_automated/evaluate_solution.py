@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from neat.representation.stochastic_network import StochasticNetworkOld, StochasticNetwork
+from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
 from tests_non_automated.deep_learning.feed_forward import FeedForward
 from neat.evaluation import EvaluationEngine, EvaluationStochasticGoodEngine
 from tests.config_files.config_files import create_configuration
