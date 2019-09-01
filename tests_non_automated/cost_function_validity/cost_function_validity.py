@@ -2,7 +2,7 @@ import torch
 
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
-from deep_learning.feed_forward import FeedForward
+from deep_learning.standard.feed_forward import FeedForward
 from neat.evaluation import EvaluationEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units

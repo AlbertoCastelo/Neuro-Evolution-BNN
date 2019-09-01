@@ -5,7 +5,7 @@ from neat.evaluation import EvaluationStochasticGoodEngine
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
-from deep_learning.feed_forward import FeedForward
+from deep_learning.standard.feed_forward import FeedForward
 
 config = create_configuration(filename='/siso.json')
 N_SAMPLES = 50

@@ -8,7 +8,7 @@ from neat.evaluation import EvaluationStochasticGoodEngine
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
-from deep_learning.feed_forward import FeedForward
+from deep_learning.standard.feed_forward import FeedForward
 
 config = create_configuration(filename='/classification-miso.json')
 N_SAMPLES = 50
@@ -21,7 +21,7 @@ def main():
     network = FeedForward(n_input=config.n_input, n_output=config.n_output,
                           n_neurons_per_layer=n_neurons_per_layer,
                           n_hidden_layers=1)
-    parameters = torch.load(f'./../deep_learning/models/{model_filename}')
+    parameters = torch.load(f'./../../deep_learning/models/{model_filename}')
     network.load_state_dict(parameters)
 
     std = -2.1
