@@ -4,7 +4,7 @@ from neat.dataset.regression_example import RegressionExample1Dataset
 
 from tests.config_files.config_files import create_configuration
 import matplotlib.pyplot as plt
-from deep_learning.train_eval import EvaluateStandardDL
+from deep_learning.standard.train_eval import EvaluateStandardDL
 
 config_file = '/siso.json'
 dataset = RegressionExample1Dataset()

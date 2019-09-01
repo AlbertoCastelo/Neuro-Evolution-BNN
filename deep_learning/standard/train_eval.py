@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 from neat.configuration import get_configuration
 from neat.loss.vi_loss import _get_loss_by_problem
-from deep_learning.feed_forward import FeedForward
+from deep_learning.standard.feed_forward import FeedForward
 
 
 class EvaluateStandardDL:
@@ -44,7 +44,7 @@ class EvaluateStandardDL:
 
     def save_network(self, filename):
         # save weights
-        torch.save(self.network.state_dict(), f'./models/{filename}')
+        torch.save(self.network.state_dict(), f'./../models/{filename}')
 
     def train_one(self):
 
@@ -70,13 +70,26 @@ class EvaluateStandardDL:
 
         return loss_epoch
 
-    def predict(self, x_pred):
+    def evaluate(self):
         self.network.eval()
 
-        x_batch = x_pred.reshape((-1, self.config.n_input))
-        x_batch = x_batch.float()
+        chunks_x = []
+        chunks_y_pred = []
+        chunks_y_true = []
+        for x_batch, y_batch in self.data_loader:
 
-        # forward pass
-        with torch.no_grad():
-            y_pred = self.network(x_batch)
-        return y_pred
+            if self.is_cuda:
+                x_batch.cuda()
+                y_batch.cuda()
+            with torch.no_grad():
+                y_pred, kl = self.network(x_batch)
+
+                chunks_x.append(x_batch)
+                chunks_y_pred.append(y_pred)
+                chunks_y_true.append(y_batch)
+
+        x = torch.cat(chunks_x, dim=0)
+        y_pred = torch.cat(chunks_y_pred, dim=0)
+        y_true = torch.cat(chunks_y_true, dim=0)
+
+        return x, y_true, y_pred
