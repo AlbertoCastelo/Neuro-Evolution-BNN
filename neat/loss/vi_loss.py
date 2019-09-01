@@ -7,11 +7,6 @@ def get_loss(problem_type):
     return VariationalInferenceLoss(loss)
 
 
-def get_loss_alternative(problem_type):
-    loss = _get_loss_by_problem(problem_type)
-    return VariationalInferenceLossAlternative(loss)
-
-
 def _get_loss_by_problem(problem_type):
     '''
     Regression problems assume Gaussian Likelihood
@@ -39,8 +34,6 @@ class VariationalInferenceLoss(nn.Module):
         logpy = -self.loss(y_pred, y_true)
         # print(f'kl_qw_pw: {kl_qw_pw}')
         # print(f'logpy: {logpy}')
-        # TODO: figure out BETA
-        beta = 0
         ll = logpy - beta * kl_qw_pw  # ELBO
         # print(f'ELBO: {ll}')
         loss = -ll
@@ -48,20 +41,15 @@ class VariationalInferenceLoss(nn.Module):
         return loss
 
 
-class VariationalInferenceLossAlternative(nn.Module):
-    '''
-    In this case we don't need to scale down the KL(q(w)||p(w)) because the log p(y) is already through all data
-    '''
-    def __init__(self, loss=nn.CrossEntropyLoss()):
-        super(VariationalInferenceLossAlternative, self).__init__()
-        self.loss = loss
+def get_beta(beta_type, m, batch_idx, epoch, n_epochs):
 
-    def forward(self, y_pred, y_true):
-        # log likelihood
-        logpy = -self.loss(y_pred, y_true)
-        return logpy
+    if beta_type is 'Blundell':
+        beta = 2 ** (m - (batch_idx + 1)) / (2 ** m - 1)
+    elif beta_type is 'Soenderby':
+        beta = min(epoch / (n_epochs // 4), 1)
+    elif beta_type is 'Standard':
+        beta = 1 / m
+    else:
+        beta = 0
 
-    def compute_complete_loss(self, logpy, kl_qw_pw):
-        ll = logpy - kl_qw_pw  # ELBO
-        loss = -ll
-        return loss
+    return beta

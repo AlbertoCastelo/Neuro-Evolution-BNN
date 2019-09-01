@@ -1,6 +1,6 @@
 from unittest import TestCase, skip
 
-from neat.evaluation import EvaluationEngine, EvaluationAlternativeEngine, EvaluationStochasticGoodEngine
+from neat.evaluation import EvaluationEngine, EvaluationAlternativeEngine, EvaluationStochasticEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
@@ -67,7 +67,7 @@ class TestEvaluationStochasticNetwork(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        evaluation_engine = EvaluationStochasticGoodEngine()
+        evaluation_engine = EvaluationStochasticEngine()
 
         loss = evaluation_engine.evaluate_genome(genome=genome, n_samples=2)
 
@@ -79,7 +79,7 @@ class TestEvaluationStochasticNetwork(TestCase):
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
-        evaluation_engine = EvaluationStochasticGoodEngine()
+        evaluation_engine = EvaluationStochasticEngine()
 
         loss = evaluation_engine.evaluate_genome(genome=genome, n_samples=2)
 

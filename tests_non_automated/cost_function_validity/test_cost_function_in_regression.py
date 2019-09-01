@@ -1,7 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
-from neat.evaluation import EvaluationStochasticGoodEngine
+from neat.evaluation import EvaluationStochasticEngine
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
@@ -24,7 +24,7 @@ def main():
     std = -3.1
     genome = get_genome_from_standard_network(network, std=std)
 
-    evaluation_engine = EvaluationStochasticGoodEngine(testing=False)
+    evaluation_engine = EvaluationStochasticEngine(testing=False)
 
 
     x, y_true, y_pred, kl_posterior = \

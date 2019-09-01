@@ -1,10 +1,12 @@
+import math
+
 import torch
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from deep_learning.probabilistic.feed_forward import ProbabilisticFeedForward
 from neat.configuration import get_configuration
-from neat.loss.vi_loss import _get_loss_by_problem, get_loss
+from neat.loss.vi_loss import _get_loss_by_problem, get_loss, get_beta
 from deep_learning.standard.feed_forward import FeedForward
 
 
@@ -38,9 +40,11 @@ class EvaluateProbabilisticDL:
             self.network.cuda()
             self.criterion.cuda()
 
+        self.m = math.ceil(len(self.data_loader) / self.batch_size)
+
         # train
         for epoch in range(self.n_epochs):
-            loss_epoch = self.train_one()
+            loss_epoch = self.train_one(epoch)
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
 
@@ -48,20 +52,23 @@ class EvaluateProbabilisticDL:
         # save weights
         torch.save(self.network.state_dict(), f'./../models/{filename}')
 
-    def train_one(self):
+    def train_one(self, epoch):
         self.network.train()
         loss_epoch = 0
 
-        for x_batch, y_batch in self.data_loader:
+        for batch_idx, (x_batch, y_batch) in enumerate(self.data_loader):
             x_batch = x_batch.view(-1, self.config.n_input).repeat(self.n_samples, 1)
-
+            print(x_batch.shape)
             y_batch = y_batch.view(-1, 1).repeat(self.n_samples, 1).squeeze()
-
+            print(y_batch.shape)
             if self.is_cuda:
                 x_batch.cuda()
                 y_batch.cuda()
             output, kl_qw_pw = self.network(x_batch)
-            kl_posterior = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=0)
+
+            beta = get_beta(beta_type=self.config.beta_type, m=self.m, batch_idx=batch_idx, epoch=epoch,
+                            n_epochs=self.n_epochs)
+            kl_posterior = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
             # print(kl_posterior.data.item())
             # loss_epoch += loss.data.item()
 

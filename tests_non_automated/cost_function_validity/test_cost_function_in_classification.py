@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score
-from neat.evaluation import EvaluationStochasticGoodEngine
+from neat.evaluation import EvaluationStochasticEngine
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from tests.config_files.config_files import create_configuration
@@ -29,7 +29,7 @@ def main():
 
     # genome = generate_genome_with_hidden_units(2, 2, n_hidden=1)
 
-    evaluation_engine = EvaluationStochasticGoodEngine(testing=False)
+    evaluation_engine = EvaluationStochasticEngine(testing=False)
 
     x, y_true, y_pred, kl_posterior = \
         evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)

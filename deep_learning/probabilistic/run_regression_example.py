@@ -22,7 +22,7 @@ weight_decay = 0.0005
 n_epochs = 2
 
 batch_size = 5000
-
+# torch.set_num_threads(1)
 evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     batch_size=batch_size,
                                     n_samples=n_samples,
@@ -39,7 +39,7 @@ evaluator.save_network(network_filename)
 # predict
 print('Evaluating')
 x, y_true, y_pred = evaluator.evaluate()
-
+print(x.shape)
 x = dataset.input_scaler.inverse_transform(x.numpy())
 y_pred = dataset.output_scaler.inverse_transform(y_pred.numpy())
 y_true = dataset.output_scaler.inverse_transform(y_true.numpy())

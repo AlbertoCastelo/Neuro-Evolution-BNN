@@ -78,7 +78,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.bias_std_prior = 1.0
 
         # loss weighting factor
-        self.beta = 'Standard'
+        self.beta_type = 'other'
 
     def _get_configuration(self):
         configuration = {}

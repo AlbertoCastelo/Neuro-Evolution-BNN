@@ -1,5 +1,5 @@
 {"batch_size": 10000,
-  "beta": "Standard",
+  "beta_type": "other",
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
   "bias_mean_max_value": 30.0,

@@ -21,7 +21,6 @@ lr = 0.01
 weight_decay = 0.0005
 n_epochs = 2
 
-
 batch_size = 50000
 
 evaluator = EvaluateProbabilisticDL(dataset=dataset,
