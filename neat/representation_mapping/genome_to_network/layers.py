@@ -22,7 +22,7 @@ class StochasticLinearParameters:
 
 class StochasticLinear(nn.Module):
 
-    def __init__(self, in_features, out_features, parameters: StochasticLinearParameters,
+    def __init__(self, in_features, out_features, parameters: StochasticLinearParameters = None,
                  n_samples=10, q_logvar_init=-5):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
@@ -56,6 +56,10 @@ class StochasticLinear(nn.Module):
             self.reset_parameters()
         else:
             # this parameters are known
+            # print(f'qw_mean: {parameters.qw_mean.shape}')
+            # print(f'qw_logvar: {parameters.qw_logvar.shape}')
+            # print(f'qb_mean: {parameters.qb_mean.shape}')
+            # print(f'qb_logvar: {parameters.qb_logvar.shape}')
             self.qw_mean = parameters.qw_mean
             self.qw_logvar = parameters.qw_logvar
 
@@ -112,6 +116,11 @@ class StochasticLinear(nn.Module):
         return y, kl_qw_pw
 
     def forward(self, x):
+        # print()
+        # print(f'qw_mean: {self.qw_mean}')
+        # print(f'qw_logvar: {self.qw_logvar}')
+        # print(f'qb_mean: {self.qb_mean}')
+        # print(f'qb_logvar: {self.qb_logvar}')
         # EQUATION
         # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
         #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
@@ -119,9 +128,10 @@ class StochasticLinear(nn.Module):
 
         std_qw = torch.exp(1.0 + self.qw_logvar)
         std_qb = torch.exp(1.0 + self.qb_logvar)
-
-        x_mu_w = F.linear(input=x, weight=self.qw_mean)
-        x_log_var_w = F.linear(input=x, weight=std_qw)
+        # print(f'x: {x.shape}')
+        # print(self.qw_mean.shape)
+        x_mu_w = 1e-8 + F.linear(input=x, weight=self.qw_mean)
+        x_log_var_w = 1e-8 + F.linear(input=x, weight=std_qw)
 
         mu_b = self.qb_mean.repeat(batch_size, 1)
         log_var_b = std_qb.repeat(batch_size, 1)
@@ -129,7 +139,11 @@ class StochasticLinear(nn.Module):
         output_size = x_mu_w.size()
         w_samples = torch.randn(output_size)
         b_samples = torch.randn(output_size)
-        output = x_mu_w + x_log_var_w * w_samples + \
+        # print()
+        # print(mu_b.shape)
+        # print(log_var_b.shape)
+        # print(b_samples.shape)
+        output = 1e-8 + x_mu_w + x_log_var_w * w_samples + \
                  mu_b + log_var_b * b_samples
 
         # calculate KL(q(theta)||p(theta))
