@@ -14,6 +14,7 @@ network_filename = f'network-regression_1.pt'
 
 config = create_configuration(filename=config_file)
 
+# TODO: fix Memory-leakage in this network when doing backprop
 n_samples = 50
 is_cuda = False
 

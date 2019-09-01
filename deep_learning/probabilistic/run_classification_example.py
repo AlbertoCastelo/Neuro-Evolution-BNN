@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import torch
 
 from deep_learning.probabilistic.train_eval import EvaluateProbabilisticDL
 from neat.dataset.classification_example import ClassificationExample1Dataset
@@ -16,12 +17,16 @@ dataset = ClassificationExample1Dataset()
 config = create_configuration(filename=config_file)
 is_cuda = False
 
-n_samples = 100
+n_samples = 10
 lr = 0.01
 weight_decay = 0.0005
 n_epochs = 2
 
 batch_size = 50000
+
+if is_cuda:
+    use_cuda = torch.cuda.is_available()
+    torch.cuda.set_device(0)
 
 evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     batch_size=batch_size,

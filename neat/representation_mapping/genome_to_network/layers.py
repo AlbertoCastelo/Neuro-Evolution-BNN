@@ -128,10 +128,11 @@ class StochasticLinear(nn.Module):
 
         std_qw = torch.exp(1.0 + self.qw_logvar)
         std_qb = torch.exp(1.0 + self.qb_logvar)
+
         # print(f'x: {x.shape}')
         # print(self.qw_mean.shape)
-        x_mu_w = 1e-8 + F.linear(input=x, weight=self.qw_mean)
-        x_log_var_w = 1e-8 + F.linear(input=x, weight=std_qw)
+        x_mu_w = F.linear(input=x, weight=self.qw_mean)
+        x_log_var_w = F.linear(input=x, weight=std_qw)
 
         mu_b = self.qb_mean.repeat(batch_size, 1)
         log_var_b = std_qb.repeat(batch_size, 1)

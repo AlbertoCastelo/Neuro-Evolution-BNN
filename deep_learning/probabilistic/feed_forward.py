@@ -31,7 +31,6 @@ class ProbabilisticFeedForward(nn.Module):
         kl_qw_pw = 0.0
         start_index = self.n_layers
         for i in range(start_index, -1, -1):
-            print(x.shape)
             # print(f'Calculating layer {i}')
             x, kl_layer = getattr(self, f'layer_{i}')(x)
             # print(x)

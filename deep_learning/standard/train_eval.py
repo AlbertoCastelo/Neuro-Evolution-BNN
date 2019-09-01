@@ -82,7 +82,7 @@ class EvaluateStandardDL:
                 x_batch.cuda()
                 y_batch.cuda()
             with torch.no_grad():
-                y_pred, kl = self.network(x_batch)
+                y_pred = self.network(x_batch)
 
                 chunks_x.append(x_batch)
                 chunks_y_pred.append(y_pred)

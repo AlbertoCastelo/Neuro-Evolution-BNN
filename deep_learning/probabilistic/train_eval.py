@@ -1,6 +1,7 @@
 import math
 
 import torch
+from torch.autograd import Variable
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
@@ -38,7 +39,7 @@ class EvaluateProbabilisticDL:
 
         if self.is_cuda:
             self.network.cuda()
-            self.criterion.cuda()
+            # self.criterion.cuda()
 
         self.m = math.ceil(len(self.data_loader) / self.batch_size)
 
@@ -58,12 +59,13 @@ class EvaluateProbabilisticDL:
 
         for batch_idx, (x_batch, y_batch) in enumerate(self.data_loader):
             x_batch = x_batch.view(-1, self.config.n_input).repeat(self.n_samples, 1)
-            print(x_batch.shape)
             y_batch = y_batch.view(-1, 1).repeat(self.n_samples, 1).squeeze()
-            print(y_batch.shape)
+
             if self.is_cuda:
-                x_batch.cuda()
-                y_batch.cuda()
+                x_batch = x_batch.cuda()
+                y_batch = y_batch.cuda()
+            # x_batch, y_batch = Variable(x_batch), Variable(y_batch)
+
             output, kl_qw_pw = self.network(x_batch)
 
             beta = get_beta(beta_type=self.config.beta_type, m=self.m, batch_idx=batch_idx, epoch=epoch,

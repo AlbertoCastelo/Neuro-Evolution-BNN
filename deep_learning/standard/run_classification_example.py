@@ -16,7 +16,7 @@ is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 1000
+n_epochs = 2
 
 
 batch_size = 50000
@@ -31,19 +31,20 @@ evaluator = EvaluateStandardDL(dataset=dataset,
                                is_cuda=is_cuda)
 evaluator.run()
 
-evaluator.save_network(network_filename)
+# evaluator.save_network(network_filename)
 
 # predict
 x_test = dataset.x
 y_true = dataset.y
-y_pred = evaluator.predict(x_test)
+x, y_true, y_pred = evaluator.evaluate()
 
-x_test = dataset.input_scaler.inverse_transform(x_test)
-y_true =y_true.numpy()
+x = dataset.input_scaler.inverse_transform(x.numpy())
+y_true = y_true.numpy()
+y_pred = y_pred.numpy()
 
 # plot results
-y_pred = np.argmax(y_pred.numpy(), 1)
-df = pd.DataFrame(x_test, columns=['x1', 'x2'])
+y_pred = np.argmax(y_pred, 1)
+df = pd.DataFrame(x, columns=['x1', 'x2'])
 df['y'] = y_pred
 
 x1_limit, x2_limit = dataset.get_separation_line()
