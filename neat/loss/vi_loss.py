@@ -43,11 +43,11 @@ class VariationalInferenceLoss(nn.Module):
 
 def get_beta(beta_type, m, batch_idx, epoch, n_epochs):
 
-    if beta_type is 'Blundell':
+    if beta_type == 'Blundell':
         beta = 2 ** (m - (batch_idx + 1)) / (2 ** m - 1)
-    elif beta_type is 'Soenderby':
+    elif beta_type == 'Soenderby':
         beta = min(epoch / (n_epochs // 4), 1)
-    elif beta_type is 'Standard':
+    elif beta_type == 'Standard':
         beta = 1 / m
     else:
         beta = 0

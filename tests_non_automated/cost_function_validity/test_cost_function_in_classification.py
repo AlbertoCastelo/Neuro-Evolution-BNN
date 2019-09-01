@@ -24,7 +24,7 @@ def main():
     parameters = torch.load(f'./../../deep_learning/models/{model_filename}')
     network.load_state_dict(parameters)
 
-    std = -2.1
+    std = -3.1
     genome = get_genome_from_standard_network(network, std=std)
 
     # genome = generate_genome_with_hidden_units(2, 2, n_hidden=1)

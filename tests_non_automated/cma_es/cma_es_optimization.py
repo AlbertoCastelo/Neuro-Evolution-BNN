@@ -3,7 +3,6 @@ from cma import CMAEvolutionStrategy
 import numpy as np
 import matplotlib.pyplot as plt
 
-from neat.evaluation import EvaluationEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
@@ -57,8 +56,8 @@ def regression_problem(x):
 
 def main():
 
-    bias0 = [0.0, 1.0] * total_biases
-    weight0 = [0.0, 1.0] * total_weights
+    bias0 = [0.0, -2.0] * total_biases
+    weight0 = [0.0, -2.0] * total_weights
     x0 = bias0
     x0.extend(weight0)
     assert(len(x0) == 62)
