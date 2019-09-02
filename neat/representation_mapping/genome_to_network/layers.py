@@ -22,7 +22,7 @@ class StochasticLinearParameters:
 
 class StochasticLinear(nn.Module):
 
-    def __init__(self, in_features, out_features, parameters: StochasticLinearParameters = None,
+    def __init__(self, in_features, out_features, is_cuda, parameters: StochasticLinearParameters = None,
                  n_samples=10, q_logvar_init=-5):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
@@ -32,6 +32,7 @@ class StochasticLinear(nn.Module):
 
         self.in_features = in_features
         self.out_features = out_features
+        self.is_cuda = is_cuda
         self.q_logvar_init = q_logvar_init
         self.n_samples = n_samples
 
@@ -129,8 +130,6 @@ class StochasticLinear(nn.Module):
         std_qw = torch.exp(1.0 + self.qw_logvar)
         std_qb = torch.exp(1.0 + self.qb_logvar)
 
-        # print(f'x: {x.shape}')
-        # print(self.qw_mean.shape)
         x_mu_w = F.linear(input=x, weight=self.qw_mean)
         x_log_var_w = F.linear(input=x, weight=std_qw)
 
@@ -140,6 +139,10 @@ class StochasticLinear(nn.Module):
         output_size = x_mu_w.size()
         w_samples = torch.randn(output_size)
         b_samples = torch.randn(output_size)
+        if self.is_cuda:
+            w_samples = w_samples.cuda()
+            b_samples = b_samples.cuda()
+
         # print()
         # print(mu_b.shape)
         # print(log_var_b.shape)
@@ -149,15 +152,30 @@ class StochasticLinear(nn.Module):
 
         # calculate KL(q(theta)||p(theta))
         kl_qw_pw = self.get_kl_qw_pw(std_qb, std_qw)
-
+        if self.is_cuda:
+            kl_qw_pw = kl_qw_pw.cuda()
         return output, kl_qw_pw
 
     def get_kl_qw_pw(self, std_qb, std_qw):
         kl_qw_pw = 0.0
-        qw = Normal(loc=self.qw_mean, scale=std_qw)
-        qb = Normal(loc=self.qb_mean, scale=std_qb)
-        pw = Normal(loc=torch.zeros(self.qw_mean.shape), scale=torch.ones(self.qw_mean.shape))
-        pb = Normal(loc=torch.zeros(self.qb_mean.shape), scale=torch.ones(self.qb_mean.shape))
+        qw_mean = self.qw_mean
+        qb_mean = self.qb_mean
+        if self.is_cuda:
+            qw_mean = qw_mean.cpu()
+            qb_mean = qb_mean.cpu()
+            std_qb = std_qb.cpu()
+            std_qw = std_qw.cpu()
+
+        qw = Normal(loc=qw_mean, scale=std_qw)
+        qb = Normal(loc=qb_mean, scale=std_qb)
+        pw = Normal(loc=torch.zeros(qw_mean.shape), scale=torch.ones(qw_mean.shape))
+        pb = Normal(loc=torch.zeros(qb_mean.shape), scale=torch.ones(qb_mean.shape))
+        # if self.is_cuda:
+        #     qw = qw.cuda()
+        #     qb = qb.cuda()
+        #     pw = pw.cuda()
+        #     pb = pb.cuda()
+
         for _ in range(self.n_samples):
             qw_sample = qw.sample()
             qb_sample = qb.sample()
@@ -176,9 +194,9 @@ class StochasticLinear(nn.Module):
 
         # 2nd alternative to calculate kl divergence
         # The Kullback–Leibler divergence is additive for independent distributions
-        kl_w_qw_pw = kl_divergence(qw, pw).sum()
-        kl_b_qw_pw = kl_divergence(qb, pb).sum()
-        kl_qw_pw_2 = kl_b_qw_pw + kl_w_qw_pw
+        # kl_w_qw_pw = kl_divergence(qw, pw).sum()
+        # kl_b_qw_pw = kl_divergence(qb, pb).sum()
+        # kl_qw_pw_2 = kl_b_qw_pw + kl_w_qw_pw
         # print(f'kl_qw_pw on distribution: {kl_qw_pw_2}')
         # print(f'kl_qw_pw on samples: {kl_qw_pw}')
         return kl_qw_pw
@@ -198,3 +216,25 @@ class StochasticLinear(nn.Module):
 
     def _log_p_theta(self, w_sample, b_sample):
         return None
+
+
+# class NormalCustom(Normal):
+#     def __init__(self, loc, scale, is_cuda):
+#         self.is_cuda = is_cuda
+#         super().__init__(loc=loc, scale=scale)
+#
+#     def sample(self, sample_shape=torch.Size()):
+#         shape = self._extended_shape(sample_shape)
+#         with torch.no_grad():
+#             sample = torch.normal(self.loc.expand(shape), self.scale.expand(shape))
+#             if self.is_cuda:
+#                 sample = sample.cuda()
+#                 return sample
+#
+#     def log_prob(self, value):
+#         if self._validate_args:
+#             self._validate_sample(value.cpu())
+#         # compute the variance
+#         var = (self.scale ** 2)
+#         log_scale = math.log(self.scale) if isinstance(self.scale, Number) else self.scale.log()
+#         return -((value - self.loc) ** 2) / (2 * var) - log_scale - math.log(math.sqrt(2 * math.pi))

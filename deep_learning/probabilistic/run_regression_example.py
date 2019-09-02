@@ -16,7 +16,7 @@ config = create_configuration(filename=config_file)
 
 # TODO: fix Memory-leakage in this network when doing backprop
 n_samples = 50
-is_cuda = False
+is_cuda = True
 
 lr = 0.01
 weight_decay = 0.0005
@@ -40,6 +40,11 @@ evaluator.save_network(network_filename)
 # predict
 print('Evaluating')
 x, y_true, y_pred = evaluator.evaluate()
+if is_cuda:
+    x = x.cpu()
+    y_true = y_true.cpu()
+    y_pred = y_pred.cpu()
+
 print(x.shape)
 x = dataset.input_scaler.inverse_transform(x.numpy())
 y_pred = dataset.output_scaler.inverse_transform(y_pred.numpy())

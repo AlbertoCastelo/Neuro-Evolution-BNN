@@ -30,6 +30,7 @@ class EvaluateProbabilisticDL:
         self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
 
         self.network = ProbabilisticFeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
+                                                is_cuda=self.is_cuda,
                                                 n_neurons_per_layer=self.n_neurons_per_layer,
                                                 n_hidden_layers=self.n_hidden_layers)
 
@@ -95,8 +96,8 @@ class EvaluateProbabilisticDL:
             y_batch = y_batch.view(-1, 1).repeat(self.n_samples, 1).squeeze()
 
             if self.is_cuda:
-                x_batch.cuda()
-                y_batch.cuda()
+                x_batch = x_batch.cuda()
+                y_batch = y_batch.cuda()
             with torch.no_grad():
                 y_pred, kl = self.network(x_batch)
 

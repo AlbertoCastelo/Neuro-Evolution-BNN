@@ -15,9 +15,9 @@ network_filename = f'network-probabilistic-classification.pt'
 dataset = ClassificationExample1Dataset()
 
 config = create_configuration(filename=config_file)
-is_cuda = False
+is_cuda = True
 
-n_samples = 10
+n_samples = 100
 lr = 0.01
 weight_decay = 0.0005
 n_epochs = 2
@@ -45,6 +45,10 @@ evaluator.run()
 print('Evaluating results')
 x, y_true, y_pred = evaluator.evaluate()
 
+if is_cuda:
+    x = x.cpu()
+    y_true = y_true.cpu()
+    y_pred = y_pred.cpu()
 x = dataset.input_scaler.inverse_transform(x)
 # y_true =y_true.numpy()
 
