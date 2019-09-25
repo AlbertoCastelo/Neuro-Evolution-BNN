@@ -20,6 +20,7 @@
   "n_generations": 200,
   "n_input": 2,
   "n_output": 2,
+  "n_samples": 100,
   "node_activation": "tanh",
   "node_aggregation": "sum",
   "pop_size": 150,

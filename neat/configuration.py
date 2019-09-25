@@ -80,6 +80,8 @@ class DefaultConfiguration(BaseConfiguration):
         # loss weighting factor
         self.beta_type = 'other'
 
+        self.n_samples = 100
+
     def _get_configuration(self):
         configuration = {}
         for attr_name in dir(self):
