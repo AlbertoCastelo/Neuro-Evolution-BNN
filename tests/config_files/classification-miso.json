@@ -1,5 +1,6 @@
 {
   "parallel_evaluation": true,
+  "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
   "bias_mean_init_mean": 0.0,
@@ -22,7 +23,6 @@
 
 
   "dataset_name": "classification_example_1",
-  "is_gpu": false,
   "n_generations": 200,
   "n_input": 2,
   "n_output": 2,

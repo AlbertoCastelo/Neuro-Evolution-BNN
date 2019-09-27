@@ -1,6 +1,10 @@
 import math
+import multiprocessing
+from multiprocessing.pool import Pool
+from time import time
+
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from neat.configuration import ConfigError, get_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
@@ -12,14 +16,55 @@ from neat.representation_mapping.genome_to_network.stochastic_network import Sto
 from neat.utils import timeit
 
 
+class CustomeDataLoader:
+    def __init__(self, dataset: Dataset, shuffle=True):
+        self.dataset = dataset
+        self.shuffle = shuffle
+
+        self.iterator = self._get_iterator()
+
+    def _get_iterator(self):
+        return self.dataset.x, self.dataset.y
+
+    def __iter__(self):
+        return self.iterator
+
+    def __len__(self):
+        return len(self.dataset)
+
+
+class NoDaemonProcess(multiprocessing.Process):
+    # make 'daemon' attribute always return False
+    def _get_daemon(self):
+        return False
+    def _set_daemon(self, value):
+        pass
+    daemon = property(_get_daemon, _set_daemon)
+
+
+class MyPool(multiprocessing.pool.Pool):
+    Process = NoDaemonProcess
+
+
+def get_data_loader(dataset: Dataset, batch_size=None):
+    config = get_configuration()
+    parallel_evaluation = config.parallel_evaluation
+    if not parallel_evaluation:
+        return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=1)
+    else:
+        return CustomeDataLoader(dataset, shuffle=True)
+
+
 class EvaluationStochasticEngine:
     def __init__(self, testing=False, batch_size=None):
         self.config = get_configuration()
         self.batch_size = batch_size if batch_size is not None else self.config.batch_size
-
+        self.parallel_evaluation = self.config.parallel_evaluation
+        self.is_gpu = self.config.is_gpu
         self.dataset = get_dataset(self.config.dataset_name, testing=testing)
         self.dataset.generate_data()
-        self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
+
+        self.data_loader = get_data_loader(dataset=self.dataset, batch_size=self.batch_size)
         self.m = math.ceil(len(self.data_loader) / self.batch_size)
 
         self.loss = get_loss(problem_type=self.config.problem_type)
@@ -28,17 +73,86 @@ class EvaluationStochasticEngine:
     def evaluate(self, population: dict):
         # TODO: make n_samples increase with generation number
         n_samples = self.config.n_samples
+        if self.parallel_evaluation:
+            n_cpus = multiprocessing.cpu_count()
+            pool = MyPool(min(n_cpus//2, 8))
+            tasks = []
+            for genome in population.values():
+                x = (genome, self.dataset, self.loss, self.config.beta_type,
+                     self.batch_size, n_samples, self.is_gpu)
+                # x = (genome, self.data_loader, self.loss, self.config.beta_type,
+                #      self.batch_size, n_samples, self.is_gpu)
+                tasks.append(x)
 
-        for key, genome in population.items():
-            genome.fitness = - evaluate_genome(genome=genome,
-                                               data_loader=self.data_loader,
-                                               loss=self.loss,
-                                               beta_type=self.config.beta_type,
-                                               n_samples=n_samples)
+            fitnesses = list(pool.imap(evaluate_genome_parallel, tasks, chunksize=len(population)//n_cpus))
+
+            pool.close()
+            for i, genome in enumerate(population.values()):
+                # genome.fitness = next(fitnesses)
+                genome.fitness = fitnesses[i]
+
+        else:
+            for genome in population.values():
+                genome.fitness = - evaluate_genome(genome=genome,
+                                                   data_loader=self.data_loader,
+                                                   loss=self.loss,
+                                                   beta_type=self.config.beta_type,
+                                                   batch_size=self.batch_size,
+                                                   n_samples=n_samples,
+                                                   is_gpu=self.is_gpu)
 
         return population
 
 
+# def evaluate_genome_parallel(x):
+#     return - evaluate_genome(*x)
+
+
+def evaluate_genome_parallel(x):
+    return - evaluate_genome2(*x)
+
+
+# @timeit
+def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
+                     batch_size=10000, n_samples=10, is_gpu=False):
+    '''
+    Calculates: KL-Div(q(w)||p(w|D))
+    Uses the VariationalInferenceLoss class (not the alternative)
+    '''
+    kl_posterior = 0
+
+    kl_qw_pw = compute_kl_qw_pw(genome=genome)
+
+    # setup network
+    network = StochasticNetwork(genome=genome, n_samples=n_samples)
+    if is_gpu:
+        network.cuda()
+
+    m = math.ceil(len(dataset) / batch_size)
+
+    network.eval()
+
+    # calculate Data log-likelihood (p(y*|x*,D))
+    x_batch, y_batch = dataset.x, dataset.y
+    x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
+
+    y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
+    if is_gpu:
+        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+
+    with torch.no_grad():
+        # forward pass
+        output, _ = network(x_batch)
+        # print(self.config.beta_type)
+        beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
+        # print(f'Beta: {beta}')
+        kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
+
+    loss_value = kl_posterior.item()
+    return loss_value
+
+
+# @timeit
 def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
                     batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
     '''
