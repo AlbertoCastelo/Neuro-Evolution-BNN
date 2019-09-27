@@ -48,7 +48,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.bias_mutate_rate = 0.7
         self.bias_replace_rate = 0.1
 
-        self.initial_hidden = False
+        self.n_initial_hidden_neurons = 5
 
         # TODO: THIS IS REDUNDANT AND INNECESARY BECAUSE IT DOES NOT CHANGE
         self.response_init_mean = 1.0
@@ -81,6 +81,27 @@ class DefaultConfiguration(BaseConfiguration):
         self.beta_type = 'other'
 
         self.n_samples = 100
+
+        # speciation
+        self.compatibility_threshold = 3.0
+        self.compatibility_weight_coefficient = 0.5
+        self.compatibility_disjoint_coefficient = 1.0
+
+        # stagnation
+        self.species_fitness_function = 'max'
+        self.species_elitism = 2
+        self.max_stagnation = 20
+
+        # reproduction
+        self.elitism = 2
+        self.survival_threshold = 0.2
+        self.min_species_size = 2
+
+        # mutation
+        self.single_structural_mutation = False
+        self.mutate_power = 0.5
+        self.mutate_rate = 0.8
+        self.replace_rate = 0.1
 
     def _get_configuration(self):
         configuration = {}

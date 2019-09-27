@@ -2,8 +2,8 @@ import torch
 import numpy as np
 
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
-from tests_non_automated.deep_learning.feed_forward import FeedForward
-from neat.evaluation import EvaluationEngine, EvaluationStochasticGoodEngine
+from deep_learning.standard.feed_forward import FeedForward
+from neat.evaluation import EvaluationEngine, EvaluationStochasticEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
@@ -26,7 +26,7 @@ def regression_problem_learn_from_nn():
 
     genome = prepare_genome(parameters)
     print(genome)
-    evaluation_engine = EvaluationStochasticGoodEngine(testing=False, batch_size=None)
+    evaluation_engine = EvaluationStochasticEngine(testing=False, batch_size=None)
 
     x, y_true, y_pred, kl_posterior = \
         evaluation_engine.evaluate_genome(genome, n_samples=100, is_gpu=False, return_all=True)

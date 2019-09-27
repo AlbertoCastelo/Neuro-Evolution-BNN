@@ -22,7 +22,7 @@ class StochasticLinearParameters:
 
 class StochasticLinear(nn.Module):
 
-    def __init__(self, in_features, out_features, is_cuda, parameters: StochasticLinearParameters = None,
+    def __init__(self, in_features, out_features, is_cuda=False, parameters: StochasticLinearParameters = None,
                  n_samples=10, q_logvar_init=-5):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)

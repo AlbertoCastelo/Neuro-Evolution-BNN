@@ -14,6 +14,7 @@ class Gene:
 
 
 class ConnectionGene(Gene):
+    main_attributes = ['weight_mean', 'weight_std']
 
     def __init__(self, key):
         '''
@@ -55,6 +56,7 @@ class ConnectionGene(Gene):
 
 
 class NodeGene(Gene):
+    main_attributes = ['bias_mean', 'bias_std']
 
     def __init__(self, key):
         super().__init__(key=key, type=NODE_TYPE)

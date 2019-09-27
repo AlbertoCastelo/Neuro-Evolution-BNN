@@ -1,16 +1,20 @@
-import cma
 from cma import CMAEvolutionStrategy
 import numpy as np
-import matplotlib.pyplot as plt
 
+from neat.evaluation import EvaluationStochasticEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
-config = create_configuration(filename='/siso.json')
+
+config_file = '/classification-miso.json'
+# config_file = '/siso.json'
+
+config = create_configuration(filename=config_file)
 N_SAMPLES = 100
+
 n_neurons_per_layer = 10
 
-total_neurons = n_neurons_per_layer + 1
+total_neurons = n_neurons_per_layer + config.n_input + config.n_output
 total_biases = total_neurons
 total_bias_params = total_biases * 2
 
@@ -41,27 +45,28 @@ def regression_problem(x):
         connection.weight_std = weight[i + 1]
         i += 2
 
-    evaluation_engine = EvaluationEngine(batch_size=50000)
+    evaluation_engine = EvaluationStochasticEngine(batch_size=50000)
 
-    x, y_true, y_pred, loss, kl_qw_pw = \
-        evaluation_engine.evaluate_genome(genome=genome, n_samples=N_SAMPLES, return_all=True)
-
-    # if iteration % 50 == 0:
-    #     plt.figure(figsize=(20, 20))
-    #     plt.plot(x.numpy().reshape(-1), y_true.numpy().reshape(-1), 'b*')
-    #     plt.plot(x.numpy().reshape(-1), y_pred.numpy().reshape(-1), 'r*')
-    #     plt.show()
+    loss = \
+        evaluation_engine.evaluate_genome(genome=genome, n_samples=N_SAMPLES, return_all=False)
+    print(loss)
     return loss
 
 
+# def regression_problem(x):
+#     print(0.5)
+#     return 0.5
+
 def main():
 
-    bias0 = [0.0, -2.0] * total_biases
-    weight0 = [0.0, -2.0] * total_weights
+    bias0 = [0.0, -3.0] * total_biases
+    weight0 = [0.0, -3.0] * total_weights
     x0 = bias0
     x0.extend(weight0)
-    assert(len(x0) == 62)
+
+    # assert(len(x0) == 108)
     sigma0 = 0.1
+
     # evolution strategy
     es = CMAEvolutionStrategy(x0, sigma0)
     optSol = es.optimize(regression_problem)

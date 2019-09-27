@@ -89,6 +89,7 @@ class Genome:
             for h in hidden_nodes:
                 for output_id in self.output_nodes_keys:
                     connections.append((h, output_id))
+            return connections
         for input_id in self.input_nodes_keys:
             for output_id in self.output_nodes_keys:
                 connections.append((input_id, output_id))
@@ -99,8 +100,12 @@ class Genome:
         '''
         hidden nodes have keys starting at n_outputs
         '''
-        if self.genome_config.initial_hidden:
-            pass
+        n_hidden = self.genome_config.n_initial_hidden_neurons
+
+        for key in range(self.n_output, self.n_output + n_hidden):
+            node = NodeGene(key=key)
+            node.random_initialization()
+            self.node_genes[key] = node
 
     def _initialize_output_nodes(self):
         for key in self.output_nodes_keys:

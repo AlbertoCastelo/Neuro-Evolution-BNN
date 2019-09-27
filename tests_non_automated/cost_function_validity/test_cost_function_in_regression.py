@@ -18,7 +18,7 @@ def main():
     network = FeedForward(n_input=config.n_input, n_output=config.n_output,
                           n_neurons_per_layer=n_neurons_per_layer,
                           n_hidden_layers=1)
-    parameters = torch.load(f'./../deep_learning/models/{model_filename}')
+    parameters = torch.load(f'./../../deep_learning/models/{model_filename}')
     network.load_state_dict(parameters)
 
     std = -3.1

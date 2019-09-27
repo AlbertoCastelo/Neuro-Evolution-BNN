@@ -14,6 +14,10 @@
   "bias_std_min_value": 0,
   "bias_std_prior": 1.0,
 
+  "compatibility_threshold": 3.0,
+  "compatibility_weight_coefficient": 0.5,
+  "compatibility_disjoint_coefficient": 1.0,
+
   "dataset_name": "regression_example_1",
   "initial_hidden": false,
   "is_gpu": false,

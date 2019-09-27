@@ -9,20 +9,25 @@ from deep_learning.standard.train_eval import EvaluateStandardDL
 
 config_file = '/siso.json'
 dataset = RegressionExample1Dataset()
-network_filename = f'network-regression_1.pt'
+network_filename = f'network-probabilistic-regression_1.pt'
 
 
 config = create_configuration(filename=config_file)
 
 # TODO: fix Memory-leakage in this network when doing backprop
-n_samples = 50
-is_cuda = True
+n_samples = 2
+is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
 n_epochs = 2
 
-batch_size = 5000
+batch_size = 50000
+
+if is_cuda:
+    use_cuda = torch.cuda.is_available()
+    torch.cuda.set_device(0)
+
 # torch.set_num_threads(1)
 evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     batch_size=batch_size,

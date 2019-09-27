@@ -9,6 +9,7 @@ from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetwork
+from neat.utils import timeit
 
 
 class EvaluationStochasticEngine:
@@ -23,13 +24,14 @@ class EvaluationStochasticEngine:
 
         self.loss = get_loss(problem_type=self.config.problem_type)
 
+    @timeit
     def evaluate(self, population: dict):
         # TODO: make n_samples increase with generation number
         n_samples = self.config.n_samples
 
         for key, genome in population.items():
-            genome.fitness = self.evaluate_genome(genome=genome,
-                                                  n_samples=n_samples)
+            genome.fitness = - self.evaluate_genome(genome=genome,
+                                                    n_samples=n_samples)
 
         return population
 
@@ -41,7 +43,7 @@ class EvaluationStochasticEngine:
         kl_posterior = 0
 
         kl_qw_pw = compute_kl_qw_pw(genome=genome)
-        print(f'KL-prior: {kl_qw_pw}')
+        # print(f'KL-prior: {kl_qw_pw}')
         # print(f'kl_prior by sum: {compute_kl_qw_pw_by_sum(genome)}')
 
         # setup network
@@ -67,9 +69,9 @@ class EvaluationStochasticEngine:
             with torch.no_grad():
                 # forward pass
                 output, _ = network(x_batch)
-                print(self.config.beta_type)
+                # print(self.config.beta_type)
                 beta = get_beta(beta_type=self.config.beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
-                print(f'Beta: {beta}')
+                # print(f'Beta: {beta}')
                 kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
                 if return_all:
                     chunks_x.append(x_batch)
