@@ -18,6 +18,7 @@ class DefaultConfiguration(BaseConfiguration):
 
         # evaluation parameters
         self.batch_size = 10000
+        self.parallel_evaluation = True
 
         # evolution parameters
         self.pop_size = 150

@@ -1,4 +1,6 @@
-{"batch_size": 100000000,
+{
+  "parallel_evaluation": true,
+  "batch_size": 100000000,
   "beta_type": "other",
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
