@@ -30,62 +30,67 @@ class EvaluationStochasticEngine:
         n_samples = self.config.n_samples
 
         for key, genome in population.items():
-            genome.fitness = - self.evaluate_genome(genome=genome,
-                                                    n_samples=n_samples)
+            genome.fitness = - evaluate_genome(genome=genome,
+                                               data_loader=self.data_loader,
+                                               loss=self.loss,
+                                               beta_type=self.config.beta_type,
+                                               n_samples=n_samples)
 
         return population
 
-    def evaluate_genome(self, genome: Genome, n_samples=10, is_gpu=False, return_all=False):
-        '''
-        Calculates: KL-Div(q(w)||p(w|D))
-        Uses the VariationalInferenceLoss class (not the alternative)
-        '''
-        kl_posterior = 0
 
-        kl_qw_pw = compute_kl_qw_pw(genome=genome)
-        # print(f'KL-prior: {kl_qw_pw}')
-        # print(f'kl_prior by sum: {compute_kl_qw_pw_by_sum(genome)}')
+def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
+                    batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
+    '''
+    Calculates: KL-Div(q(w)||p(w|D))
+    Uses the VariationalInferenceLoss class (not the alternative)
+    '''
+    kl_posterior = 0
 
-        # setup network
-        network = StochasticNetwork(genome=genome, n_samples=n_samples)
+    kl_qw_pw = compute_kl_qw_pw(genome=genome)
+    # print(f'KL-prior: {kl_qw_pw}')
+    # print(f'kl_prior by sum: {compute_kl_qw_pw_by_sum(genome)}')
+
+    # setup network
+    network = StochasticNetwork(genome=genome, n_samples=n_samples)
+    if is_gpu:
+        network.cuda()
+
+    m = math.ceil(len(data_loader) / batch_size)
+
+    network.eval()
+
+    chunks_x = []
+    chunks_y_pred = []
+    chunks_y_true = []
+    # calculate Data log-likelihood (p(y*|x*,D))
+    for batch_idx, (x_batch, y_batch) in enumerate(data_loader):
+        x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
+
+        y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
         if is_gpu:
-            network.cuda()
+            x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
-        m = math.ceil(len(self.data_loader) / self.batch_size)
+        with torch.no_grad():
+            # forward pass
+            output, _ = network(x_batch)
+            # print(self.config.beta_type)
+            beta = get_beta(beta_type=beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
+            # print(f'Beta: {beta}')
+            kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
+            if return_all:
+                chunks_x.append(x_batch)
+                chunks_y_pred.append(output)
+                chunks_y_true.append(y_batch)
 
-        network.eval()
+    loss_value = kl_posterior.item()
 
-        chunks_x = []
-        chunks_y_pred = []
-        chunks_y_true = []
-        # calculate Data log-likelihood (p(y*|x*,D))
-        for batch_idx, (x_batch, y_batch) in enumerate(self.data_loader):
-            x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
-
-            y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
-            if is_gpu:
-                x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
-
-            with torch.no_grad():
-                # forward pass
-                output, _ = network(x_batch)
-                # print(self.config.beta_type)
-                beta = get_beta(beta_type=self.config.beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
-                # print(f'Beta: {beta}')
-                kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
-                if return_all:
-                    chunks_x.append(x_batch)
-                    chunks_y_pred.append(output)
-                    chunks_y_true.append(y_batch)
-
-        loss_value = kl_posterior.item()
-
-        if return_all:
-            x = torch.cat(chunks_x, dim=0)
-            y_pred = torch.cat(chunks_y_pred, dim=0)
-            y_true = torch.cat(chunks_y_true, dim=0)
-            return x, y_true, y_pred, loss_value
-        return loss_value
+    if return_all:
+        x = torch.cat(chunks_x, dim=0)
+        y_pred = torch.cat(chunks_y_pred, dim=0)
+        y_true = torch.cat(chunks_y_true, dim=0)
+        return x, y_true, y_pred, loss_value
+    return loss_value
 
 
 def get_dataset(dataset_name, testing=False):
