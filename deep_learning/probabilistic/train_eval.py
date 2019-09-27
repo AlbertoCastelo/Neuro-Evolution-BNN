@@ -1,14 +1,12 @@
 import math
 
 import torch
-from torch.autograd import Variable
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from deep_learning.probabilistic.feed_forward import ProbabilisticFeedForward
 from neat.configuration import get_configuration
-from neat.loss.vi_loss import _get_loss_by_problem, get_loss, get_beta
-from deep_learning.standard.feed_forward import FeedForward
+from neat.loss.vi_loss import get_loss, get_beta
 
 
 class EvaluateProbabilisticDL:
@@ -40,7 +38,7 @@ class EvaluateProbabilisticDL:
 
         if self.is_cuda:
             self.network.cuda()
-            # self.criterion.cuda()
+            self.criterion.cuda()
 
         self.m = math.ceil(len(self.data_loader) / self.batch_size)
 
@@ -61,14 +59,15 @@ class EvaluateProbabilisticDL:
         for batch_idx, (x_batch, y_batch) in enumerate(self.data_loader):
             x_batch = x_batch.view(-1, self.config.n_input).repeat(self.n_samples, 1)
             y_batch = y_batch.view(-1, 1).repeat(self.n_samples, 1).squeeze()
-
+            # print(x_batch.shape)
+            # print(y_batch.shape)
             if self.is_cuda:
                 x_batch = x_batch.cuda()
                 y_batch = y_batch.cuda()
             # x_batch, y_batch = Variable(x_batch), Variable(y_batch)
 
             output, kl_qw_pw = self.network(x_batch)
-
+            # print(output.shape)
             beta = get_beta(beta_type=self.config.beta_type, m=self.m, batch_idx=batch_idx, epoch=epoch,
                             n_epochs=self.n_epochs)
             kl_posterior = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
