@@ -46,8 +46,9 @@ class EvolutionEngine:
                                                            generation=generation)
         # evaluate
         self.population = self.evaluation_engine.evaluate(population=self.population)
+
         # create new species based on new population
-        self.speciation_engine.speciate(self.population, generation=0)
+        self.speciation_engine.speciate(self.population, generation=generation)
         # final generation report
         self.report.report_new_generation(generation, self.population)
 
@@ -294,6 +295,12 @@ class Crossover:
                 setattr(new_node, attribute, getattr(node_1, attribute))
             else:
                 setattr(new_node, attribute, getattr(node_2, attribute))
+
+        for attribute in new_node.other_attributes:
+            if random.random() > 0.5:
+                setattr(new_node, attribute, getattr(node_1, attribute))
+            else:
+                setattr(new_node, attribute, getattr(node_2, attribute))
         return new_node
 
     def _get_connection_crossover(self, connection_1: ConnectionGene, connection_2: ConnectionGene):
@@ -303,6 +310,12 @@ class Crossover:
         new_connection = ConnectionGene(key=connection_key)
 
         for attribute in new_connection.main_attributes:
+            if random.random() > 0.5:
+                setattr(new_connection, attribute, getattr(connection_1, attribute))
+            else:
+                setattr(new_connection, attribute, getattr(connection_2, attribute))
+
+        for attribute in new_connection.other_attributes:
             if random.random() > 0.5:
                 setattr(new_connection, attribute, getattr(connection_1, attribute))
             else:
@@ -379,6 +392,11 @@ class Mutation:
             attribute_value = getattr(connection, attribute)
             mutated_value = self._mutate_float(value=attribute_value, name=attribute)
             setattr(connection, attribute, mutated_value)
+
+        # for attribute in connection.other_attributes:
+        #     attribute_value = getattr(connection, attribute)
+        #     mutated_value = self._mutate_float(value=attribute_value, name=attribute)
+        #     setattr(connection, attribute, mutated_value)
         return connection
 
     def mutate_node(self, node: NodeGene):
@@ -386,6 +404,11 @@ class Mutation:
             attribute_value = getattr(node, attribute)
             mutated_value = self._mutate_float(value=attribute_value, name=attribute)
             setattr(node, attribute, mutated_value)
+
+        # for attribute in node.other_attributes:
+        #     attribute_value = getattr(node, attribute)
+        #     mutated_value = self._mutate_float(value=attribute_value, name=attribute)
+        #     setattr(node, attribute, mutated_value)
         return node
 
     def _mutate_float(self, value, name: str):

@@ -14,7 +14,10 @@ class Gene:
 
 
 class ConnectionGene(Gene):
-    main_attributes = ['weight_mean', 'weight_std']
+    # main_attributes = ['weight_mean', 'weight_std']
+    # other_attributes = []
+    main_attributes = ['weight_mean']
+    other_attributes = ['weight_std']
 
     def __init__(self, key):
         '''
@@ -56,7 +59,10 @@ class ConnectionGene(Gene):
 
 
 class NodeGene(Gene):
-    main_attributes = ['bias_mean', 'bias_std']
+    # main_attributes = ['bias_mean', 'bias_std']
+    # other_attributes = []
+    main_attributes = ['bias_mean']
+    other_attributes = ['bias_std']
 
     def __init__(self, key):
         super().__init__(key=key, type=NODE_TYPE)
