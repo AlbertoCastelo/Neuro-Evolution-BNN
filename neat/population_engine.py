@@ -50,8 +50,6 @@ class EvolutionEngine:
         # evaluate
         self.population = self.evaluation_engine.evaluate(population=self.population)
 
-        # create new species based on new population
-        self.speciation_engine.speciate(self.population, generation=generation)
         # final generation report
         self.report.report_new_generation(generation, self.population)
 
