@@ -21,7 +21,7 @@ class SpeciationEngine:
         self.gdmean = None
         self.gdstdev = None
 
-    def speciate(self, population, generation):
+    def speciate(self, population: dict, generation: int):
         """
         Disclaimer: code copied from NEAT-Python: https://neat-python.readthedocs.io/en/latest/
 
@@ -33,6 +33,9 @@ class SpeciationEngine:
         assumption, you should make sure other necessary parts of the code are updated to reflect
         the new behavior.
         """
+        if generation > 0 and len(self.species) == 0:
+            return ValueError('All species have died')
+        
         unspeciated_genomes = list(population.keys())
         distances = DistanceCalculation()
         new_representatives = {}
