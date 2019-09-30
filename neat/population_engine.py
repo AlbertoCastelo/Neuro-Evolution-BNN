@@ -44,6 +44,9 @@ class EvolutionEngine:
         self.population = self.population_engine.reproduce(species=self.speciation_engine.species,
                                                            pop_size=self.population_engine.pop_size,
                                                            generation=generation)
+        # create new species based on new population
+        self.speciation_engine.speciate(self.population, generation=generation)
+
         # evaluate
         self.population = self.evaluation_engine.evaluate(population=self.population)
 
