@@ -1,13 +1,18 @@
 import numpy as np
+from neat.configuration import write_json_file_from_dict
 
 
 class EvolutionReport:
 
-    def __init__(self):
+    def __init__(self, experiment_name: str):
+        self.experiment_name = experiment_name
+        # datetime = datetime.datetime.now()
+        datetime = None
+        self.execution_id = f'{experiment_name}_{datetime}'
         self.generation_metrics = dict()
         self.best_individual = None
 
-    def report_new_generation(self, generation, population):
+    def report_new_generation(self, generation: int, population: dict):
         best_individual_key = -1
         best_individual_fitness = 1000000
         fitness_all = []
@@ -27,8 +32,14 @@ class EvolutionReport:
               f'Mean fitness: {round(np.mean(fitness_all), 3)}')
         self.generation_metrics[generation] = data
 
+        if self.best_individual is None or self.best_individual.fitness < best_individual_fitness:
+            self.best_individual = population.get(best_individual_key)
+
     def generate_final_report(self):
-        pass
+        best_individual = self.get_best_individual().to_dict()
+        filename = f'./executions/{self.execution_id}.json'
+
+        write_json_file_from_dict(data=best_individual, filename=filename)
 
     def persist(self):
         pass

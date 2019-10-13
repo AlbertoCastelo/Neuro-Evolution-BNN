@@ -15,12 +15,12 @@ from neat.utils import timeit
 
 class EvolutionEngine:
 
-    def __init__(self):
+    def __init__(self, report: EvolutionReport):
         self.population_engine = PopulationEngine(stagnation_engine=Stagnation())
         self.speciation_engine = SpeciationEngine()
         self.evaluation_engine = EvaluationStochasticEngine()
         self.evolution_configuration = get_configuration()
-        self.report = EvolutionReport()
+        self.report = report
         self.n_generations = self.evolution_configuration.n_generations
 
         self.population = None

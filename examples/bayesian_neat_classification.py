@@ -1,4 +1,5 @@
 from neat.population_engine import EvolutionEngine
+from neat.reports import EvolutionReport
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
@@ -7,7 +8,8 @@ config = create_configuration(filename=config_file)
 
 @timeit
 def main():
-    evolution_engine = EvolutionEngine()
+    report = EvolutionReport(experiment_name='fixed_std')
+    evolution_engine = EvolutionEngine(report=report)
     evolution_engine.run()
     return evolution_engine
 

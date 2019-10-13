@@ -2,7 +2,7 @@ import uuid
 
 import jsons
 
-from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict
+from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
 
 
@@ -17,12 +17,30 @@ class GenomeSample:
 
 
 class Genome:
+    @staticmethod
+    def from_dict(genome_dict: dict):
+        genome_config_dict = genome_dict['config']
+        genome_config = jsons.load(genome_config_dict, BaseConfiguration)
+        genome = Genome(key=genome_dict['key'], id=genome_dict['id'], genome_config=genome_config)
 
-    def __init__(self, key):
+        # reconstruct nodes and connections
+        connection_genes_dict = genome_dict['connection_genes']
+        for key, connection_gene_dict in connection_genes_dict.items():
+            connection_gene = ConnectionGene.from_dict(connection_gene_dict=connection_gene_dict)
+            genome.connection_genes[connection_gene.key] = connection_gene
+
+        node_genes_dict = genome_dict['node_genes']
+        for key, node_gene_dict in node_genes_dict.items():
+            node_gene = NodeGene.from_dict(node_gene_dict=node_gene_dict)
+            genome.node_genes[node_gene.key] = node_gene
+
+        return genome
+
+    def __init__(self, key, id=None, genome_config=None):
         self.key = key
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4()) if id is None else id
 
-        self.genome_config = get_configuration()
+        self.genome_config = get_configuration() if genome_config is None else genome_config
         self.n_input = self.genome_config.n_input
         self.n_output = self.genome_config.n_output
 
@@ -33,6 +51,26 @@ class Genome:
         self.node_genes = {}
 
         self.fitness = None
+
+    def to_dict(self):
+        dict_ = {'key': self.key,
+                 'id': self.id,
+                 'n_input': self.n_input,
+                 'n_output': self.n_output,
+                 'output_nodes_keys': self.output_nodes_keys,
+                 'input_nodes_keys': self.input_nodes_keys,
+                 'connection_genes': {},
+                 'node_genes': {},
+                 'config': self.genome_config.to_dict()}
+
+        for key, connection_gene in self.connection_genes.items():
+            dict_['connection_genes'][str(key)] = connection_gene.to_dict()
+
+        for key, node_gene in self.node_genes.items():
+            dict_['node_genes'][str(key)] = node_gene.to_dict()
+
+        return dict_
+
 
     def create_random_genome(self):
         self._initialize_output_nodes()
@@ -138,17 +176,10 @@ class Genome:
         genome_str = ''.join([bias_str, '\n', weight_str])
         return genome_str
 
-    def to_dict(self):
-        return jsons.dump(self)
-
     def save_genome(self, filename=None):
         filename = ''.join([str(uuid.uuid4()), '.json']) if filename is None else filename
 
         write_json_file_from_dict(data=self.to_dict(), filename=filename)
-
-    @staticmethod
-    def from_dict(genome_dict):
-        return jsons.load(genome_dict, Genome)
 
     @staticmethod
     def create_from_file(filename):

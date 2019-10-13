@@ -1,5 +1,7 @@
 import json
 
+import jsons
+
 
 class ConfigError(Exception):
     def __init__(self, message):
@@ -8,6 +10,9 @@ class ConfigError(Exception):
 
 class BaseConfiguration:
     pass
+
+    def to_dict(self):
+        return jsons.dump(self)
 
 
 class DefaultConfiguration(BaseConfiguration):

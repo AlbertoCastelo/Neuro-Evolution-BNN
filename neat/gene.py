@@ -107,6 +107,21 @@ class ConnectionGene(Gene):
     crossover_attributes = ['mean', 'std']
     mutation_attributes = ['mean']
 
+    @staticmethod
+    def from_dict(connection_gene_dict: dict):
+        # key = ConnectionGene._get_tuple(tuple_str=connection_gene_dict['key'])
+        key = tuple(connection_gene_dict['key'])
+        connection_gene = ConnectionGene(key=key)
+        connection_gene.set_mean(connection_gene_dict['_weight_mean'])
+        connection_gene.set_std(connection_gene_dict['_weight_std'])
+        return connection_gene
+
+    @staticmethod
+    def _get_tuple(tuple_str) -> tuple:
+        tuple_str = tuple_str[1:-1].split(',')
+        tuple_ = (int(tuple_str[0]), int(tuple_str[1]))
+        return tuple_
+
     def __init__(self, key):
         '''
         key: must be a tuple of nodes' keys (key-origin-node, key-destiny-node)
@@ -129,10 +144,26 @@ class ConnectionGene(Gene):
     def take_sample(self):
         return np.random.normal(loc=self.get_mean(), scale=self.get_std())
 
+    def to_dict(self):
+
+        dict_ = {'key': self.key,
+                 'enabled': self.enabled,
+                 '_weight_mean': self._weight_mean,
+                 '_weight_std': self._weight_std}
+        return dict_
+
 
 class NodeGene(Gene):
     crossover_attributes = ['mean', 'std']
     mutation_attributes = ['mean']
+
+    @staticmethod
+    def from_dict(node_gene_dict: dict):
+        key = int(node_gene_dict['key'])
+        node_gene = NodeGene(key=key)
+        node_gene.set_mean(node_gene_dict['_bias_mean'])
+        node_gene.set_std(node_gene_dict['_bias_std'])
+        return node_gene
 
     def __init__(self, key):
         super().__init__(key=key, type=NODE_TYPE)
@@ -153,6 +184,14 @@ class NodeGene(Gene):
 
     def take_sample(self):
         return np.random.normal(loc=self.get_mean(), scale=self.get_std())
+
+    def to_dict(self):
+        dict_ = {'key': self.key,
+                 'activation': self.activation,
+                 'aggregation': self.aggregation,
+                 '_bias_mean': self._bias_mean,
+                 '_bias_std': self._bias_std}
+        return dict_
 
 
 class BiasConfig:
