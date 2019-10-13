@@ -88,27 +88,27 @@ class StochasticLinear(nn.Module):
         batch_size = x.shape[0]
 
         print(f'x: {x.shape}')
-        qw_std = torch.exp(1.0 + self.qw_logvar)
-        qb_std = torch.exp(1.0 + self.qb_logvar)
+        qw_var = torch.exp(1.0 + self.qw_logvar)
+        qb_var = torch.exp(1.0 + self.qb_logvar)
 
         w_sample_size = (self.out_features * self.n_samples, self.in_features)
         qw_mean = self.qw_mean.repeat(self.n_samples, 1)
-        qw_std = qw_std.repeat(self.n_samples, 1)
+        qw_var = qw_var.repeat(self.n_samples, 1)
         # assert (qw_mean.shape == w_sample_size)
 
-        w_sample = qw_mean + qw_std * torch.randn(w_sample_size)
+        w_sample = qw_mean + qw_var * torch.randn(w_sample_size)
         print(f'w-samples: {w_sample.shape}')
         b_sample_size = (self.out_features * self.n_samples, 1)
         b_mean = self.qb_mean.view(-1, 1).repeat(self.n_samples, 1)
-        qb_std = qb_std.view(-1, 1).repeat(self.n_samples, 1)
+        qb_var = qb_var.view(-1, 1).repeat(self.n_samples, 1)
 
-        b_sample = b_mean + qb_std * torch.randn(b_sample_size)
+        b_sample = b_mean + qb_var * torch.randn(b_sample_size)
         print(f'b-samples: {b_sample.shape}')
         y = F.linear(input=x, weight=w_sample, )
         print(f'y: {y.shape}')
         log_q_theta = self._log_q_theta(w_sample=w_sample, b_sample=b_sample,
-                                        qw_mean=self.qw_mean, qw_std=qw_std,
-                                        qb_mean=self.qb_mean, qb_std=qb_std)
+                                        qw_mean=self.qw_mean, qw_std=qw_var,
+                                        qb_mean=self.qb_mean, qb_std=qb_var)
 
         log_p_theta = self._log_p_theta(w_sample=w_sample, b_sample=b_sample)
 
@@ -127,16 +127,16 @@ class StochasticLinear(nn.Module):
         #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
         batch_size = x.shape[0]
 
-        std_qw = torch.exp(1.0 + self.qw_logvar)
-        std_qb = torch.exp(1.0 + self.qb_logvar)
+        qw_var = torch.exp(1.0 + self.qw_logvar)
+        qb_var = torch.exp(1.0 + self.qb_logvar)
 
-        x_mu_w = F.linear(input=x, weight=self.qw_mean)
-        x_log_var_w = F.linear(input=x, weight=std_qw)
+        x_w_mu = F.linear(input=x, weight=self.qw_mean)
+        x_w_var = F.linear(input=x, weight=qw_var)
 
-        mu_b = self.qb_mean.repeat(batch_size, 1)
-        log_var_b = std_qb.repeat(batch_size, 1)
+        b_mu = self.qb_mean.repeat(batch_size, 1)
+        b_var = qb_var.repeat(batch_size, 1)
 
-        output_size = x_mu_w.size()
+        output_size = x_w_mu.size()
         w_samples = torch.randn(output_size)
         b_samples = torch.randn(output_size)
         if self.is_cuda:
@@ -147,27 +147,27 @@ class StochasticLinear(nn.Module):
         # print(mu_b.shape)
         # print(log_var_b.shape)
         # print(b_samples.shape)
-        output = 1e-8 + x_mu_w + x_log_var_w * w_samples + \
-                 mu_b + log_var_b * b_samples
+        output = 1e-8 + x_w_mu + x_w_var * w_samples + \
+                 b_mu + b_var * b_samples
 
         # calculate KL(q(theta)||p(theta))
-        kl_qw_pw = self.get_kl_qw_pw(std_qb, std_qw)
+        kl_qw_pw = self.get_kl_qw_pw(torch.sqrt(qb_var), torch.sqrt(qw_var))
         if self.is_cuda:
             kl_qw_pw = kl_qw_pw.cuda()
         return output, kl_qw_pw
 
-    def get_kl_qw_pw(self, std_qb, std_qw):
+    def get_kl_qw_pw(self, qb_std, qw_std):
         kl_qw_pw = 0.0
         qw_mean = self.qw_mean
         qb_mean = self.qb_mean
         if self.is_cuda:
             qw_mean = qw_mean.cpu()
             qb_mean = qb_mean.cpu()
-            std_qb = std_qb.cpu()
-            std_qw = std_qw.cpu()
+            qb_std = qb_std.cpu()
+            qw_std = qw_std.cpu()
 
-        qw = Normal(loc=qw_mean, scale=std_qw)
-        qb = Normal(loc=qb_mean, scale=std_qb)
+        qw = Normal(loc=qw_mean, scale=qw_std)
+        qb = Normal(loc=qb_mean, scale=qb_std)
         pw = Normal(loc=torch.zeros(qw_mean.shape), scale=torch.ones(qw_mean.shape))
         pb = Normal(loc=torch.zeros(qb_mean.shape), scale=torch.ones(qb_mean.shape))
         # if self.is_cuda:

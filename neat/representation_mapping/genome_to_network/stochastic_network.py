@@ -40,9 +40,9 @@ class StochasticNetwork(nn.Module):
             layer_dict = layers[layer_key]
 
             parameters = StochasticLinearParameters.create(qw_mean=layer_dict['weight_mean'],
-                                                           qw_logvar=layer_dict['weight_std'],
+                                                           qw_logvar=layer_dict['weight_log_var'],
                                                            qb_mean=layer_dict['bias_mean'],
-                                                           qb_logvar=layer_dict['bias_std'])
+                                                           qb_logvar=layer_dict['bias_log_var'])
 
             layer = StochasticLinear(in_features=layer_dict['n_input'],
                                      out_features=layer_dict['n_output'],
@@ -83,19 +83,19 @@ class StochasticNetworkOld(nn.Module):
             layer_dict = layers[layer_key]
             layer = nn.Linear(layer_dict['n_input'], layer_dict['n_output'], bias=True)
             layer.bias_mean = layer_dict['bias_mean']
-            layer.bias_std = layer_dict['bias_std']
+            layer.bias_log_var = layer_dict['bias_log_var']
             layer.weight_mean = layer_dict['weight_mean']
-            layer.weight_std = layer_dict['weight_std']
+            layer.weight_log_var = layer_dict['weight_log_var']
             setattr(self, f'layer_{layer_key}', layer)
             setattr(self, f'activation_{layer_key}', self.activation)
 
     @staticmethod
     def _sample_layer(layer):
 
-        bias_dist = Normal(loc=layer.bias_mean, scale=layer.bias_std)
+        bias_dist = Normal(loc=layer.bias_mean, scale=layer.bias_log_var)
         bias_sampled = bias_dist.sample()
 
-        weight_dist = Normal(loc=layer.weight_mean, scale=layer.weight_std)
+        weight_dist = Normal(loc=layer.weight_mean, scale=layer.weight_log_var)
         weight_sampled = weight_dist.sample()
 
         state_dict = layer.state_dict()
@@ -149,11 +149,11 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
 
     # get bias
     layer_node_keys.sort()
-    bias_mean_values = [nodes[key].bias_mean for key in layer_node_keys]
+    bias_mean_values = [nodes[key].get_mean() for key in layer_node_keys]
     bias_mean = torch.tensor(bias_mean_values)
 
-    bias_std_values = [nodes[key].bias_std for key in layer_node_keys]
-    bias_std = torch.tensor(bias_std_values)
+    bias_log_var_values = [nodes[key].get_log_var() for key in layer_node_keys]
+    bias_log_var = torch.tensor(bias_log_var_values)
 
     layer_connections = dict()
     input_node_keys = set({})
@@ -175,12 +175,12 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
         key_index_mapping_output[output_key] = output_index
 
     weight_mean = torch.zeros([n_output, n_input])
-    weight_std = torch.zeros([n_output, n_input])
+    weight_log_var = torch.zeros([n_output, n_input])
     for key in layer_connections:
         weight_mean[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            float(layer_connections[key].weight_mean)
-        weight_std[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            float(layer_connections[key].weight_std)
+            float(layer_connections[key].get_mean())
+        weight_log_var[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
+            float(layer_connections[key].get_log_var())
 
     # weights = torch.transpose(weights)
     layer['n_input'] = n_input
@@ -188,7 +188,7 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
     layer['input_keys'] = input_node_keys
     layer['output_keys'] = layer_node_keys
     layer['bias_mean'] = bias_mean
-    layer['bias_std'] = bias_std
+    layer['bias_log_var'] = bias_log_var
     layer['weight_mean'] = weight_mean
-    layer['weight_std'] = weight_std
+    layer['weight_log_var'] = weight_log_var
     return layer
