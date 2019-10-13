@@ -1,6 +1,7 @@
 from itertools import count
 import numpy as np
 from neat.configuration import get_configuration
+from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
 
 
@@ -201,12 +202,12 @@ class DistanceCalculation:
         distance = node_distance + connection_distance
         return distance
 
-    def _node_distance(self, node_1, node_2):
+    def _node_distance(self, node_1: NodeGene, node_2: NodeGene):
         '''
         Node distance is modified to account for both bias and standard deviation
         '''
-        distance = l2_distance(v1=[node_1.bias_mean, node_1.bias_std],
-                               v2=[node_2.bias_mean, node_2.bias_std])
+        distance = l2_distance(v1=[node_1.get_mean(), node_1.get_std()],
+                               v2=[node_2.get_mean(), node_2.get_std()])
         # TODO: add distance components if we are allowed to change activation or aggregation
         # if self.activation != other.activation:
         #     d += 1.0
@@ -214,12 +215,12 @@ class DistanceCalculation:
         #     d += 1.0
         return distance * self.compatibility_weight_coefficient
 
-    def _connection_distance(self, connection_1, connection_2):
+    def _connection_distance(self, connection_1: ConnectionGene, connection_2: ConnectionGene):
         '''
         Connection distance is modified to account for both bias and standard deviation
         '''
-        distance = l2_distance(v1=[connection_1.weight_mean, connection_1.weight_std],
-                               v2=[connection_2.weight_mean, connection_2.weight_std])
+        distance = l2_distance(v1=[connection_1.get_mean(), connection_1.get_std()],
+                               v2=[connection_2.get_mean(), connection_2.get_std()])
 
         # this is not being used
         if connection_1.enabled != connection_2.enabled:

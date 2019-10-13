@@ -42,16 +42,12 @@ def get_qw(genome: Genome) -> Distribution:
     means = []
     stds = []
     for key, node in genome.node_genes.items():
-        means.append(node.bias_mean)
-        # TODO: fix log_var
-        # stds.append(node.bias_std)
-        stds.append(np.exp(1.0 + node.bias_std))
+        means.append(node.get_mean())
+        stds.append(node.get_std())
 
     for key, connection in genome.connection_genes.items():
-        means.append(connection.weight_mean)
-        # TODO: fix log_var
-        # stds.append(connection.weight_std)
-        stds.append(np.exp(1.0 + connection.weight_std))
+        means.append(connection.get_mean())
+        stds.append(connection.get_std())
 
     mu = torch.Tensor(means)
     sigma = torch.Tensor(stds)
