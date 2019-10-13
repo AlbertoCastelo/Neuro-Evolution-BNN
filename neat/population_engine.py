@@ -4,7 +4,7 @@ from itertools import count
 import numpy as np
 from neat.configuration import get_configuration
 from neat.evaluation import EvaluationStochasticEngine
-from neat.gene import ConnectionGene, NodeGene
+from neat.gene import ConnectionGene, NodeGene, Gene
 from neat.genome import Genome
 from neat.species import SpeciationEngine
 from neat.stagnation import Stagnation
@@ -291,36 +291,29 @@ class Crossover:
 
         new_node = NodeGene(key=node_key)
 
-        for attribute in new_node.main_attributes:
+        for attribute in new_node.crossover_attributes:
             if random.random() > 0.5:
-                setattr(new_node, attribute, getattr(node_1, attribute))
+                self.set_child_attribute(attribute=attribute, new_gene=new_node, parent_gene=node_1)
             else:
-                setattr(new_node, attribute, getattr(node_2, attribute))
-
-        for attribute in new_node.other_attributes:
-            if random.random() > 0.5:
-                setattr(new_node, attribute, getattr(node_1, attribute))
-            else:
-                setattr(new_node, attribute, getattr(node_2, attribute))
+                self.set_child_attribute(attribute=attribute, new_gene=new_node, parent_gene=node_2)
+                # setattr(new_node, attribute, getattr(node_2, attribute))
         return new_node
+
+    @staticmethod
+    def set_child_attribute(attribute: str, new_gene: Gene, parent_gene: Gene):
+        getattr(new_gene, f'set_{attribute}')(getattr(parent_gene, f'get_{attribute}')())
 
     def _get_connection_crossover(self, connection_1: ConnectionGene, connection_2: ConnectionGene):
         assert connection_1.key == connection_2.key
         connection_key = connection_1.key
 
         new_connection = ConnectionGene(key=connection_key)
-
-        for attribute in new_connection.main_attributes:
+        for attribute in new_connection.crossover_attributes:
             if random.random() > 0.5:
-                setattr(new_connection, attribute, getattr(connection_1, attribute))
+                self.set_child_attribute(attribute=attribute, new_gene=new_connection, parent_gene=connection_1)
             else:
-                setattr(new_connection, attribute, getattr(connection_2, attribute))
+                self.set_child_attribute(attribute=attribute, new_gene=new_connection, parent_gene=connection_2)
 
-        for attribute in new_connection.other_attributes:
-            if random.random() > 0.5:
-                setattr(new_connection, attribute, getattr(connection_1, attribute))
-            else:
-                setattr(new_connection, attribute, getattr(connection_2, attribute))
         return new_connection
 
 
@@ -368,11 +361,10 @@ class Mutation:
 
         # Mutate connection genes.
         for key in genome.connection_genes.keys():
-            genome.connection_genes[key] = self.mutate_connection(connection=genome.connection_genes[key])
-
+            genome.connection_genes[key].mutate()
         # Mutate node genes (bias, response, etc.).
         for key in genome.node_genes.keys():
-            genome.node_genes[key] = self.mutate_node(node=genome.node_genes[key])
+            genome.node_genes[key].mutate()
         return genome
 
     def mutate_add_node(self, genome):
@@ -387,52 +379,3 @@ class Mutation:
 
     def mutate_delete_connection(self, genome: Genome):
         pass
-
-    def mutate_connection(self, connection: ConnectionGene):
-        for attribute in connection.main_attributes:
-            attribute_value = getattr(connection, attribute)
-            mutated_value = self._mutate_float(value=attribute_value, name=attribute)
-            setattr(connection, attribute, mutated_value)
-
-        # for attribute in connection.other_attributes:
-        #     attribute_value = getattr(connection, attribute)
-        #     mutated_value = self._mutate_float(value=attribute_value, name=attribute)
-        #     setattr(connection, attribute, mutated_value)
-        return connection
-
-    def mutate_node(self, node: NodeGene):
-        for attribute in node.main_attributes:
-            attribute_value = getattr(node, attribute)
-            mutated_value = self._mutate_float(value=attribute_value, name=attribute)
-            setattr(node, attribute, mutated_value)
-
-        # for attribute in node.other_attributes:
-        #     attribute_value = getattr(node, attribute)
-        #     mutated_value = self._mutate_float(value=attribute_value, name=attribute)
-        #     setattr(node, attribute, mutated_value)
-        return node
-
-    def _mutate_float(self, value, name: str):
-        r = random.random()
-        if r < self.mutate_rate:
-            mutated_value = value + random.gauss(0.0, self.mutate_power)
-            mutated_value = self._clip(value=mutated_value,
-                                       name=name)
-            return mutated_value
-
-        if r < self.replace_rate + self.mutate_rate:
-            return self._init_float(name=name)
-
-        return value
-
-    def _clip(self, value, name):
-        min_ = getattr(self.config, f'{name}_min_value')
-        max_ = getattr(self.config, f'{name}_max_value')
-        return np.clip(value, a_min=min_, a_max=max_)
-
-    def _init_float(self, name):
-        mean = getattr(self.config, f'{name}_init_mean')
-        std = getattr(self.config, f'{name}_init_std')
-
-        value = np.random.normal(loc=mean, scale=std)
-        return self._clip(value=value, name=name)
