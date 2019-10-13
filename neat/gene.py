@@ -1,23 +1,111 @@
+import random
+
 import numpy as np
 
 from neat.configuration import get_configuration
 
 NODE_TYPE = 'node'
 CONNECTION_TYPE = 'connection'
+PARAMETERS_NAMES = {NODE_TYPE: 'bias',
+                    CONNECTION_TYPE: 'weight'}
 
 
 class Gene:
+    mutation_attributes = []
 
     def __init__(self, key, type):
         self.key = key
         self.type = type
+        self.parameter_name = PARAMETERS_NAMES[type]
+        self.config = get_configuration()
+
+        self.single_structural_mutation = self.config.single_structural_mutation
+        self.mutate_rate = self.config.mutate_rate
+        self.mutate_power = self.config.mutate_power
+        self.replace_rate = self.config.replace_rate
+
+        self.mean_name = f'_{self.parameter_name}_mean'
+        self.var_name = f'_{self.parameter_name}_var'
+        self.std_name = f'_{self.parameter_name}_std'
+        self.log_var_name = f'_{self.parameter_name}_log_var'
+
+        setattr(self, self.mean_name, None)
+        setattr(self, self.var_name, None)
+        setattr(self, self.log_var_name, None)
+        setattr(self, self.std_name, None)
+
+    def mutate(self):
+        for attribute in self.mutation_attributes:
+            attribute_value = getattr(self, f'get_{attribute}')()
+            mutated_value = self._mutate_float(value=attribute_value, parameter_name=self.parameter_name,
+                                               parameter_type=attribute)
+            getattr(self, f'set_{attribute}')(mutated_value)
+
+    def set_std(self, std):
+        std = self._clip(value=std, parameter_type='std')
+        self._set_std(std)
+        var = calculate_variance_given_std(std)
+        self._set_variance(var)
+        log_var = calculate_log_var_given_variance(var)
+        self._set_log_var(log_var)
+
+    def set_mean(self, mean):
+        mean = self._clip(value=mean, parameter_type='mean')
+        setattr(self, self.mean_name, mean)
+
+    def get_mean(self):
+        return getattr(self, self.mean_name)
+
+    def get_std(self):
+        return getattr(self, self.std_name)
+
+    def get_variance(self):
+        return getattr(self, self.var_name)
+
+    def get_log_var(self):
+        return getattr(self, self.log_var_name)
+
+    def _set_log_var(self, log_var):
+        setattr(self, self.log_var_name, log_var)
+
+    def _set_variance(self, var):
+        assert var >= 0.0
+        setattr(self, self.var_name, var)
+
+    def _set_std(self, std):
+        assert std >= 0.0
+        setattr(self, self.std_name, std)
+
+    def _set_mean(self, mean):
+        setattr(self, self.mean_name, mean)
+
+    def _clip(self, value: float, parameter_type: str) -> float:
+        min_ = getattr(self.config, f'{self.parameter_name}_{parameter_type}_min_value')
+        max_ = getattr(self.config, f'{self.parameter_name}_{parameter_type}_max_value')
+        return float(np.clip(value,
+                             a_min=min_,
+                             a_max=max_))
+
+    def _initialize_float(self, parameter_name, parameter_type):
+        mean = getattr(self.config, f'{parameter_name}_{parameter_type}_init_mean')
+        std = getattr(self.config, f'{parameter_name}_{parameter_type}_init_std')
+        value = np.random.normal(loc=mean, scale=std)
+        return value
+
+    def _mutate_float(self, value, parameter_name: str, parameter_type: str):
+        r = random.random()
+        if r < self.mutate_rate:
+            mutated_value = value + random.gauss(0.0, self.mutate_power)
+            return mutated_value
+
+        if r < self.replace_rate + self.mutate_rate:
+            return self._initialize_float(parameter_name=parameter_name, parameter_type=parameter_type)
+        return value
 
 
 class ConnectionGene(Gene):
-    # main_attributes = ['weight_mean', 'weight_std']
-    # other_attributes = []
-    main_attributes = ['weight_mean']
-    other_attributes = ['weight_std']
+    crossover_attributes = ['mean', 'std']
+    mutation_attributes = ['mean']
 
     def __init__(self, key):
         '''
@@ -31,38 +119,20 @@ class ConnectionGene(Gene):
         self.config = get_configuration()
         self.weight_configuration = WeightConfig()
 
-        self.weight_mean = None
-        self.weight_std = None
-        self.weight_log_var = None
-
     def random_initialization(self):
-        weight_mean_mean = self.weight_configuration.weight_mean_init_mean
-        weight_mean_std = self.weight_configuration.weight_mean_init_std
+        weight_mean = self._initialize_float(parameter_name='weight', parameter_type='mean')
+        self.set_mean(weight_mean)
 
-        weight_mean = np.random.normal(loc=weight_mean_mean, scale=weight_mean_std)
-        weight_mean = np.clip(weight_mean,
-                              a_min=self.weight_configuration.weight_mean_min_value,
-                              a_max=self.weight_configuration.weight_mean_max_value)
-        self.weight_mean = weight_mean
-
-        weight_std_mean = self.weight_configuration.weight_std_init_mean
-        weight_std_std = self.weight_configuration.weight_std_init_std
-
-        weight_std = np.random.normal(loc=weight_std_mean, scale=weight_std_std)
-        weight_std = np.clip(weight_std,
-                             a_min=self.weight_configuration.weight_std_min_value,
-                             a_max=self.weight_configuration.weight_std_max_value)
-        self.weight_std = weight_std
+        weight_std = self._initialize_float(parameter_name='weight', parameter_type='std')
+        self.set_std(weight_std)
 
     def take_sample(self):
-        return np.random.normal(loc=self.weight_mean, scale=self.weight_std)
+        return np.random.normal(loc=self.get_mean(), scale=self.get_std())
 
 
 class NodeGene(Gene):
-    # main_attributes = ['bias_mean', 'bias_std']
-    # other_attributes = []
-    main_attributes = ['bias_mean']
-    other_attributes = ['bias_std']
+    crossover_attributes = ['mean', 'std']
+    mutation_attributes = ['mean']
 
     def __init__(self, key):
         super().__init__(key=key, type=NODE_TYPE)
@@ -73,30 +143,16 @@ class NodeGene(Gene):
         self.aggregation = self.config.node_aggregation
 
         self.bias_configuration = BiasConfig()
-        self.bias_mean = None
-        self.bias_std = None
-        self.bias_log_var = None
 
     def random_initialization(self):
-        mean = self.bias_configuration.bias_mean_init_mean
-        std = self.bias_configuration.bias_mean_init_std
-        bias = np.random.normal(loc=mean, scale=std)
-        bias = np.clip(bias,
-                       a_min=self.bias_configuration.bias_mean_min_value,
-                       a_max=self.bias_configuration.bias_mean_max_value)
-        self.bias_mean = bias
+        bias_mean = self._initialize_float(parameter_name='bias', parameter_type='mean')
+        self.set_mean(bias_mean)
 
-        bias_std_mean = self.bias_configuration.bias_std_init_mean
-        bias_std_std = self.bias_configuration.bias_std_init_std
-
-        bias_std = np.random.normal(loc=bias_std_mean, scale=bias_std_std)
-        bias_std = np.clip(bias_std,
-                           a_min=self.bias_configuration.bias_std_min_value,
-                           a_max=self.bias_configuration.bias_std_max_value)
-        self.bias_std = bias_std
+        bias_std = self._initialize_float(parameter_name='bias', parameter_type='std')
+        self.set_std(bias_std)
 
     def take_sample(self):
-        return np.random.normal(loc=self.bias_mean, scale=self.bias_std)
+        return np.random.normal(loc=self.get_mean(), scale=self.get_std())
 
 
 class BiasConfig:
@@ -137,3 +193,18 @@ class WeightConfig:
         weight_mutate_rate = 0.8
         weight_replace_rate = 0.1
 
+
+def calculate_std_given_variance(var):
+    return float(np.sqrt(var))
+
+
+def calculate_log_var_given_variance(var):
+    return float(np.log(var) - 1.0)
+
+
+def calculate_variance_given_log_var(log_var):
+    return float(np.exp(log_var + 1.0))
+
+
+def calculate_variance_given_std(std):
+    return float(np.square(std))
