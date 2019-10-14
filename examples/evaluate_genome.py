@@ -17,7 +17,7 @@ config = create_configuration(filename=config_file)
 
 def main():
 
-    genome_filename = f'./executions/test_genome_persistance_None.json'
+    genome_filename = f'./executions/fixed_std_None.json'
     genome_dict = read_json_file_to_dict(filename=genome_filename)
     genome = Genome.from_dict(genome_dict)
 

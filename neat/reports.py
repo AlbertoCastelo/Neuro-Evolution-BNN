@@ -14,11 +14,11 @@ class EvolutionReport:
 
     def report_new_generation(self, generation: int, population: dict):
         best_individual_key = -1
-        best_individual_fitness = 1000000
+        best_individual_fitness = -1000000
         fitness_all = []
         for key, genome in population.items():
             fitness_all.append(genome.fitness)
-            if genome.fitness < best_individual_fitness:
+            if genome.fitness > best_individual_fitness:
                 best_individual_fitness = genome.fitness
                 best_individual_key = genome.key
 
@@ -34,6 +34,7 @@ class EvolutionReport:
 
         if self.best_individual is None or self.best_individual.fitness < best_individual_fitness:
             self.best_individual = population.get(best_individual_key)
+            print(f'    New best individual found:{round(self.best_individual.fitness, 3)}')
 
     def generate_final_report(self):
         best_individual = self.get_best_individual().to_dict()
