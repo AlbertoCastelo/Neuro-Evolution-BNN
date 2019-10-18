@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from neat.configuration import ConfigError, get_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
+from neat.dataset.classification_mnist import MNISTReducedDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
@@ -223,6 +224,10 @@ def get_dataset(dataset_name, testing=False):
         return dataset
     elif dataset_name == 'classification_example_1':
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
+        dataset.generate_data()
+        return dataset
+    elif dataset_name == 'classification_mnist_reduced':
+        dataset = MNISTReducedDataset(dataset_type=dataset_type)
         dataset.generate_data()
         return dataset
     else:

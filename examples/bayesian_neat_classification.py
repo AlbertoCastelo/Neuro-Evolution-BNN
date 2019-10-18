@@ -3,12 +3,13 @@ from neat.reports import EvolutionReport
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
-config_file = '/classification-miso.json'
-config = create_configuration(filename=config_file)
+# config_file = '/classification-miso.json'
+config_file = 'mnist_reduced'
+config = create_configuration(filename=f'/{config_file}.json')
 
 @timeit
 def main():
-    report = EvolutionReport(experiment_name='fixed_std')
+    report = EvolutionReport(experiment_name=f'{config_file}_v1')
     evolution_engine = EvolutionEngine(report=report)
     evolution_engine.run()
     return evolution_engine
