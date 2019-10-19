@@ -111,3 +111,6 @@ venv.bak/
 
 # cma_es algorithm
 outcmaes
+
+# avoid saving environment.env
+environment.env
