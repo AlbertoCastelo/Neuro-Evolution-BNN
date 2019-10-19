@@ -21,4 +21,4 @@ class TestGenome(TestCase):
 
         genome_read = Genome.create_from_file(filename)
 
-        print(genome_read)
+        self.assertEqual(len(genome.__dict__), len(genome_read.__dict__))

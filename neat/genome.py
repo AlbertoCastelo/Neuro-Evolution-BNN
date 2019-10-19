@@ -34,7 +34,14 @@ class Genome:
             node_gene = NodeGene.from_dict(node_gene_dict=node_gene_dict)
             genome.node_genes[node_gene.key] = node_gene
 
+        genome.n_weight_parameters = genome_dict['n_weight_parameters']
+        genome.n_bias_parameters = genome_dict['n_bias_parameters']
         return genome
+
+    @staticmethod
+    def create_from_file(filename):
+        genome_dict = read_json_file_to_dict(filename)
+        return Genome.from_dict(genome_dict)
 
     def __init__(self, key, id=None, genome_config=None):
         self.key = key
@@ -50,6 +57,9 @@ class Genome:
         self.connection_genes = {}
         self.node_genes = {}
 
+        self.n_weight_parameters = None
+        self.n_bias_parameters = None
+
         self.fitness = None
 
     def to_dict(self):
@@ -61,6 +71,8 @@ class Genome:
                  'input_nodes_keys': self.input_nodes_keys,
                  'connection_genes': {},
                  'node_genes': {},
+                 'n_bias_parameters': self.n_bias_parameters,
+                 'n_weight_parameters': self.n_weight_parameters,
                  'config': self.genome_config.to_dict()}
 
         for key, connection_gene in self.connection_genes.items():
@@ -71,6 +83,10 @@ class Genome:
 
         return dict_
 
+    def save_genome(self, filename=None):
+        filename = ''.join([str(uuid.uuid4()), '.json']) if filename is None else filename
+
+        write_json_file_from_dict(data=self.to_dict(), filename=filename)
 
     def create_random_genome(self):
         self._initialize_output_nodes()
@@ -108,6 +124,11 @@ class Genome:
         return GenomeSample(key=self.key, n_input=self.n_input, n_output=self.n_output,
                             node_genes=node_genes_sample,
                             connection_genes=connection_genes_sample)
+
+    def calculate_number_of_parameters(self):
+        self.n_weight_parameters = 2 * len(self.connection_genes)
+        self.n_bias_parameters = 2 * len(self.node_genes)
+        return self.n_weight_parameters + self.n_bias_parameters
 
     def _initialize_connections(self):
         # initialize fully connected network with no recurrent connections
@@ -159,30 +180,23 @@ class Genome:
         return list(range(-1, -self.n_input-1, -1))
 
     def __str__(self):
+        print(f'Total number of Parameters: {self.calculate_number_of_parameters()}')
+        print(f'    N-Bias-Parameters: {self.n_bias_parameters}')
+        print(f'    N-Weight-Parameters: {self.n_weight_parameters}')
+
         bias_data = []
         bias_data.append(''.join(['Node Key | Mean  | Std \n']))
         for key, node in self.node_genes.items():
-            bias_data.append(''.join([str(key), ':     ', str(round(node.bias_mean, 4)), '  |  ',
-                                      str(round(node.bias_std, 4)), ' \n']))
+            bias_data.append(''.join([str(key), ':     ', str(round(node.get_mean(), 4)), '  |  ',
+                                      str(round(node.get_std(), 4)), ' \n']))
         bias_str = ''.join(bias_data)
 
         weights_data = []
         weights_data.append(''.join(['Connection Key | Mean  | Std \n']))
         for key, connection in self.connection_genes.items():
-            weights_data.append(''.join([str(key), ': ', str(round(connection.weight_mean, 4)), '  |  ',
-                                      str(round(connection.weight_std, 4)), ' \n']))
+            weights_data.append(''.join([str(key), ': ', str(round(connection.get_mean(), 4)), '  |  ',
+                                         str(round(connection.get_std(), 4)), ' \n']))
         weight_str = ''.join(weights_data)
 
         genome_str = ''.join([bias_str, '\n', weight_str])
         return genome_str
-
-    def save_genome(self, filename=None):
-        filename = ''.join([str(uuid.uuid4()), '.json']) if filename is None else filename
-
-        write_json_file_from_dict(data=self.to_dict(), filename=filename)
-
-    @staticmethod
-    def create_from_file(filename):
-        genome_dict = read_json_file_to_dict(filename)
-        return Genome.from_dict(genome_dict)
-
