@@ -1,3 +1,4 @@
+from experiments.slack_client import SlackNotifier
 from neat.population_engine import EvolutionEngine
 from neat.reports import EvolutionReport
 from neat.utils import timeit
@@ -8,8 +9,8 @@ config_file = 'classification-miso'
 config = create_configuration(filename=f'/{config_file}.json')
 
 # TODO: better mechanism for override
-# config.n_generations = 1
-# config.pop_size = 20
+config.n_generations = 1
+config.pop_size = 20
 
 
 @timeit
@@ -22,4 +23,6 @@ def main():
 evolution_engine = main()
 
 best_individual = evolution_engine.report.get_best_individual()
-
+# report to slack
+notifier = SlackNotifier.create(channel='batch-jobs')
+notifier.send(message=f'{str(best_individual)}')
