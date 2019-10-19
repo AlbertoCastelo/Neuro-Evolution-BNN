@@ -3,8 +3,8 @@ from neat.reports import EvolutionReport
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
-# config_file = '/classification-miso.json'
-config_file = 'mnist_reduced'
+config_file = 'classification-miso'
+# config_file = 'mnist_reduced'
 config = create_configuration(filename=f'/{config_file}.json')
 
 @timeit
