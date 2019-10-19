@@ -180,9 +180,9 @@ class Genome:
         return list(range(-1, -self.n_input-1, -1))
 
     def __str__(self):
-        print(f'Total number of Parameters: {self.calculate_number_of_parameters()}')
-        print(f'    N-Bias-Parameters: {self.n_bias_parameters}')
-        print(f'    N-Weight-Parameters: {self.n_weight_parameters}')
+        general_data = ''.join([f'Total number of Parameters: {self.calculate_number_of_parameters()}\n',
+                                f'    N-Bias-Parameters: {self.n_bias_parameters}\n',
+                                f'    N-Weight-Parameters: {self.n_weight_parameters}\n'])
 
         bias_data = []
         bias_data.append(''.join(['Node Key | Mean  | Std \n']))
@@ -198,5 +198,5 @@ class Genome:
                                          str(round(connection.get_std(), 4)), ' \n']))
         weight_str = ''.join(weights_data)
 
-        genome_str = ''.join([bias_str, '\n', weight_str])
+        genome_str = ''.join([general_data, '\n', bias_str, '\n', weight_str])
         return genome_str
