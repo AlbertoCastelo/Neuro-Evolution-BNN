@@ -1,3 +1,4 @@
+import copy
 import random
 
 import numpy as np
@@ -9,15 +10,23 @@ CONNECTION_TYPE = 'connection'
 PARAMETERS_NAMES = {NODE_TYPE: 'bias',
                     CONNECTION_TYPE: 'weight'}
 
+CROSSOVER_ATTRIBUTES = ['mean', 'std']
+MUTATION_ATTRIBUTES = ['mean']
+
 
 class Gene:
-    mutation_attributes = []
 
     def __init__(self, key, type):
         self.key = key
         self.type = type
         self.parameter_name = PARAMETERS_NAMES[type]
+        self.crossover_attributes = copy.deepcopy(CROSSOVER_ATTRIBUTES)
+        self.mutation_attributes = copy.deepcopy(MUTATION_ATTRIBUTES)
+
         self.config = get_configuration()
+        self.fix_std = self.config.fix_std
+        if not self.fix_std:
+            self.mutation_attributes.append('std')
 
         self.single_structural_mutation = self.config.single_structural_mutation
         self.mutate_rate = self.config.mutate_rate
@@ -104,8 +113,8 @@ class Gene:
 
 
 class ConnectionGene(Gene):
-    crossover_attributes = ['mean', 'std']
-    mutation_attributes = ['mean']
+    # crossover_attributes = ['mean', 'std']
+    # mutation_attributes = ['mean']
 
     @staticmethod
     def from_dict(connection_gene_dict: dict):
@@ -154,8 +163,8 @@ class ConnectionGene(Gene):
 
 
 class NodeGene(Gene):
-    crossover_attributes = ['mean', 'std']
-    mutation_attributes = ['mean']
+    # crossover_attributes = ['mean', 'std']
+    # mutation_attributes = ['mean']
 
     @staticmethod
     def from_dict(node_gene_dict: dict):

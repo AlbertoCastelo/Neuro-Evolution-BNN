@@ -21,6 +21,10 @@ class DefaultConfiguration(BaseConfiguration):
         self.dataset_name = 'regression_example_1'
         self.problem_type = 'regression'
 
+        # Degrees of Freedom
+        self.fix_std = True
+        self.fix_architecture = True
+
         # evaluation parameters
         self.batch_size = 10000
         self.parallel_evaluation = True

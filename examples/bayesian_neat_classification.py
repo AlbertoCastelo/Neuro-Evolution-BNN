@@ -7,9 +7,14 @@ config_file = 'classification-miso'
 # config_file = 'mnist_reduced'
 config = create_configuration(filename=f'/{config_file}.json')
 
+# TODO: better mechanism for override
+# config.n_generations = 1
+# config.pop_size = 20
+
+
 @timeit
 def main():
-    report = EvolutionReport(experiment_name=f'{config_file}_v1')
+    report = EvolutionReport(experiment_name=f'{config_file}_v3')
     evolution_engine = EvolutionEngine(report=report)
     evolution_engine.run()
     return evolution_engine
