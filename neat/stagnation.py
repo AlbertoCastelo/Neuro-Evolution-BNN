@@ -4,7 +4,15 @@ from neat.configuration import get_configuration
 
 
 class Stagnation:
-
+    '''
+    Disclaimer: Taken from Python-NEAT project
+    Updates species fitness history information,
+        checking for ones that have not improved in max_stagnation generations,
+        and - unless it would result in the number of species dropping below the configured
+        species_elitism parameter if they were removed,
+        in which case the highest-fitness species are spared -
+        returns a list with stagnant species marked for removal.
+    '''
     def __init__(self):
         self.config = get_configuration()
 
@@ -14,6 +22,7 @@ class Stagnation:
         self.max_stagnation = self.config.max_stagnation
 
     def get_stagnant_species(self, species, generation):
+
         species_data = []
         for sid, s in species.items():
             if s.fitness_history:

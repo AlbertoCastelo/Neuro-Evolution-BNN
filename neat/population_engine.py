@@ -116,6 +116,7 @@ class PopulationEngine:
 
     def reproduce(self, species, pop_size, generation):
         """
+        Disclaimer: this is taken from Python-NEAT
         Handles creation of genomes, either from scratch or by sexual or
         asexual reproduction from parents.
         """
