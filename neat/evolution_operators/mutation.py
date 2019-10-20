@@ -136,7 +136,6 @@ class Mutation:
                                                           out_node_key=out_node_key,
                                                           config=self.config)
         if len(possible_inputs) == 0:
-            # TODO: Log
             return genome
         in_node = random.choice(possible_inputs)
 
