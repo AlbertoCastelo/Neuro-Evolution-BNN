@@ -20,8 +20,8 @@ class Mutation:
 
         self.node_add_prob = self.config.node_add_prob
         self.node_delete_prob = self.config.node_delete_prob
-        self.conn_add_prob = self.config.conn_add_prob
-        self.conn_delete_prob = self.config.conn_delete_prob
+        self.connection_add_prob = self.config.connection_add_prob
+        self.connection_delete_prob = self.config.connection_delete_prob
 
     def mutate(self, genome: Genome):
         if self.fix_architecture:
@@ -38,17 +38,17 @@ class Mutation:
     def _mutate_architecture(self, genome: Genome):
         if self.single_structural_mutation:
             div = max(1, (self.node_add_prob + self.node_delete_prob +
-                          self.conn_add_prob + self.conn_delete_prob))
+                          self.connection_add_prob + self.connection_delete_prob))
             r = random.random()
             if r < (self.node_add_prob / div):
                 genome = self.mutate_add_node(genome)
             elif r < ((self.node_add_prob + self.node_delete_prob) / div):
                 genome = self.mutate_delete_node(genome)
             elif r < ((self.node_add_prob + self.node_delete_prob +
-                       self.conn_add_prob) / div):
+                       self.connection_add_prob) / div):
                 genome = self.mutate_add_connection(genome)
             elif r < ((self.node_add_prob + self.node_delete_prob +
-                       self.conn_add_prob + self.conn_delete_prob) / div):
+                       self.connection_add_prob + self.connection_delete_prob) / div):
                 genome = self.mutate_delete_connection(genome)
         else:
             if random.random() < self.node_add_prob:
@@ -57,14 +57,15 @@ class Mutation:
             if random.random() < self.node_delete_prob:
                 genome = self.mutate_delete_node(genome)
 
-            if random.random() < self.conn_add_prob:
+            if random.random() < self.connection_add_prob:
                 genome = self.mutate_add_connection(genome)
 
-            if random.random() < self.conn_delete_prob:
+            if random.random() < self.connection_delete_prob:
                 genome = self.mutate_delete_connection(genome)
         return genome
 
     def mutate_add_node(self, genome: Genome):
+        # TODO: careful! this can add multihop-jumps to the network
         # if not genome.connection_genes:
         #     # if config.check_structural_mutation_surer():
         #     if self.is_valid_structural_mutation():
@@ -103,23 +104,29 @@ class Mutation:
 
     def mutate_delete_node(self, genome: Genome):
         # Do nothing if there are no non-output nodes.
-        available_nodes = [k for k in genome.node_genes.keys() if k not in self.config.n_output]
+        available_nodes = self._get_available_nodes_to_be_deleted(genome)
+        # available_nodes = [k for k in genome.node_genes.keys() if k not in ]
         if not available_nodes:
-            return -1
+            return genome
 
         del_key = random.choice(available_nodes)
 
-        connections_to_delete = set()
+        # delete connections related
+        connections_to_delete = []
         for k, v in genome.connection_genes.items():
             if del_key in v.key:
-                connections_to_delete.add(v.key)
+                connections_to_delete.append(v.key)
 
         for key in connections_to_delete:
             del genome.connection_genes[key]
 
+        # delete node
         del genome.node_genes[del_key]
-
         return genome
+
+    def _get_available_nodes_to_be_deleted(self, genome: Genome):
+        available_nodes = set(genome.node_genes.keys()) - set(genome.get_output_nodes_keys())
+        return list(available_nodes)
 
     def mutate_add_connection(self, genome: Genome):
         possible_outputs = list(genome.node_genes.keys())
@@ -134,23 +141,6 @@ class Mutation:
         in_node = random.choice(possible_inputs)
 
         new_connection_key = (in_node, out_node)
-
-        # # Don't duplicate connections.
-        # if new_connection_key in genome.connection_genes:
-        #     # T#ODO: Should this be using mutation to/from rates? Hairy to configure...
-        #     # if config.check_structural_mutation_surer():
-        #     #     genome.connection_genes[key].enabled = True
-        #     return genome
-        #
-        # # Don't allow connections between two output nodes
-        # if in_node in genome.get_output_nodes_keys() and out_node in genome.get_output_nodes_keys():
-        #     return genome
-        #
-        # # For feed-forward networks, avoid creating cycles.
-        # hypothetical_connection_keys = list(genome.connection_genes.keys()) + [new_connection_key]
-        # if (self.config.feed_forward and contains_cycles(connection_keys=hypothetical_connection_keys) and
-        #         is_multi_hop(connection_keys=hypothetical_connection_keys)):
-        #     return genome
 
         new_connection = ConnectionGene(key=new_connection_key).random_initialization()
         genome.connection_genes[new_connection_key] = new_connection
