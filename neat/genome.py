@@ -1,4 +1,5 @@
 import uuid
+from itertools import count
 
 import jsons
 
@@ -36,6 +37,7 @@ class Genome:
 
         genome.n_weight_parameters = genome_dict['n_weight_parameters']
         genome.n_bias_parameters = genome_dict['n_bias_parameters']
+        genome.node_counter = count(max(list(genome.node_genes.keys())) + 1)
         return genome
 
     @staticmethod
@@ -51,14 +53,16 @@ class Genome:
         self.n_input = self.genome_config.n_input
         self.n_output = self.genome_config.n_output
 
-        self.output_nodes_keys = list(range(0, self.n_output))
-        self.input_nodes_keys = self._initialize_input_nodes()
+        self.output_nodes_keys = self.get_output_nodes_keys()
+        self.input_nodes_keys = self.get_input_nodes_keys()
 
         self.connection_genes = {}
         self.node_genes = {}
 
         self.n_weight_parameters = None
         self.n_bias_parameters = None
+
+        self.node_counter = None
 
         self.fitness = None
 
@@ -125,10 +129,25 @@ class Genome:
                             node_genes=node_genes_sample,
                             connection_genes=connection_genes_sample)
 
+    def get_new_node_key(self):
+        if self.node_counter is None:
+            self.node_counter = count(max(list(self.node_genes.keys())) + 1)
+
+        new_key = next(self.node_counter)
+        assert new_key not in self.node_genes
+        return new_key
+
     def calculate_number_of_parameters(self):
         self.n_weight_parameters = 2 * len(self.connection_genes)
         self.n_bias_parameters = 2 * len(self.node_genes)
         return self.n_weight_parameters + self.n_bias_parameters
+
+    def get_input_nodes_keys(self):
+        # input nodes only contain keys (they cannot be evolved)
+        return list(range(-1, -self.n_input-1, -1))
+
+    def get_output_nodes_keys(self):
+        return list(range(0, self.n_output))
 
     def _initialize_connections(self):
         # initialize fully connected network with no recurrent connections
@@ -174,10 +193,6 @@ class Genome:
 
     def _get_hidden_nodes(self):
         return list(self.node_genes.keys())[self.n_output:]
-
-    def _initialize_input_nodes(self):
-        # input nodes only contain keys (they cannot be evolved)
-        return list(range(-1, -self.n_input-1, -1))
 
     def __str__(self):
         general_data = ''.join([f'Total number of Parameters: {self.calculate_number_of_parameters()}\n',

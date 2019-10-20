@@ -149,6 +149,7 @@ class ConnectionGene(Gene):
 
         weight_std = self._initialize_float(parameter_name='weight', parameter_type='std')
         self.set_std(weight_std)
+        return self
 
     def take_sample(self):
         return np.random.normal(loc=self.get_mean(), scale=self.get_std())
@@ -190,6 +191,7 @@ class NodeGene(Gene):
 
         bias_std = self._initialize_float(parameter_name='bias', parameter_type='std')
         self.set_std(bias_std)
+        return self
 
     def take_sample(self):
         return np.random.normal(loc=self.get_mean(), scale=self.get_std())
