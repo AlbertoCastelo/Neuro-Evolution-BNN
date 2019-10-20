@@ -1,11 +1,41 @@
 from unittest import TestCase
 
 from neat.evolution_operators.mutation import Mutation, exist_cycle, adds_multihop_jump
+from neat.genome import Genome
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 
 class TestArchitectureMutation(TestCase):
+    def test_mutate_delete_connection(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.n_initial_hidden_neurons = 0
+        genome = Genome(key='foo').create_random_genome()
+
+        possible_connections_to_delete = Mutation._calculate_possible_connections_to_delete(genome=genome)
+        expected_possible_connections_to_delete = {(-1, 0), (-2, 0)}
+        self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
+
+    def test_mutate_delete_connection_when_two_input_one_hidden(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.n_initial_hidden_neurons = 1
+        genome = Genome(key='foo').create_random_genome()
+
+        possible_connections_to_delete = Mutation._calculate_possible_connections_to_delete(genome=genome)
+        expected_possible_connections_to_delete = {(-1, 1), (-2, 1), (1, 0)}
+        self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
+
+    def test_mutate_delete_connection_when_one_input_one_hidden(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.n_initial_hidden_neurons = 1
+        self.config.n_input = 1
+        genome = Genome(key='foo').create_random_genome()
+
+        possible_connections_to_delete = Mutation._calculate_possible_connections_to_delete(genome=genome)
+        expected_possible_connections_to_delete = {(-1, 1), (1, 0)}
+        self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
+
+
     def test_calculate_possible_inputs_when_adding_connection(self):
         self.config = create_configuration(filename='/miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,

@@ -108,7 +108,6 @@ class Mutation:
         logger.debug('Mutation: Delete a Node')
         # Do nothing if there are no non-output nodes.
         available_nodes = self._get_available_nodes_to_be_deleted(genome)
-        # available_nodes = [k for k in genome.node_genes.keys() if k not in ]
         if not available_nodes:
             return genome
 
@@ -147,10 +146,29 @@ class Mutation:
 
     def mutate_delete_connection(self, genome: Genome):
         logger.debug('Mutation: Delete a Connection')
-        if genome.connection_genes:
-            key = random.choice(list(genome.connection_genes.keys()))
+        possible_connections_to_delete = self._calculate_possible_connections_to_delete(genome=genome)
+        if len(possible_connections_to_delete) > 0:
+            key = random.choice(possible_connections_to_delete)
             del genome.connection_genes[key]
         return genome
+
+    @staticmethod
+    def _calculate_possible_connections_to_delete(genome):
+        '''
+        Assumes the network does not have cycles nor multi-hop jumps.
+        '''
+        possible_connections_to_delete_set = set(genome.connection_genes.keys())
+        possible_connections_to_delete_set = \
+            Mutation._remove_connection_that_introduces_multihop_jumps(
+                genome=genome,
+                possible_connection_set=possible_connections_to_delete_set)
+
+        possible_connections_to_delete_set = \
+            Mutation._remove_connection_that_introduces_cycles(
+                genome=genome,
+                possible_connection_set=possible_connections_to_delete_set)
+
+        return possible_connections_to_delete_set
 
     def _get_available_nodes_to_be_deleted(self, genome: Genome):
         available_nodes = set(genome.node_genes.keys()) - set(genome.get_output_nodes_keys())

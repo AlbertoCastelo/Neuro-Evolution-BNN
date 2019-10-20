@@ -100,6 +100,7 @@ class Genome:
 
         # initialize connections
         self._initialize_connections()
+        return self
 
     def add_node(self, key, mean=None, std=None):
         node = NodeGene(key=key)
