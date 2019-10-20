@@ -10,6 +10,7 @@ class TestArchitectureMutationAddNode(TestCase):
     def test_mutate_add_node(self):
         pass
 
+
 class TestArchitectureMutationDeleteConnection(TestCase):
     def test_mutate_delete_connection(self):
         self.config = create_configuration(filename='/miso.json')
