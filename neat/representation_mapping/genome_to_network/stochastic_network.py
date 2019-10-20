@@ -157,11 +157,12 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
 
     layer_connections = dict()
     input_node_keys = set({})
-    for key in connections:
+    for key, connection in connections.items():
         output_node = key[1]
         if output_node in layer_node_keys:
             input_node_keys = input_node_keys.union({key[0]})
-            layer_connections[key] = connections[key]
+            if connection.enabled:
+                layer_connections[key] = connections[key]
 
     input_node_keys = list(input_node_keys)
     n_input = len(input_node_keys)
