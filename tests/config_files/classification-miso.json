@@ -1,11 +1,12 @@
 {
-  "parallel_evaluation": true,
+  "parallel_evaluation": false,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
   "fix_std": false,
-  "fix_architecture": true,
+  "fix_architecture": false,
+  "n_initial_hidden_neurons": 5,
 
   "feed_forward": true,
 
@@ -34,7 +35,7 @@
   "n_input": 2,
   "n_output": 2,
   "n_samples": 100,
-  "n_initial_hidden_neurons": 5,
+
   "node_activation": "tanh",
   "node_aggregation": "sum",
   "pop_size": 150,

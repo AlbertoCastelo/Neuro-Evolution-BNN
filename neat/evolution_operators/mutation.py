@@ -2,6 +2,7 @@ import copy
 import itertools
 import random
 
+from experiments.logger import logger
 from neat.configuration import get_configuration, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
@@ -24,7 +25,7 @@ class Mutation:
         self.connection_delete_prob = self.config.connection_delete_prob
 
     def mutate(self, genome: Genome):
-        if self.fix_architecture:
+        if not self.fix_architecture:
             genome = self._mutate_architecture(genome)
 
         # Mutate connection genes.
@@ -65,6 +66,7 @@ class Mutation:
         return genome
 
     def mutate_add_node(self, genome: Genome):
+        logger.debug('Mutation: Add a Node')
         # TODO: careful! this can add multihop-jumps to the network
         # if not genome.connection_genes:
         #     # if config.check_structural_mutation_surer():
@@ -103,6 +105,7 @@ class Mutation:
         return genome
 
     def mutate_delete_node(self, genome: Genome):
+        logger.debug('Mutation: Delete a Node')
         # Do nothing if there are no non-output nodes.
         available_nodes = self._get_available_nodes_to_be_deleted(genome)
         # available_nodes = [k for k in genome.node_genes.keys() if k not in ]
@@ -124,33 +127,35 @@ class Mutation:
         del genome.node_genes[del_key]
         return genome
 
-    def _get_available_nodes_to_be_deleted(self, genome: Genome):
-        available_nodes = set(genome.node_genes.keys()) - set(genome.get_output_nodes_keys())
-        return list(available_nodes)
-
     def mutate_add_connection(self, genome: Genome):
+        logger.debug('Mutation: Add a Connection')
         possible_outputs = list(genome.node_genes.keys())
-        out_node = random.choice(possible_outputs)
+        out_node_key = random.choice(possible_outputs)
 
         possible_inputs = self._calculate_possible_inputs(genome,
-                                                          out_node_key=out_node.key,
+                                                          out_node_key=out_node_key,
                                                           config=self.config)
         if len(possible_inputs) == 0:
             # TODO: Log
-            pass
+            return genome
         in_node = random.choice(possible_inputs)
 
-        new_connection_key = (in_node, out_node)
+        new_connection_key = (in_node, out_node_key)
 
         new_connection = ConnectionGene(key=new_connection_key).random_initialization()
         genome.connection_genes[new_connection_key] = new_connection
         return genome
 
     def mutate_delete_connection(self, genome: Genome):
+        logger.debug('Mutation: Delete a Connection')
         if genome.connection_genes:
             key = random.choice(list(genome.connection_genes.keys()))
             del genome.connection_genes[key]
         return genome
+
+    def _get_available_nodes_to_be_deleted(self, genome: Genome):
+        available_nodes = set(genome.node_genes.keys()) - set(genome.get_output_nodes_keys())
+        return list(available_nodes)
 
     @staticmethod
     def _calculate_possible_inputs(genome: Genome, out_node_key: int, config: BaseConfiguration):

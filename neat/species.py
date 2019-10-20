@@ -1,8 +1,11 @@
 from itertools import count
 import numpy as np
+
+from experiments.logger import logger
 from neat.configuration import get_configuration
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
+from neat.utils import timeit
 
 
 class SpeciationEngine:
@@ -22,6 +25,7 @@ class SpeciationEngine:
         self.gdmean = None
         self.gdstdev = None
 
+    @timeit
     def speciate(self, population: dict, generation: int):
         """
         Disclaimer: code copied from NEAT-Python: https://neat-python.readthedocs.io/en/latest/
@@ -86,6 +90,7 @@ class SpeciationEngine:
         for sid, rid in new_representatives.items():
             s = self.species.get(sid)
             if s is None:
+                logger.debug(f'New specie')
                 s = Specie(sid, generation)
                 self.species[sid] = s
 
@@ -98,6 +103,7 @@ class SpeciationEngine:
 
         self.gdmean = distances.get_mean_distance()
         self.gdstdev = distances.get_std_distance()
+        logger.debug(f'Number of species: {len(self.species)}')
 
 
 class Specie:

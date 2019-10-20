@@ -1,4 +1,6 @@
 import numpy as np
+
+from experiments.logger import logger
 from neat.configuration import write_json_file_from_dict
 from datetime import datetime, timezone
 
@@ -28,13 +30,13 @@ class EvolutionReport:
                 'min': round(min(fitness_all), 3),
                 'max': round(max(fitness_all), 3),
                 'mean': round(np.mean(fitness_all), 3)}
-        print(f'Generation {generation}. Best fitness: {round(max(fitness_all), 3)}. '
-              f'Mean fitness: {round(np.mean(fitness_all), 3)}')
+        logger.info(f'Generation {generation}. Best fitness: {round(max(fitness_all), 3)}. '
+                     f'Mean fitness: {round(np.mean(fitness_all), 3)}')
         self.generation_metrics[generation] = data
 
         if self.best_individual is None or self.best_individual.fitness < best_individual_fitness:
             self.best_individual = population.get(best_individual_key)
-            print(f'    New best individual found:{round(self.best_individual.fitness, 3)}')
+            logger.debug(f'    New best individual found:{round(self.best_individual.fitness, 3)}')
 
     def generate_final_report(self):
         best_individual = self.get_best_individual().to_dict()

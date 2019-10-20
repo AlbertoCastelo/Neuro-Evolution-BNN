@@ -1,5 +1,6 @@
 from functools import wraps
 from time import time
+from experiments.logger import logger
 
 
 def timeit(func):
@@ -11,6 +12,5 @@ def timeit(func):
         finally:
             end_ = round(time(), 3) - start
             message = f"         Total Time in {func.__name__}: {end_} s"
-            print(message)
-            # logger.debug(message)
+            logger.debug(message)
     return _time_it

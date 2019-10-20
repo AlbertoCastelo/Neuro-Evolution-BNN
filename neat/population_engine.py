@@ -2,6 +2,8 @@ import math
 import random
 from itertools import count
 import numpy as np
+
+from experiments.logger import logger
 from neat.configuration import get_configuration
 from neat.evaluation import EvaluationStochasticEngine
 from neat.evolution_operators.crossover import Crossover
@@ -25,7 +27,9 @@ class EvolutionEngine:
 
         self.population = None
 
+    @timeit
     def run(self):
+        logger.info('Starting evolutionary process')
         # initialize population
         self.population = self.population_engine.initialize_population()
         self.speciation_engine.speciate(self.population, generation=0)
@@ -39,6 +43,7 @@ class EvolutionEngine:
             self._run_generation(generation)
 
         self.report.generate_final_report()
+        logger.info('Finishing evolutionary process')
 
     @timeit
     def _run_generation(self, generation):
@@ -114,6 +119,7 @@ class PopulationEngine:
 
         return spawn_amounts
 
+    @timeit
     def reproduce(self, species, pop_size, generation):
         """
         Disclaimer: this is taken from Python-NEAT
