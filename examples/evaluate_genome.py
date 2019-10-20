@@ -17,7 +17,7 @@ config = create_configuration(filename=config_file)
 
 def main():
 
-    genome_filename = f'./executions/fixed_std_None.json'
+    genome_filename = f'./executions/10-20-2019, 10:19:01__classification-miso_v3.json'
     genome_dict = read_json_file_to_dict(filename=genome_filename)
     genome = Genome.from_dict(genome_dict)
 

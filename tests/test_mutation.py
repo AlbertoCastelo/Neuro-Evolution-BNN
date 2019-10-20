@@ -6,7 +6,11 @@ from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 
-class TestArchitectureMutation(TestCase):
+class TestArchitectureMutationAddNode(TestCase):
+    def test_mutate_add_node(self):
+        pass
+
+class TestArchitectureMutationDeleteConnection(TestCase):
     def test_mutate_delete_connection(self):
         self.config = create_configuration(filename='/miso.json')
         self.config.n_initial_hidden_neurons = 0
@@ -36,6 +40,7 @@ class TestArchitectureMutation(TestCase):
         self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
 
 
+class TestArchitectureMutation(TestCase):
     def test_calculate_possible_inputs_when_adding_connection(self):
         self.config = create_configuration(filename='/miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,

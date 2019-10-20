@@ -68,40 +68,38 @@ class Mutation:
     def mutate_add_node(self, genome: Genome):
         logger.debug('Mutation: Add a Node')
         # TODO: careful! this can add multihop-jumps to the network
-        # if not genome.connection_genes:
-        #     # if config.check_structural_mutation_surer():
-        #     if self.is_valid_structural_mutation():
-        #         self.mutate_add_connection(config)
-        #     return
+
         # Choose a random connection to split
-        conn_to_split = random.choice(list(genome.connection_genes.values()))
+        connection_to_split_key = random.choice(list(genome.connection_genes.keys()))
 
         new_node_key = genome.get_new_node_key()
         new_node = NodeGene(key=new_node_key).random_initialization()
         genome.node_genes[new_node_key] = new_node
 
-        # Disable this connection and create two new connections joining its nodes via
-        # the given node.  The new node+connections have roughly the same behavior as
-        # the original connection (depending on the activation function of the new node).
-        # TODO: handle enabled connection
-        conn_to_split.enabled = False
-
-        i, o = conn_to_split.key
+        connection_to_split = genome.connection_genes[connection_to_split_key]
+        i, o = connection_to_split_key
 
         # add connection between input and the new node
         # TODO: careful I'm doing a random initialization but python-neat sets weight to 1
         new_connection_key_i = (i, new_node_key)
-        new_connection_i = ConnectionGene(key=new_connection_key_i).random_initialization()
+        new_connection_i = ConnectionGene(key=new_connection_key_i)
+        new_connection_i.set_mean(mean=1.0), new_connection_i.set_std(std=0.000001)
         genome.connection_genes[new_connection_key_i] = new_connection_i
         # genome.add_connection(config, i, new_node_key, 1.0, True)
 
         # add connection between new node and output
         new_connection_key_o = (new_node_key, o)
         new_connection_o = ConnectionGene(key=new_connection_key_o).random_initialization()
-        new_connection_o.set_mean(mean=conn_to_split.get_mean())
-        new_connection_o.set_std(std=conn_to_split.get_std())
+        new_connection_o.set_mean(mean=connection_to_split.get_mean())
+        new_connection_o.set_std(std=connection_to_split.get_std())
         genome.connection_genes[new_connection_key_o] = new_connection_o
         # self.add_connection(config, new_node_id, o, conn_to_split.weight, True)
+
+        # delete connection
+        # Careful: neat-python disable the connection instead of deleting
+        # conn_to_split.enabled = False
+        del genome.connection_genes[connection_to_split_key]
+
         return genome
 
     def mutate_delete_node(self, genome: Genome):
@@ -113,6 +111,7 @@ class Mutation:
 
         del_key = random.choice(available_nodes)
 
+        # TODO: if delete a node, we should
         # delete connections related
         connections_to_delete = []
         for k, v in genome.connection_genes.items():
@@ -147,7 +146,7 @@ class Mutation:
     def mutate_delete_connection(self, genome: Genome):
         logger.debug('Mutation: Delete a Connection')
         possible_connections_to_delete = self._calculate_possible_connections_to_delete(genome=genome)
-        if len(possible_connections_to_delete) > 0:
+        if len(possible_connections_to_delete) > 1:
             key = random.choice(possible_connections_to_delete)
             del genome.connection_genes[key]
         return genome
@@ -168,7 +167,7 @@ class Mutation:
                 genome=genome,
                 possible_connection_set=possible_connections_to_delete_set)
 
-        return possible_connections_to_delete_set
+        return list(possible_connections_to_delete_set)
 
     def _get_available_nodes_to_be_deleted(self, genome: Genome):
         available_nodes = set(genome.node_genes.keys()) - set(genome.get_output_nodes_keys())

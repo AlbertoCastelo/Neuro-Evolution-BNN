@@ -150,6 +150,10 @@ class Genome:
     def get_output_nodes_keys(self):
         return list(range(0, self.n_output))
 
+    def get_graph(self):
+        connections = list(self.connection_genes.keys())
+        return str(connections)
+
     def _initialize_connections(self):
         # initialize fully connected network with no recurrent connections
         for input_node, output_node in self._compute_full_connections():
