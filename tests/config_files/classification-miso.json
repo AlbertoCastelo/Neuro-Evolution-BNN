@@ -5,7 +5,7 @@
   "beta_type": "other",
 
   "fix_std": false,
-  "fix_architecture": false,
+  "fix_architecture": true,
   "n_initial_hidden_neurons": 5,
 
   "feed_forward": true,

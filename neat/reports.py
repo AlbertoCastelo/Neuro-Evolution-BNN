@@ -1,16 +1,14 @@
 import numpy as np
 
+from experiments.file_utils import write_json_file_from_dict
 from experiments.logger import logger
-from neat.configuration import write_json_file_from_dict
-from datetime import datetime, timezone
+from experiments.report import BaseReport
 
 
-class EvolutionReport:
+class EvolutionReport(BaseReport):
 
     def __init__(self, experiment_name: str):
-        self.experiment_name = experiment_name
-        experiment_datetime = datetime.now(timezone.utc).strftime("%m-%d-%Y, %H:%M:%S")
-        self.execution_id = f'{experiment_datetime}__{experiment_name}'
+        super().__init__(experiment_name)
         self.generation_metrics = dict()
         self.best_individual = None
 

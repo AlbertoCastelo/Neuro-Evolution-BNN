@@ -2,6 +2,8 @@ import json
 
 import jsons
 
+from experiments.file_utils import read_json_file_to_dict, write_json_file_from_dict
+
 
 class ConfigError(Exception):
     def __init__(self, message):
@@ -154,17 +156,6 @@ class _Configuration:
     def read_configuration_from_file(self, filename):
         configuration = read_json_file_to_dict(filename)
         return configuration
-
-
-def read_json_file_to_dict(filename) -> dict:
-    with open(filename, 'rb') as file:
-        data = json.load(file)
-    return data
-
-
-def write_json_file_from_dict(data: dict, filename):
-    with open(filename, 'w') as file:
-        json.dump(data, file)
 
 
 def get_configuration(filename=None):
