@@ -1,5 +1,14 @@
 {"batch_size": 10000,
   "beta_type": "other",
+
+  "fix_std": true,
+
+  "feed_forward": true,
+  "single_structural_mutation": true,
+  "mutate_rate": 0.2,
+  "mutate_power": 0.5,
+  "replace_rate": 0.1,
+
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
   "bias_mean_max_value": 30.0,

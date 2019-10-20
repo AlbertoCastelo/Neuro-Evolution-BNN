@@ -7,6 +7,8 @@
   "fix_std": false,
   "fix_architecture": true,
 
+  "feed_forward": true,
+
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
   "bias_mean_max_value": 30.0,
@@ -70,5 +72,10 @@
   "single_structural_mutation": false,
   "mutate_power": 0.5,
   "mutate_rate": 0.8,
-  "replace_rate": 0.1
+  "replace_rate": 0.1,
+
+  "node_add_prob": 0.2,
+  "node_delete_prob": 0.2,
+  "connection_add_prob": 0.5,
+  "connection_delete_prob": 0.5
 }
