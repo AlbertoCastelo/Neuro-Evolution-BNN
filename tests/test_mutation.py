@@ -5,17 +5,17 @@ from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 
-class TestMutation(TestCase):
-    def test_calculate_possible_inputs(self):
+class TestArchitectureMutation(TestCase):
+    def test_calculate_possible_inputs_when_adding_connection(self):
         self.config = create_configuration(filename='/miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output,
                                                    n_hidden=3)
         out_node = genome.node_genes[2]
 
-        possible_inputs = list(Mutation._calculate_possible_inputs(genome=genome,
-                                                                   out_node_key=out_node.key,
-                                                                   config=self.config))
+        possible_inputs = list(Mutation._calculate_possible_inputs_when_adding_connection(genome=genome,
+                                                                                          out_node_key=out_node.key,
+                                                                                          config=self.config))
         expected_possible_inputs = []
         self.assertEqual(expected_possible_inputs, possible_inputs)
 

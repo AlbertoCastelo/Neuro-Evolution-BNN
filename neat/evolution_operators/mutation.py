@@ -132,9 +132,9 @@ class Mutation:
         possible_outputs = list(genome.node_genes.keys())
         out_node_key = random.choice(possible_outputs)
 
-        possible_inputs = self._calculate_possible_inputs(genome,
-                                                          out_node_key=out_node_key,
-                                                          config=self.config)
+        possible_inputs = self._calculate_possible_inputs_when_adding_connection(genome,
+                                                                                 out_node_key=out_node_key,
+                                                                                 config=self.config)
         if len(possible_inputs) == 0:
             return genome
         in_node = random.choice(possible_inputs)
@@ -157,7 +157,7 @@ class Mutation:
         return list(available_nodes)
 
     @staticmethod
-    def _calculate_possible_inputs(genome: Genome, out_node_key: int, config: BaseConfiguration):
+    def _calculate_possible_inputs_when_adding_connection(genome: Genome, out_node_key: int, config: BaseConfiguration):
         # all nodes
         possible_input_keys_set = set(genome.node_genes.keys()).union(set(genome.get_input_nodes_keys()))
 
