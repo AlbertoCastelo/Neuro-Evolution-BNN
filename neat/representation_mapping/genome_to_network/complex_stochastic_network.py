@@ -44,9 +44,7 @@ class ComplexStochasticNetwork(nn.Module):
 
             x = getattr(self, f'layer_{i}')(x)
             if i > 0:
-                # x = getattr(self, f'activation_{i}')(x)
-                pass
-
+                x = getattr(self, f'activation_{i}')(x)
 
         return x, kl_qw_pw
 
