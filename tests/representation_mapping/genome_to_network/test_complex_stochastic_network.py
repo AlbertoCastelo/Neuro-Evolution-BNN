@@ -39,22 +39,6 @@ def generate_genome_given_graph(graph, connection_weights):
     return genome
 
 
-class TestStochasticFeedForwardWithMultiHopJumps(TestCase):
-
-    def test_network_structure_miso(self):
-        self.config = create_configuration(filename='/miso.json')
-        genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
-                                             connection_weights=(1.0, 2.0, 3.0, 4.0))
-
-        # layers = transform_genome_to_layers(genome)
-        #
-        # layer_0 = layers[0]
-        # self.assertEqual(len(layer_0.input_keys), 2)
-        # self.assertEqual(len(layer_0.output_keys), 1)
-        # print(layer_0.weight_mean)
-        # self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[3.0, 4.0]]), atol=1e-02))
-
-
 class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/miso.json')
@@ -138,3 +122,56 @@ class TestMaxGraphDepthPerNode(TestCase):
                               -1: 0,
                               -2: 0}
         self.assertEqual(expected_max_depth, max_graph_depth_per_node)
+
+
+class TestComplexStochasticNetwork(TestCase):
+
+    def test_network_structure_miso(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
+                                             connection_weights=(1.0, 2.0, 3.0, 4.0))
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+
+        model = ComplexStochasticNetwork(genome=genome)
+
+        # TODO: remove cache. This is only as intermediate step
+        model.layers[1].indeces_of_nodes_to_cache = [0]
+        model.layers[0].indeces_of_needed_nodes = [(1, 0)]
+
+        y, _ = model(input_data)
+
+        expected_y = 13.0
+        self.assertAlmostEqual(expected_y, y.numpy()[0][0])
+
+    def test_network_structure_miso_2(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+
+        graph = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
+                 (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
+                 (3, 0), (4, 0), (-1, 0), (1, 0))
+        connection_weights = (1.0, 2.0, 3.0, 4.0,
+                              5.0, 6.0, 7.0, 8.0, 1.5,
+                              1.0, 2.0, 3.0, 4.0)
+        genome = generate_genome_given_graph(graph, connection_weights)
+
+        n_samples = 100
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+
+        model = ComplexStochasticNetwork(genome=genome)
+
+        # TODO: remove cache. This is only as intermediate step
+        model.layers[2].indeces_of_nodes_to_cache = [0]
+        model.layers[1].indeces_of_nodes_to_cache = [0]
+
+        model.layers[1].indeces_of_needed_nodes = [(2, 0)]
+        model.layers[0].indeces_of_needed_nodes = [(2, 0), (1, 0)]
+
+        y, _ = model(input_data)
+
+        expected_y = 355.95
+        self.assertAlmostEqual(expected_y, y.mean().item(), delta=10)

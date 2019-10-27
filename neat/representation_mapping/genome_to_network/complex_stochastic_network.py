@@ -4,20 +4,66 @@ from torch.distributions import Normal
 
 from neat.evolution_operators.mutation import _get_connections_per_node
 from neat.genome import Genome
+from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, StochasticLinear, \
+    ComplexStochasticLinear
 from neat.representation_mapping.genome_to_network.stochastic_network import _is_next_layer_input, \
     _filter_nodes_without_input_connection
+from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
 class ComplexStochasticNetwork(nn.Module):
-    def __init__(self, genome: Genome, n_samples: int):
+    def __init__(self, genome: Genome):
         super(ComplexStochasticNetwork, self).__init__()
-        self.genome = genome
-        self.n_samples = n_samples
 
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
+
+        self.activation = get_activation()
+        self.layers = transform_genome_to_layers(genome=genome)
+        self.n_layers = len(self.layers)
+        self._set_network_layers(layers=self.layers)
+        self._cache = {}
+
+    def forward(self, x):
+        kl_qw_pw = 0.0
+        start_index = self.n_layers - 1
+
+        for i in range(start_index, -1, -1):
+            # cache needed values
+            for index_to_cache in self.layers[i].indeces_of_nodes_to_cache:
+                # self._cache[(i, index_to_cache)] = x[:, index_to_cache]
+                self._cache[(i, index_to_cache)] = x.index_select(1, torch.LongTensor((index_to_cache,)))
+            # append needed values
+            chunks = [x]
+            for index_needed in self.layers[i].indeces_of_needed_nodes:
+                chunks.append(self._cache[index_needed])
+            x = torch.cat(chunks, 1)
+
+            x = getattr(self, f'layer_{i}')(x)
+            if i > 0:
+                # x = getattr(self, f'activation_{i}')(x)
+                pass
+
+
+        return x, kl_qw_pw
+
+    def _set_network_layers(self, layers: dict):
+        for layer_key in layers:
+            layer = layers[layer_key]
+
+            parameters = StochasticLinearParameters.create(qw_mean=layer.weight_mean,
+                                                           qw_logvar=layer.weight_log_var,
+                                                           qb_mean=layer.bias_mean,
+                                                           qb_logvar=layer.bias_log_var)
+
+            layer = ComplexStochasticLinear(in_features=layer.n_input,
+                                            out_features=layer.n_output,
+                                            parameters=parameters)
+
+            setattr(self, f'layer_{layer_key}', layer)
+            setattr(self, f'activation_{layer_key}', self.activation)
 
 
 def get_nodes_per_depth_level(links: list):
@@ -113,6 +159,9 @@ class Layer:
         self.external_input_keys = None
         self.original_input_keys = None
         self.output_keys = None
+
+        self.indeces_of_nodes_to_cache = []
+        self.indeces_of_needed_nodes = []
 
         # parameters
         self.bias_mean = None
