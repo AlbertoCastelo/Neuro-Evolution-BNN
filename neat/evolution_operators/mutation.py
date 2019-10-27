@@ -265,12 +265,7 @@ def adds_multihop_jump(connections: list, output_node_keys, input_node_keys) -> 
 
 def exist_cycle(connections: list) -> bool:
     # change data structure
-    con = {}
-    for connection in connections:
-        if connection[0] in con:
-            con[connection[0]].append(connection[1])
-        else:
-            con[connection[0]] = [connection[1]]
+    con = _get_connections_per_node(connections)
 
     def _go_throgh_graph(node_in, graph, past=[]):
         # print(f'{node_in}. {past}')
@@ -290,3 +285,21 @@ def exist_cycle(connections: list) -> bool:
         if _go_throgh_graph(node_in, graph=con, past=[]):
             return True
     return False
+
+
+def _get_connections_per_node(connections: list, inverse_order=False):
+    '''
+    :param connections: eg. ((-1, 1), (1, 2), (2, 3), (2, 4))
+    :param inverse_order: whether it follows the input to output direction or the output to input direction
+    :return: {-1: [1], 1: [2], 2: [3, 4]
+    '''
+    con = {}
+    for connection in connections:
+        input_node_key, output_node_key = connection
+        if inverse_order:
+            output_node_key, input_node_key = connection
+        if input_node_key in con:
+            con[input_node_key].append(output_node_key)
+        else:
+            con[input_node_key] = [output_node_key]
+    return con
