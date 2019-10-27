@@ -28,6 +28,7 @@ class StochasticNetwork(nn.Module):
         kl_qw_pw = 0.0
         start_index = self.n_layers - 1
         for i in range(start_index, -1, -1):
+            # TODO: remove kl_estimation from layer because one parameter could show un in several layers...
             x, kl_layer = getattr(self, f'layer_{i}')(x)
             kl_qw_pw += kl_layer
             if i > 0:
@@ -118,9 +119,9 @@ def _transform_genome_to_layers(nodes: dict, connections: dict, n_output: int) -
     layer_counter = 0
     is_not_finished = True
     while is_not_finished:
-        layer = _get_layer_definition(nodes=nodes,
-                                      connections=connections,
-                                      layer_node_keys=layer_node_keys)
+        layer = build_layer_parameters(nodes=nodes,
+                                       connections=connections,
+                                       layer_node_keys=layer_node_keys)
         layer_node_keys = layer['input_keys']
         layers[layer_counter] = layer
         layer_counter += 1
@@ -139,12 +140,24 @@ def _is_next_layer_input(layer_node_keys):
     return is_negative
 
 
-def _get_layer_definition(nodes, connections, layer_node_keys):
+def _filter_nodes_without_input_connection(node_keys, connections: dict):
+    node_keys_filtered = []
+    output_node_keys = list(zip(*list(connections.keys())))[1]
+    for node_key in node_keys:
+        if node_key in output_node_keys:
+            node_keys_filtered.append(node_key)
+    return list(set(node_keys_filtered))
+
+
+def build_layer_parameters(nodes, connections, layer_node_keys):
     '''
     It only works for feed-forward neural networks without multihop connections.
     That is, there is no recurrent connection neigther connections between layer{i} and layer{i+2}
     '''
+    # TODO: filter out layer_node_keys that don't have any input connection
     layer = dict()
+
+    layer_node_keys = _filter_nodes_without_input_connection(node_keys=layer_node_keys, connections=connections)
     n_output = len(layer_node_keys)
 
     # get bias
@@ -157,12 +170,12 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
 
     layer_connections = dict()
     input_node_keys = set({})
-    for key, connection in connections.items():
-        output_node = key[1]
-        if output_node in layer_node_keys:
-            input_node_keys = input_node_keys.union({key[0]})
+    for connection_key, connection in connections.items():
+        input_node_key, output_node_key = connection_key
+        if output_node_key in layer_node_keys:
+            input_node_keys = input_node_keys.union({input_node_key})
             if connection.enabled:
-                layer_connections[key] = connections[key]
+                layer_connections[connection_key] = connections[connection_key]
 
     input_node_keys = list(input_node_keys)
     n_input = len(input_node_keys)
@@ -177,13 +190,13 @@ def _get_layer_definition(nodes, connections, layer_node_keys):
 
     weight_mean = torch.zeros([n_output, n_input])
     weight_log_var = torch.zeros([n_output, n_input])
-    for key in layer_connections:
-        weight_mean[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            float(layer_connections[key].get_mean())
-        weight_log_var[key_index_mapping_output[key[1]], key_index_mapping_input[key[0]]] = \
-            float(layer_connections[key].get_log_var())
+    for connection_key in layer_connections:
+        input_node_key, output_node_key = connection_key
+        weight_mean[key_index_mapping_output[output_node_key], key_index_mapping_input[input_node_key]] = \
+            float(layer_connections[connection_key].get_mean())
+        weight_log_var[key_index_mapping_output[output_node_key], key_index_mapping_input[input_node_key]] = \
+            float(layer_connections[connection_key].get_log_var())
 
-    # weights = torch.transpose(weights)
     layer['n_input'] = n_input
     layer['n_output'] = n_output
     layer['input_keys'] = input_node_keys
