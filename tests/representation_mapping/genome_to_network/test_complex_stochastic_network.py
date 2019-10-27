@@ -5,7 +5,7 @@ import torch
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import transform_genome_to_layers, \
-    ComplexStochasticNetwork
+    ComplexStochasticNetwork, calculate_max_graph_depth_per_node
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
 from tests.config_files.config_files import create_configuration
 
@@ -39,6 +39,22 @@ def generate_genome_given_graph(graph, connection_weights):
     return genome
 
 
+class TestStochasticFeedForwardWithMultiHopJumps(TestCase):
+
+    def test_network_structure_miso(self):
+        self.config = create_configuration(filename='/miso.json')
+        genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
+                                             connection_weights=(1.0, 2.0, 3.0, 4.0))
+
+        # layers = transform_genome_to_layers(genome)
+        #
+        # layer_0 = layers[0]
+        # self.assertEqual(len(layer_0.input_keys), 2)
+        # self.assertEqual(len(layer_0.output_keys), 1)
+        # print(layer_0.weight_mean)
+        # self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[3.0, 4.0]]), atol=1e-02))
+
+
 class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/miso.json')
@@ -55,21 +71,23 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
 
         # we have 2 nodes in each layer
         for layer in layers.values():
-            self.assertEqual(layer['n_input'], 2)
+            self.assertEqual(layer.n_input, 2)
 
-        connections_0 = layers[0]['weight_mean']
+        connections_0 = layers[0].weight_mean
+        print(connections_0)
         self.assertTrue(torch.allclose(connections_0, torch.tensor([[3.0, 4.0]]), atol=1e-02))
 
-        connections_1 = layers[1]['weight_mean']
-        self.assertTrue(torch.allclose(connections_1, torch.tensor([[0.0, 0.0], [1.0, 2.0]]), atol=1e-02))
+        connections_1 = layers[1].weight_mean
+        print(connections_1)
+        self.assertTrue(torch.allclose(connections_1, torch.tensor([[1.0, 2.0]]), atol=1e-02))
 
     def test_network_structure_miso_2(self):
 
         graph = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
-                 (1, 4), (1, 3), (2, 3), (2, 4),
+                 (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
                  (3, 0), (4, 0), (-1, 0), (1, 0))
         connection_weights = (1.0, 2.0, 3.0, 4.0,
-                              5.0, 6.0, 7.0, 8.0,
+                              5.0, 6.0, 7.0, 8.0, 1.5,
                               1.0, 2.0, 3.0, 4.0)
         genome = generate_genome_given_graph(graph, connection_weights)
 
@@ -95,17 +113,28 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
                                                                              [3.0, 4.0]]), atol=1e-02))
 
 
-class TestStochasticFeedForwardWithMultiHopJumps(TestCase):
+class TestMaxGraphDepthPerNode(TestCase):
+    def test_simple_case(self):
+        links = ((-1, 1), (-2, 1), (1, 0))
+        max_graph_depth_per_node = calculate_max_graph_depth_per_node(links=links)
+        print(max_graph_depth_per_node)
+        expected_max_depth = {0: 2,
+                              1: 1,
+                              -1: 0,
+                              -2: 0}
+        self.assertEqual(expected_max_depth, max_graph_depth_per_node)
 
-    def test_network_structure_miso(self):
-        self.config = create_configuration(filename='/miso.json')
-        genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
-                                             connection_weights=(1.0, 2.0, 3.0, 4.0))
-
-        layers = transform_genome_to_layers(genome)
-
-        layer_0 = layers[0]
-        self.assertEqual(len(layer_0['input_keys']), 2)
-        self.assertEqual(len(layer_0['output_keys']), 1)
-        print(layer_0['weight_mean'])
-        self.assertTrue(torch.allclose(layer_0['weight_mean'], torch.tensor([[3.0, 4.0]]), atol=1e-02))
+    def test_with_jumps(self):
+        links = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
+                 (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
+                 (3, 0), (4, 0), (-1, 0), (1, 0))
+        max_graph_depth_per_node = calculate_max_graph_depth_per_node(links=links)
+        print(max_graph_depth_per_node)
+        expected_max_depth = {0: 3,
+                              3: 2,
+                              4: 2,
+                              1: 1,
+                              2: 1,
+                              -1: 0,
+                              -2: 0}
+        self.assertEqual(expected_max_depth, max_graph_depth_per_node)
