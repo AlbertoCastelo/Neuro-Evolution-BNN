@@ -149,8 +149,30 @@ def transform_genome_to_layers(genome: Genome) -> dict:
             is_not_finished = False
 
     # enrich layers
+    for layer_counter, layer in layers.items():
+        # add needed indices
+        for node_key in layer.external_input_keys:
+            layer_counter_needed = _get_layer_counter(nodes_per_depth_level=nodes_per_depth_level,
+                                                      node_key=node_key)
+            node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
+            index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
+            layer.indices_of_needed_nodes.append(index)
+
+        # add indices to cache
+        for node_key in layer.original_input_keys:
+            for layer_2 in layers.values():
+                if node_key in layer_2.external_input_keys:
+                    index = layer_2.input_keys.index(node_key)
+                    layer.indices_of_nodes_to_cache.append(index)
 
     return layers
+
+
+def _get_node_index_to_cache(node_key, layers):
+    for layer in layers.values():
+        if node_key in layer.original_input_keys:
+        # if node_key in layer.input_keys:
+            return layer.input_keys.index(node_key)
 
 
 class Layer:
@@ -205,6 +227,7 @@ class LayerBuilder:
         self.layer_node_keys = layer_node_keys
         self.nodes_per_depth_level = nodes_per_depth_level
         self.layer_counter = layer_counter
+        self._total_number_of_layers = len(nodes_per_depth_level) - 1
 
         self.layer = None
 
@@ -246,8 +269,6 @@ class LayerBuilder:
                                        n_output=n_output)
 
         self.layer.bias_mean, self.layer.bias_log_var = self._build_bias_tensors(layer_node_keys, self.nodes)
-
-        # add indices to cache
 
         self.layer.validate()
         return self
@@ -306,6 +327,18 @@ class LayerBuilder:
         original_input_keys.sort()
         logger.info(f'   Original Input Keys: {original_input_keys}')
         return original_input_keys
+
+
+def _generate_cache_index(layer_counter: int, index: int):
+    return (layer_counter, index)
+
+
+def _get_layer_counter(nodes_per_depth_level, node_key):
+    for distance, node_keys in nodes_per_depth_level.items():
+        if node_key in node_keys:
+            layer_counter = len(nodes_per_depth_level) - distance - 2
+            logger.info(f'  layer_counter: {layer_counter}')
+            return layer_counter
 
 # def build_layer_parameters(nodes, connections, layer_node_keys, max_graph_depth_per_node) -> dict:
 #     '''

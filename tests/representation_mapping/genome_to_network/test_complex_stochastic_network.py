@@ -139,8 +139,8 @@ class TestComplexStochasticNetwork(TestCase):
         model = ComplexStochasticNetwork(genome=genome)
 
         # TODO: remove cache. This is only as intermediate step
-        model.layers[1].indices_of_nodes_to_cache = [1]
-        model.layers[0].indices_of_needed_nodes = [(1, 1)]
+        # model.layers[1].indices_of_nodes_to_cache = [1]
+        # model.layers[0].indices_of_needed_nodes = [(1, 1)]
 
         y, _ = model(input_data)
 
@@ -165,12 +165,12 @@ class TestComplexStochasticNetwork(TestCase):
 
         model = ComplexStochasticNetwork(genome=genome)
 
-        # TODO: remove cache. This is only as intermediate step
-        model.layers[2].indices_of_nodes_to_cache = [0]
-        model.layers[1].indices_of_nodes_to_cache = [0]
-
-        model.layers[1].indices_of_needed_nodes = [(2, 0)]
-        model.layers[0].indices_of_needed_nodes = [(2, 0), (1, 0)]
+        # # TODO: remove cache. This is only as intermediate step
+        # model.layers[2].indices_of_nodes_to_cache = [0]
+        # model.layers[1].indices_of_nodes_to_cache = [0]
+        #
+        # model.layers[1].indices_of_needed_nodes = [(2, 0)]
+        # model.layers[0].indices_of_needed_nodes = [(2, 0), (1, 0)]
 
         y, _ = model(input_data)
 
