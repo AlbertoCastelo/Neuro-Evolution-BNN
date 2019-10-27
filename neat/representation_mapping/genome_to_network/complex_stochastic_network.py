@@ -33,12 +33,12 @@ class ComplexStochasticNetwork(nn.Module):
 
         for i in range(start_index, -1, -1):
             # cache needed values
-            for index_to_cache in self.layers[i].indeces_of_nodes_to_cache:
+            for index_to_cache in self.layers[i].indices_of_nodes_to_cache:
                 # self._cache[(i, index_to_cache)] = x[:, index_to_cache]
                 self._cache[(i, index_to_cache)] = x.index_select(1, torch.LongTensor((index_to_cache,)))
             # append needed values
             chunks = [x]
-            for index_needed in self.layers[i].indeces_of_needed_nodes:
+            for index_needed in self.layers[i].indices_of_needed_nodes:
                 chunks.append(self._cache[index_needed])
             x = torch.cat(chunks, 1)
 
@@ -132,6 +132,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
 
     nodes_per_depth_level = get_nodes_per_depth_level(links=list(connections.keys()))
 
+    # build layers
     layer_counter = 0
     is_not_finished = True
     while is_not_finished:
@@ -149,6 +150,8 @@ def transform_genome_to_layers(genome: Genome) -> dict:
         if _is_next_layer_input(layer_node_keys):
             is_not_finished = False
 
+    # enrich layers
+
     return layers
 
 
@@ -162,8 +165,8 @@ class Layer:
         self.original_input_keys = None
         self.output_keys = None
 
-        self.indeces_of_nodes_to_cache = []
-        self.indeces_of_needed_nodes = []
+        self.indices_of_nodes_to_cache = []
+        self.indices_of_needed_nodes = []
 
         # parameters
         self.bias_mean = None
@@ -181,10 +184,10 @@ class Layer:
         return self.original_input_keys
 
     def add_index_to_cache(self, index):
-        self.indeces_of_nodes_to_cache.append(index)
+        self.indices_of_nodes_to_cache.append(index)
 
     def add_index_needed(self, index):
-        self.indeces_of_needed_nodes.append(index)
+        self.indices_of_needed_nodes.append(index)
 
     def validate(self):
         # validate shapes
@@ -245,6 +248,8 @@ class LayerBuilder:
                                        n_output=n_output)
 
         self.layer.bias_mean, self.layer.bias_log_var = self._build_bias_tensors(layer_node_keys, self.nodes)
+
+        # add indices to cache
 
         self.layer.validate()
         return self

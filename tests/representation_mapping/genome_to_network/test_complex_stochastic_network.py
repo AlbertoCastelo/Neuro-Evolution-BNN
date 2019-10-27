@@ -63,7 +63,7 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
 
         connections_1 = layers[1].weight_mean
         print(connections_1)
-        self.assertTrue(torch.allclose(connections_1, torch.tensor([[1.0, 2.0]]), atol=1e-02))
+        self.assertTrue(torch.allclose(connections_1, torch.tensor([[2.0, 1.0]]), atol=1e-02))
 
     def test_network_structure_miso_2(self):
 
@@ -81,7 +81,7 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         self.assertEqual(len(layer_0.input_keys), 4)
         self.assertEqual(len(layer_0.output_keys), 1)
         print(layer_0.weight_mean)
-        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[4.0, 1.0, 2.0, 3.0]]), atol=1e-02))
+        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[1.0, 2.0, 3.0, 4.0]]), atol=1e-02))
 
         layer_1 = layers[1]
         self.assertEqual(len(layer_1.input_keys), 3)
@@ -94,8 +94,8 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         self.assertEqual(len(layer_2.input_keys), 2)
         self.assertEqual(len(layer_2.output_keys), 2)
         print(layer_2.weight_mean)
-        self.assertTrue(torch.allclose(layer_2.weight_mean, torch.tensor([[1.0, 2.0],
-                                                                          [3.0, 4.0]]), atol=1e-02))
+        self.assertTrue(torch.allclose(layer_2.weight_mean, torch.tensor([[2.0, 1.0],
+                                                                          [4.0, 3.0]]), atol=1e-02))
 
 
 class TestMaxGraphDepthPerNode(TestCase):
@@ -139,8 +139,8 @@ class TestComplexStochasticNetwork(TestCase):
         model = ComplexStochasticNetwork(genome=genome)
 
         # TODO: remove cache. This is only as intermediate step
-        model.layers[1].indeces_of_nodes_to_cache = [0]
-        model.layers[0].indeces_of_needed_nodes = [(1, 0)]
+        model.layers[1].indices_of_nodes_to_cache = [1]
+        model.layers[0].indices_of_needed_nodes = [(1, 1)]
 
         y, _ = model(input_data)
 
@@ -166,13 +166,13 @@ class TestComplexStochasticNetwork(TestCase):
         model = ComplexStochasticNetwork(genome=genome)
 
         # TODO: remove cache. This is only as intermediate step
-        model.layers[2].indeces_of_nodes_to_cache = [0]
-        model.layers[1].indeces_of_nodes_to_cache = [0]
+        model.layers[2].indices_of_nodes_to_cache = [0]
+        model.layers[1].indices_of_nodes_to_cache = [0]
 
-        model.layers[1].indeces_of_needed_nodes = [(2, 0)]
-        model.layers[0].indeces_of_needed_nodes = [(2, 0), (1, 0)]
+        model.layers[1].indices_of_needed_nodes = [(2, 0)]
+        model.layers[0].indices_of_needed_nodes = [(2, 0), (1, 0)]
 
         y, _ = model(input_data)
 
-        expected_y = 355.95
+        expected_y = 225
         self.assertAlmostEqual(expected_y, y.mean().item(), delta=10)
