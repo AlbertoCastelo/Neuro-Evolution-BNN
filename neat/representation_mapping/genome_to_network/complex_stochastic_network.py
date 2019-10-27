@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.distributions import Normal
 
+from experiments.logger import logger
 from neat.evolution_operators.mutation import _get_connections_per_node
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, StochasticLinear, \
@@ -147,6 +148,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
         layer_counter += 1
         if _is_next_layer_input(layer_node_keys):
             is_not_finished = False
+
     return layers
 
 
@@ -177,6 +179,12 @@ class Layer:
 
     def get_original_input_keys(self):
         return self.original_input_keys
+
+    def add_index_to_cache(self, index):
+        self.indeces_of_nodes_to_cache.append(index)
+
+    def add_index_needed(self, index):
+        self.indeces_of_needed_nodes.append(index)
 
     def validate(self):
         # validate shapes
@@ -215,19 +223,23 @@ class LayerBuilder:
                     layer_connections[connection_key] = self.connections[connection_key]
 
         input_node_keys = list(input_node_keys)
-        original_input_keys = self._get_original_input_keys()
         n_input = len(input_node_keys)
-
         self.layer = Layer(key=self.layer_counter, n_input=n_input, n_output=n_output)
+
+        # sorted input keys
+        original_input_keys = self._get_original_input_keys()
+        external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
+        input_node_keys = original_input_keys + external_input_keys
+
         self.layer.input_keys = input_node_keys
         self.layer.original_input_keys = original_input_keys
-        self.layer.update_input_keys()
+        self.layer.external_input_keys = external_input_keys
         self.layer.output_keys = layer_node_keys
 
         # set parameters
         self.layer.weight_mean, self.layer.weight_log_var = \
-            self._build_weight_tensors(input_node_keys=input_node_keys,
-                                       layer_connections=layer_connections,
+            self._build_weight_tensors(layer_connections=layer_connections,
+                                       input_node_keys=input_node_keys,
                                        layer_node_keys=layer_node_keys,
                                        n_input=n_input,
                                        n_output=n_output)
@@ -237,11 +249,24 @@ class LayerBuilder:
         self.layer.validate()
         return self
 
+    def _get_external_input_keys(self, input_node_key, original_input_keys):
+        external_input_keys = list(set(input_node_key) - set(original_input_keys))
+        external_input_keys.sort()
+        logger.info(f'   External Input Keys: {external_input_keys}')
+        return external_input_keys
+
     def get_layer(self):
         return self.layer
 
     @staticmethod
-    def _build_weight_tensors(input_node_keys, layer_connections, layer_node_keys, n_input, n_output):
+    def _build_weight_tensors(layer_connections, input_node_keys, layer_node_keys, n_input, n_output):
+        '''
+        The input parameters (input_node_keys and layer_node_keys) must be sorted. Then the output matrices will
+        also be sorted.
+
+        input_node_keys = (input_node_keys_{original} | input_node_keys_{external})
+        W = (W_{original} | W_{external})
+        '''
         key_index_mapping_input = dict()
         for input_index, input_key in enumerate(input_node_keys):
             key_index_mapping_input[input_key] = input_index
@@ -260,6 +285,9 @@ class LayerBuilder:
 
     @staticmethod
     def _build_bias_tensors(layer_node_keys, nodes):
+        '''
+        This also keeps the order
+        '''
         bias_mean_values = [nodes[key].get_mean() for key in layer_node_keys]
         bias_mean = torch.tensor(bias_mean_values)
 
@@ -270,9 +298,11 @@ class LayerBuilder:
     def _get_original_input_keys(self):
         distances = list(self.nodes_per_depth_level.keys())
         distances.sort(reverse=True)
-        # distances.reverse()
         distance_key = distances[self.layer_counter + 1]
-        return self.nodes_per_depth_level[distance_key]
+        original_input_keys = self.nodes_per_depth_level[distance_key]
+        original_input_keys.sort()
+        logger.info(f'   Original Input Keys: {original_input_keys}')
+        return original_input_keys
 
 # def build_layer_parameters(nodes, connections, layer_node_keys, max_graph_depth_per_node) -> dict:
 #     '''
