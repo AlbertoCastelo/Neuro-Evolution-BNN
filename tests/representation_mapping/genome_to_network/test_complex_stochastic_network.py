@@ -78,23 +78,24 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         layers = transform_genome_to_layers(genome)
 
         layer_0 = layers[0]
-        self.assertEqual(len(layer_0['input_keys']), 4)
-        self.assertEqual(len(layer_0['output_keys']), 1)
-        print(layer_0['weight_mean'])
-        self.assertTrue(torch.allclose(layer_0['weight_mean'], torch.tensor([[4.0, 1.0, 2.0, 3.0]]), atol=1e-02))
+        self.assertEqual(len(layer_0.input_keys), 4)
+        self.assertEqual(len(layer_0.output_keys), 1)
+        print(layer_0.weight_mean)
+        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[4.0, 1.0, 2.0, 3.0]]), atol=1e-02))
 
         layer_1 = layers[1]
-        self.assertEqual(len(layer_1['input_keys']), 3)
-        self.assertEqual(len(layer_1['output_keys']), 2)
-        print(layer_1['weight_mean'])
-        self.assertTrue(torch.allclose(layer_1['weight_mean'], torch.tensor([[1.0, 2.0, 3.0, 4.0]]), atol=1e-02))
+        self.assertEqual(len(layer_1.input_keys), 3)
+        self.assertEqual(len(layer_1.output_keys), 2)
+        print(layer_1.weight_mean)
+        self.assertTrue(torch.allclose(layer_1.weight_mean, torch.tensor([[6.0000, 7.0000, 1.5000],
+                                                                          [5.0000, 8.0000, 0.0000]]), atol=1e-02))
 
         layer_2 = layers[2]
-        self.assertEqual(len(layer_2['input_keys']), 2)
-        self.assertEqual(len(layer_2['output_keys']), 2)
-        print(layer_2['weight_mean'])
-        self.assertTrue(torch.allclose(layer_2['weight_mean'], torch.tensor([[1.0, 2.0],
-                                                                             [3.0, 4.0]]), atol=1e-02))
+        self.assertEqual(len(layer_2.input_keys), 2)
+        self.assertEqual(len(layer_2.output_keys), 2)
+        print(layer_2.weight_mean)
+        self.assertTrue(torch.allclose(layer_2.weight_mean, torch.tensor([[1.0, 2.0],
+                                                                          [3.0, 4.0]]), atol=1e-02))
 
 
 class TestMaxGraphDepthPerNode(TestCase):
