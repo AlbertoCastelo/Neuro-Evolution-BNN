@@ -150,6 +150,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
 
     # enrich layers
     for layer_counter, layer in layers.items():
+        logger.info(f'Layer: {layer_counter}')
         # add needed indices
         for node_key in layer.external_input_keys:
             layer_counter_needed = _get_layer_counter(nodes_per_depth_level=nodes_per_depth_level,
@@ -162,8 +163,28 @@ def transform_genome_to_layers(genome: Genome) -> dict:
         for node_key in layer.original_input_keys:
             for layer_2 in layers.values():
                 if node_key in layer_2.external_input_keys:
-                    index = layer_2.input_keys.index(node_key)
-                    layer.indices_of_nodes_to_cache.append(index)
+                    index = layer.input_keys.index(node_key)
+                    # add if not in list
+                    if index not in layer.indices_of_nodes_to_cache:
+                        layer.indices_of_nodes_to_cache.append(index)
+        # logger.info(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
+
+        # sort needed indices in ascendent order
+        # TODO: this sorting needs to be done by the node-key not the index!!!!
+        if len(layer.indices_of_needed_nodes) > 1:
+            needed_indices = list(list(zip(*layer.indices_of_needed_nodes))[1])
+            needed_indices.sort()
+            sorted_indices_of_needed_nodes = []
+            for node_index in needed_indices:
+                for index in layer.indices_of_needed_nodes:
+                    if node_index == index[1]:
+                        sorted_indices_of_needed_nodes.append(index)
+                        break
+            assert len(sorted_indices_of_needed_nodes) == len(layer.indices_of_needed_nodes)
+            layer.indices_of_needed_nodes = sorted_indices_of_needed_nodes
+
+        logger.info(f'Indices to cache: {layer.indices_of_nodes_to_cache}')
+        logger.info(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
 
     return layers
 
@@ -251,9 +272,11 @@ class LayerBuilder:
         self.layer = Layer(key=self.layer_counter, n_input=n_input, n_output=n_output)
 
         # sorted input keys
+        logger.info(f'Layer: {self.layer_counter}')
         original_input_keys = self._get_original_input_keys()
         external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
         input_node_keys = original_input_keys + external_input_keys
+        logger.info(f'   Input Keys: {input_node_keys}')
 
         self.layer.input_keys = input_node_keys
         self.layer.original_input_keys = original_input_keys
@@ -337,7 +360,6 @@ def _get_layer_counter(nodes_per_depth_level, node_key):
     for distance, node_keys in nodes_per_depth_level.items():
         if node_key in node_keys:
             layer_counter = len(nodes_per_depth_level) - distance - 2
-            logger.info(f'  layer_counter: {layer_counter}')
             return layer_counter
 
 # def build_layer_parameters(nodes, connections, layer_node_keys, max_graph_depth_per_node) -> dict:
