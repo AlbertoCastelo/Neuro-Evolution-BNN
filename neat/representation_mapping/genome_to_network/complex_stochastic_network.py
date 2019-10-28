@@ -158,6 +158,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
             node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
             index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
             layer.indices_of_needed_nodes.append(index)
+            layer.needed_nodes[node_key] = index
 
         # add indices to cache
         for node_key in layer.original_input_keys:
@@ -167,19 +168,14 @@ def transform_genome_to_layers(genome: Genome) -> dict:
                     # add if not in list
                     if index not in layer.indices_of_nodes_to_cache:
                         layer.indices_of_nodes_to_cache.append(index)
-        # logger.info(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
 
-        # sort needed indices in ascendent order
-        # TODO: this sorting needs to be done by the node-key not the index!!!!
         if len(layer.indices_of_needed_nodes) > 1:
-            needed_indices = list(list(zip(*layer.indices_of_needed_nodes))[1])
-            needed_indices.sort()
+            needed_node_keys = list(layer.needed_nodes.keys())
+            needed_node_keys.sort()
             sorted_indices_of_needed_nodes = []
-            for node_index in needed_indices:
-                for index in layer.indices_of_needed_nodes:
-                    if node_index == index[1]:
-                        sorted_indices_of_needed_nodes.append(index)
-                        break
+            for node_key in needed_node_keys:
+                sorted_indices_of_needed_nodes.append(layer.needed_nodes[node_key])
+
             assert len(sorted_indices_of_needed_nodes) == len(layer.indices_of_needed_nodes)
             layer.indices_of_needed_nodes = sorted_indices_of_needed_nodes
 
@@ -206,6 +202,7 @@ class Layer:
         self.original_input_keys = None
         self.output_keys = None
 
+        self.needed_nodes = {}
         self.indices_of_nodes_to_cache = []
         self.indices_of_needed_nodes = []
 

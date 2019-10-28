@@ -146,6 +146,33 @@ class TestComplexStochasticNetwork(TestCase):
     def test_network_structure_miso_2(self):
         self.config = create_configuration(filename='/miso.json')
         self.config.node_activation = 'identity'
+        self.config.n_output = 2
+        genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1),
+                                                    (-1, 0), (-1, 1), (-2, 1), (-2, 0)),
+                                             connection_weights=(1.0, 2.0, 3.0, 4.0,
+                                                                 0, 1.0, 0, 1.0))
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+
+        model = ComplexStochasticNetwork(genome=genome)
+        # print(model.layers[0].weight_mean)
+        self.assertEqual(model.layers[0].input_keys, [2, -2, -1])
+        self.assertTrue(torch.allclose(model.layers[0].weight_mean,
+                                       torch.tensor([[3.0, 1.0, 0.0],
+                                                     [4.0, 0.0, 1.0]]), atol=1e-02))
+        self.assertEqual(model.layers[1].input_keys, [-2, -1])
+        self.assertTrue(torch.allclose(model.layers[1].weight_mean,
+                                       torch.tensor([[2.0, 1.0]]), atol=1e-02))
+
+        y, _ = model(input_data)
+
+        expected_y = torch.tensor([[10.0, 13.0]])
+        self.assertTrue(torch.allclose(y, expected_y, atol=1e-02))
+
+    def test_network_structure_miso_3(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
 
         graph = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
                  (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
