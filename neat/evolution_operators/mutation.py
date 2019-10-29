@@ -6,6 +6,7 @@ from experiments.logger import logger
 from neat.configuration import get_configuration, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
+from neat.representation_mapping.genome_to_network.graph_utils import adds_multihop_jump, exist_cycle
 
 
 class Mutation:
@@ -66,7 +67,6 @@ class Mutation:
         return genome
 
     def mutate_add_node(self, genome: Genome):
-        logger.debug('Mutation: Add a Node')
         # TODO: careful! this can add multihop-jumps to the network
 
         # Choose a random connection to split
@@ -80,12 +80,10 @@ class Mutation:
         i, o = connection_to_split_key
 
         # add connection between input and the new node
-        # TODO: careful I'm doing a random initialization but python-neat sets weight to 1
         new_connection_key_i = (i, new_node_key)
         new_connection_i = ConnectionGene(key=new_connection_key_i)
-        new_connection_i.set_mean(mean=1.0), new_connection_i.set_std(std=0.000001)
+        new_connection_i.set_mean(mean=1.0), new_connection_i.set_std(std=0.0000001)
         genome.connection_genes[new_connection_key_i] = new_connection_i
-        # genome.add_connection(config, i, new_node_key, 1.0, True)
 
         # add connection between new node and output
         new_connection_key_o = (new_node_key, o)
@@ -93,17 +91,15 @@ class Mutation:
         new_connection_o.set_mean(mean=connection_to_split.get_mean())
         new_connection_o.set_std(std=connection_to_split.get_std())
         genome.connection_genes[new_connection_key_o] = new_connection_o
-        # self.add_connection(config, new_node_id, o, conn_to_split.weight, True)
 
         # delete connection
         # Careful: neat-python disable the connection instead of deleting
         # conn_to_split.enabled = False
         del genome.connection_genes[connection_to_split_key]
-
+        logger.debug(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
         return genome
 
     def mutate_delete_node(self, genome: Genome):
-        logger.debug('Mutation: Delete a Node')
         # Do nothing if there are no non-output nodes.
         available_nodes = self._get_available_nodes_to_be_deleted(genome)
         if not available_nodes:
@@ -123,10 +119,10 @@ class Mutation:
 
         # delete node
         del genome.node_genes[del_key]
+        logger.debug(f'Genome {genome.key}. Mutation: Delete a Node: {del_key}')
         return genome
 
     def mutate_add_connection(self, genome: Genome):
-        logger.debug('Mutation: Add a Connection')
         possible_outputs = list(genome.node_genes.keys())
         out_node_key = random.choice(possible_outputs)
 
@@ -141,14 +137,15 @@ class Mutation:
 
         new_connection = ConnectionGene(key=new_connection_key).random_initialization()
         genome.connection_genes[new_connection_key] = new_connection
+        logger.debug(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
         return genome
 
     def mutate_delete_connection(self, genome: Genome):
-        logger.debug('Mutation: Delete a Connection')
         possible_connections_to_delete = self._calculate_possible_connections_to_delete(genome=genome)
         if len(possible_connections_to_delete) > 1:
             key = random.choice(possible_connections_to_delete)
             del genome.connection_genes[key]
+            logger.debug(f'Genome {genome.key}. Mutation: Delete a Connection: {key}')
         return genome
 
     @staticmethod
@@ -197,10 +194,10 @@ class Mutation:
             Mutation._remove_connection_that_introduces_cycles(genome=genome,
                                                                possible_connection_set=possible_connection_set)
 
-        # remove possible connections that introduce multihop jumps
-        possible_connection_set = \
-            Mutation._remove_connection_that_introduces_multihop_jumps(genome=genome,
-                                                                       possible_connection_set=possible_connection_set)
+        # # remove possible connections that introduce multihop jumps
+        # possible_connection_set = \
+        #     Mutation._remove_connection_that_introduces_multihop_jumps(genome=genome,
+        #                                                                possible_connection_set=possible_connection_set)
         if len(possible_connection_set) == 0:
             return []
         possible_input_keys_set = list(zip(*list(possible_connection_set)))[0]
@@ -231,75 +228,3 @@ class Mutation:
                 connections_to_remove.append(connection)
         possible_connection_set -= set(connections_to_remove)
         return possible_connection_set
-
-
-def adds_multihop_jump(connections: list, output_node_keys, input_node_keys) -> bool:
-    layer_counter = 0
-    layers = {0: output_node_keys}
-
-    nodes = []
-    layer_output_node_keys = copy.deepcopy(output_node_keys)
-    is_not_done = True
-    while is_not_done:
-
-        nodes_in_previous_layer_set = set()
-        for connection in connections:
-            input_node = connection[0]
-            output_node = connection[1]
-            if output_node in layer_output_node_keys:
-                if input_node in nodes:
-                    return True
-                nodes_in_previous_layer_set = nodes_in_previous_layer_set.union({input_node})
-        nodes += list(nodes_in_previous_layer_set)
-
-        # keep
-        if len(nodes_in_previous_layer_set) == 0:
-            is_not_done = False
-        else:
-            layer_counter += 1
-            layers[layer_counter] = nodes_in_previous_layer_set
-            layer_output_node_keys = nodes_in_previous_layer_set
-
-    return False
-
-
-def exist_cycle(connections: list) -> bool:
-    # change data structure
-    con = _get_connections_per_node(connections)
-
-    def _go_throgh_graph(node_in, graph, past=[]):
-        # print(f'{node_in}. {past}')
-        if node_in in graph.keys():
-            for node in graph[node_in]:
-                if node in past:
-                    return True
-                else:
-                    past_copy = copy.deepcopy(past)
-                    past_copy.append(node_in)
-                    if _go_throgh_graph(node_in=node, graph=graph, past=past_copy):
-                        return True
-        else:
-            return False
-
-    for node_in, nodes_out in con.items():
-        if _go_throgh_graph(node_in, graph=con, past=[]):
-            return True
-    return False
-
-
-def _get_connections_per_node(connections: list, inverse_order=False):
-    '''
-    :param connections: eg. ((-1, 1), (1, 2), (2, 3), (2, 4))
-    :param inverse_order: whether it follows the input to output direction or the output to input direction
-    :return: {-1: [1], 1: [2], 2: [3, 4]
-    '''
-    con = {}
-    for connection in connections:
-        input_node_key, output_node_key = connection
-        if inverse_order:
-            output_node_key, input_node_key = connection
-        if input_node_key in con:
-            con[input_node_key].append(output_node_key)
-        else:
-            con[input_node_key] = [output_node_key]
-    return con
