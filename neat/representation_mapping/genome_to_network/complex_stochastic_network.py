@@ -65,7 +65,41 @@ class ComplexStochasticNetwork(nn.Module):
             setattr(self, f'activation_{layer_key}', self.activation)
 
 
-def get_nodes_per_depth_level(links: list):
+def calculate_nodes_per_layer(links: list or tuple, output_node_keys: list, input_node_keys: list):
+    nodes_per_layer = {}
+    nodes_per_layer[0] = output_node_keys
+
+    layer_counter = 1
+    layer_keys = output_node_keys
+    is_not_done = True
+    while is_not_done:
+        previous_layer_keys = []
+        for node_key in layer_keys:
+            for in_node_key, out_node_key in links:
+                if node_key == out_node_key:
+                    previous_layer_keys.append(in_node_key)
+        nodes_per_layer[layer_counter] = previous_layer_keys
+
+        if _is_next_layer_input(previous_layer_keys):
+            is_not_done = False
+            nodes_per_layer[layer_counter] = input_node_keys
+        else:
+            layer_counter += 1
+            layer_keys = previous_layer_keys
+
+    layers_indices = list(nodes_per_layer.keys())
+    layers_indices.sort(reverse=True)
+    node_keys = set(input_node_keys)
+    for layer_index in layers_indices[1:]:
+        repeated_nodes = set(nodes_per_layer[layer_index]).intersection(node_keys)
+        if len(repeated_nodes) > 0:
+            # remove repeated_nodes from layer
+            nodes_per_layer[layer_index] = list(set(nodes_per_layer[layer_index]) - repeated_nodes)
+
+    return nodes_per_layer
+
+
+def get_nodes_per_depth_level(links: list or tuple):
     max_graph_depth_per_node = calculate_max_graph_depth_per_node(links=links)
 
     # get nodes at each depth level
@@ -128,6 +162,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
     connections = genome.connection_genes
     layer_node_keys = output_node_keys
 
+    # TODO: fix problem when output nodes are not in the first layer.
     nodes_per_depth_level = get_nodes_per_depth_level(links=list(connections.keys()))
 
     # build layers

@@ -5,7 +5,7 @@ import torch
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import transform_genome_to_layers, \
-    ComplexStochasticNetwork, calculate_max_graph_depth_per_node
+    ComplexStochasticNetwork, calculate_max_graph_depth_per_node, calculate_nodes_per_layer
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
 from tests.config_files.config_files import create_configuration
 
@@ -192,3 +192,91 @@ class TestComplexStochasticNetwork(TestCase):
 
         expected_y = 225
         self.assertAlmostEqual(expected_y, y.mean().item(), delta=10)
+
+    def test_network_structure_mimo_4(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        self.config.n_output = 2
+        graph = ((-1, 0), (-1, 1), (-2, 0), (-2, 2), (2, 1))
+        weights = (1, 1, 1, 1, 1)
+
+        genome = generate_genome_given_graph(graph, weights)
+        model = ComplexStochasticNetwork(genome=genome)
+
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+        y, _ = model(input_data)
+
+    def test_network_structure_mimo_5(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        self.config.n_output = 2
+        graph = ((-1, 1), (-2, 0), (-2, 1), (-1, 2), (2, 0), (-1, 0))
+        weights = (1, 1, 1, 1, 1, 1)
+
+        genome = generate_genome_given_graph(graph, weights)
+        model = ComplexStochasticNetwork(genome=genome)
+
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+        y, _ = model(input_data)
+
+
+class TestCalculateNodesPerLayer(TestCase):
+    def test_case_1(self):
+        links = ((-1, 1), (-2, 1), (1, 0))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0],
+                                                    input_node_keys=[-1, -2])
+
+        expected_nodes_per_layer = {0: [0],
+                                    1: [1],
+                                    2: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
+    def test_case_2(self):
+        links = ((-1, 1), (-2, 1), (-1, 0), (1, 0))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0],
+                                                    input_node_keys=[-1, -2])
+
+        expected_nodes_per_layer = {0: [0],
+                                    1: [1],
+                                    2: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
+    def test_case_3(self):
+        links = ((-1, 1), (-2, 1), (-1, 0), (-2, 0), (1, 0))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0],
+                                                    input_node_keys=[-1, -2])
+
+        expected_nodes_per_layer = {0: [0],
+                                    1: [1],
+                                    2: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
+    def test_case_4(self):
+        links = ((-1, 1), (-2, 0), (-2, 1), (-1, 2), (2, 0), (-1, 0))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0, 1],
+                                                    input_node_keys=[-1, -2])
+
+        expected_nodes_per_layer = {0: [0, 1],
+                                    1: [2],
+                                    2: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
+    def test_case_5(self):
+        links = ((-1, 0), (-1, 1), (-2, 0), (-2, 2), (2, 1))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0, 1],
+                                                    input_node_keys=[-1, -2])
+
+        expected_nodes_per_layer = {0: [0, 1],
+                                    1: [2],
+                                    2: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
