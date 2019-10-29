@@ -65,14 +65,9 @@ class ComplexStochasticNetwork(nn.Module):
 
 def transform_genome_to_layers(genome: Genome) -> dict:
     layers = dict()
-
-    output_node_keys = genome.get_output_nodes_keys()
     nodes = genome.node_genes
     connections = genome.connection_genes
-    layer_node_keys = output_node_keys
 
-    # TODO: fix problem when output nodes are not in the first layer.
-    # nodes_per_depth_level = get_nodes_per_depth_level(links=list(connections.keys()))
     nodes_per_layer = calculate_nodes_per_layer(links=list(connections.keys()),
                                                 input_node_keys=genome.get_input_nodes_keys(),
                                                 output_node_keys=genome.get_output_nodes_keys())
@@ -114,10 +109,16 @@ def transform_genome_to_layers(genome: Genome) -> dict:
         logger.info(f'Layer: {layer_counter}')
         # add needed indices
         for node_key in layer.external_input_keys:
-            layer_counter_needed = _get_layer_given_node(nodes_per_layer=nodes_per_layer,
-                                                         node_key=node_key)
-            node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
-            index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
+            index = None
+            for layer_2 in layers.values():
+                if node_key in layer_2.original_input_keys:
+                    index = (layer_2.key, layer_2.input_keys.index(node_key))
+                    break
+            assert index is not None
+            # layer_counter_needed = _get_layer_given_node(nodes_per_layer=nodes_per_layer,
+            #                                              node_key=node_key)
+            # node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
+            # index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
             layer.indices_of_needed_nodes.append(index)
             layer.needed_nodes[node_key] = index
 
@@ -217,7 +218,7 @@ class LayerBuilder:
         n_output = len(layer_node_keys)
 
         layer_connections = dict()
-        input_node_keys = set({})
+        input_node_keys = set(self.nodes_per_layer[self.layer_counter+1])
         for connection_key, connection in self.connections.items():
             input_node_key, output_node_key = connection_key
             if output_node_key in layer_node_keys:
@@ -232,6 +233,7 @@ class LayerBuilder:
         # sorted input keys
         logger.info(f'Layer: {self.layer_counter}')
         original_input_keys = self.nodes_per_layer[self.layer_counter+1]
+        original_input_keys.sort()
         external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
         input_node_keys = original_input_keys + external_input_keys
         logger.info(f'   Input Keys: {input_node_keys}')

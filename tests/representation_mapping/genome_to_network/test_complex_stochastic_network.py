@@ -15,30 +15,70 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/miso.json')
 
-    def test_network_structure_miso(self):
+    def test_network_structure_0(self):
+        '''
+        1 layers
+        '''
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        genome = generate_genome_given_graph(graph=((-1, 0), (-2, 0)),
+                                             connection_weights=(1.0, 2.0))
+
+        layers = transform_genome_to_layers(genome)
+
+        self.assertEqual(layers[0].input_keys, [-2, -1])
+        self.assertEqual(layers[0].indices_of_needed_nodes, [])
+        self.assertEqual(layers[0].indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layers[0].weight_mean,
+                                       torch.tensor([[2.0, 1.0]]), atol=1e-02))
+
+    def test_network_structure_1(self):
+        '''
+        2 layers
+        '''
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0)),
+                                             connection_weights=(1.0, 2.0, 3.0))
+
+        layers = transform_genome_to_layers(genome)
+
+        self.assertEqual(layers[0].input_keys, [1])
+        self.assertEqual(layers[0].indices_of_needed_nodes, [])
+        self.assertEqual(layers[0].indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layers[0].weight_mean,
+                                       torch.tensor([[3.0]]), atol=1e-02))
+
+        self.assertEqual(layers[1].input_keys, [-2, -1])
+        self.assertEqual(layers[1].indices_of_needed_nodes, [])
+        self.assertEqual(layers[1].indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layers[1].weight_mean,
+                                       torch.tensor([[2.0, 1.0]]), atol=1e-02))
+
+    def test_network_structure_2(self):
+        '''
+        1 connection jumping one layer
+        '''
         graph = ((-1, 1), (-2, 1), (1, 0), (-1, 0))
         connection_weights = (1.0, 2.0, 3.0, 4.0)
         genome = generate_genome_given_graph(graph, connection_weights)
 
         layers = transform_genome_to_layers(genome)
-
-        # we have 2 layers
         self.assertEqual(len(layers), 2)
 
-        # we have 2 nodes in each layer
-        for layer in layers.values():
-            self.assertEqual(layer.n_input, 2)
-
+        self.assertEqual(layers[0].input_keys, [1, -1])
+        self.assertEqual(layers[0].indices_of_needed_nodes, [(1, 1)])
+        self.assertEqual(layers[0].indices_of_nodes_to_cache, [])
         connections_0 = layers[0].weight_mean
-        print(connections_0)
         self.assertTrue(torch.allclose(connections_0, torch.tensor([[3.0, 4.0]]), atol=1e-02))
 
+        self.assertEqual(layers[1].input_keys, [-2, -1])
+        self.assertEqual(layers[1].indices_of_needed_nodes, [])
+        self.assertEqual(layers[1].indices_of_nodes_to_cache, [1])
         connections_1 = layers[1].weight_mean
-        print(connections_1)
         self.assertTrue(torch.allclose(connections_1, torch.tensor([[2.0, 1.0]]), atol=1e-02))
 
     def test_network_structure_miso_2(self):
-
         graph = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
                  (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
                  (3, 0), (4, 0), (-1, 0), (1, 0))
@@ -50,24 +90,50 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         layers = transform_genome_to_layers(genome)
 
         layer_0 = layers[0]
-        self.assertEqual(len(layer_0.input_keys), 4)
-        self.assertEqual(len(layer_0.output_keys), 1)
-        print(layer_0.weight_mean)
+        self.assertEqual(layers[0].indices_of_needed_nodes, [(2, 1), (1, 0)])
+        self.assertEqual(layers[0].indices_of_nodes_to_cache, [])
         self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[1.0, 2.0, 3.0, 4.0]]), atol=1e-02))
 
         layer_1 = layers[1]
-        self.assertEqual(len(layer_1.input_keys), 3)
-        self.assertEqual(len(layer_1.output_keys), 2)
-        print(layer_1.weight_mean)
+        self.assertEqual(layer_1.input_keys, [1, 2, -1])
+        self.assertEqual(layer_1.output_keys, [3, 4])
+        self.assertEqual(layers[1].indices_of_needed_nodes, [(2, 1)])
+        self.assertEqual(layers[1].indices_of_nodes_to_cache, [0])
         self.assertTrue(torch.allclose(layer_1.weight_mean, torch.tensor([[6.0000, 7.0000, 1.5000],
                                                                           [5.0000, 8.0000, 0.0000]]), atol=1e-02))
 
         layer_2 = layers[2]
-        self.assertEqual(len(layer_2.input_keys), 2)
-        self.assertEqual(len(layer_2.output_keys), 2)
-        print(layer_2.weight_mean)
+        self.assertEqual(layer_2.input_keys, [-2, -1])
+        self.assertEqual(layer_2.output_keys, [1, 2])
+        self.assertEqual(layer_2.indices_of_needed_nodes, [])
+        self.assertEqual(layer_2.indices_of_nodes_to_cache, [1])
         self.assertTrue(torch.allclose(layer_2.weight_mean, torch.tensor([[2.0, 1.0],
                                                                           [4.0, 3.0]]), atol=1e-02))
+
+    def test_network_structure_5(self):
+        self.config = create_configuration(filename='/miso.json')
+        self.config.node_activation = 'identity'
+        self.config.n_output = 2
+        graph = ((-1, 1), (-2, 0), (-2, 1), (-1, 2), (2, 0), (-1, 0))
+        weights = (1, 1, 1, 1, 1, 1)
+
+        genome = generate_genome_given_graph(graph, weights)
+        layers = transform_genome_to_layers(genome=genome)
+
+        layer_0 = layers[0]
+        self.assertEqual(layer_0.input_keys, [2, -2, -1])
+        self.assertEqual(layer_0.output_keys, [0, 1])
+        self.assertEqual(layer_0.indices_of_needed_nodes, [(1, 0), (1, 1)])
+        self.assertEqual(layer_0.indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[1.0, 1.0, 1.0],
+                                                                          [0.0, 1.0, 1.0]]), atol=1e-02))
+
+        layer_1 = layers[1]
+        self.assertEqual(layer_1.input_keys, [-2, -1])
+        self.assertEqual(layer_1.output_keys, [2])
+        self.assertEqual(layer_1.indices_of_needed_nodes, [])
+        self.assertEqual(layer_1.indices_of_nodes_to_cache, [0, 1])
+        self.assertTrue(torch.allclose(layer_1.weight_mean, torch.tensor([[0.0, 1.0]]), atol=1e-02))
 
 
 class TestComplexStochasticNetwork(TestCase):
@@ -91,7 +157,7 @@ class TestComplexStochasticNetwork(TestCase):
 
         y, _ = model(input_data)
 
-        expected_y = 13.0
+        expected_y = 9.0
         self.assertAlmostEqual(expected_y, y.numpy()[0][0])
 
     def test_network_structure_miso(self):
@@ -189,8 +255,6 @@ class TestComplexStochasticNetwork(TestCase):
         input_data = torch.tensor([[1.0, 1.0]])
         input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
         y, _ = model(input_data)
-
-
 
 def generate_genome_given_graph(graph, connection_weights):
     unique_node_keys = []
