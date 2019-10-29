@@ -80,7 +80,7 @@ class EvaluationStochasticEngine:
             pool = MyPool(min(n_cpus//2, 8))
             tasks = []
             for genome in population.values():
-                logger.debug(genome.get_graph())
+                logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome, self.dataset, self.loss, self.config.beta_type,
                      self.batch_size, n_samples, self.is_gpu)
                 # x = (genome, self.data_loader, self.loss, self.config.beta_type,
@@ -97,7 +97,7 @@ class EvaluationStochasticEngine:
 
         else:
             for genome in population.values():
-                logger.debug(genome.get_graph())
+                logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 genome.fitness = - evaluate_genome(genome=genome,
                                                    data_loader=self.data_loader,
                                                    loss=self.loss,
