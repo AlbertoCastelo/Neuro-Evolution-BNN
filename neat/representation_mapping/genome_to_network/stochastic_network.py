@@ -2,7 +2,9 @@ import torch
 from torch import nn
 from torch.distributions import Normal
 
+from experiments.logger import logger
 from neat.genome import Genome
+from neat.representation_mapping.genome_to_network.graph_utils import _is_next_layer_input
 from neat.representation_mapping.genome_to_network.layers import StochasticLinear, StochasticLinearParameters
 from neat.representation_mapping.genome_to_network.utils import get_activation
 
@@ -128,16 +130,6 @@ def _transform_genome_to_layers(nodes: dict, connections: dict, n_output: int) -
         if _is_next_layer_input(layer_node_keys):
             is_not_finished = False
     return layers
-
-
-def _is_next_layer_input(layer_node_keys):
-    '''
-    Given all the keys in a layer will return True if all the keys are negative.
-    '''
-    is_negative = True
-    for key in layer_node_keys:
-        is_negative *= True if key < 0 else False
-    return is_negative
 
 
 def _filter_nodes_without_input_connection(node_keys, connections: dict):

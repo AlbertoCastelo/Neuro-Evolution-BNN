@@ -1,14 +1,12 @@
 import torch
 from torch import nn
-from torch.distributions import Normal
 
 from experiments.logger import logger
-from neat.evolution_operators.mutation import _get_connections_per_node
 from neat.genome import Genome
-from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, StochasticLinear, \
+from neat.representation_mapping.genome_to_network.graph_utils import calculate_nodes_per_layer
+from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, \
     ComplexStochasticLinear
-from neat.representation_mapping.genome_to_network.stochastic_network import _is_next_layer_input, \
-    _filter_nodes_without_input_connection
+from neat.representation_mapping.genome_to_network.stochastic_network import _filter_nodes_without_input_connection
 from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
@@ -65,95 +63,6 @@ class ComplexStochasticNetwork(nn.Module):
             setattr(self, f'activation_{layer_key}', self.activation)
 
 
-def calculate_nodes_per_layer(links: list or tuple, output_node_keys: list, input_node_keys: list):
-    nodes_per_layer = {}
-    nodes_per_layer[0] = output_node_keys
-
-    layer_counter = 1
-    layer_keys = output_node_keys
-    is_not_done = True
-    while is_not_done:
-        previous_layer_keys = []
-        for node_key in layer_keys:
-            for in_node_key, out_node_key in links:
-                if node_key == out_node_key:
-                    previous_layer_keys.append(in_node_key)
-        nodes_per_layer[layer_counter] = previous_layer_keys
-
-        if _is_next_layer_input(previous_layer_keys):
-            is_not_done = False
-            nodes_per_layer[layer_counter] = input_node_keys
-        else:
-            layer_counter += 1
-            layer_keys = previous_layer_keys
-
-    layers_indices = list(nodes_per_layer.keys())
-    layers_indices.sort(reverse=True)
-    node_keys = set(input_node_keys)
-    for layer_index in layers_indices[1:]:
-        repeated_nodes = set(nodes_per_layer[layer_index]).intersection(node_keys)
-        if len(repeated_nodes) > 0:
-            # remove repeated_nodes from layer
-            nodes_per_layer[layer_index] = list(set(nodes_per_layer[layer_index]) - repeated_nodes)
-
-    return nodes_per_layer
-
-
-def get_nodes_per_depth_level(links: list or tuple):
-    max_graph_depth_per_node = calculate_max_graph_depth_per_node(links=links)
-
-    # get nodes at each depth level
-    nodes_per_depth_level = {}
-    for node_key, depth in max_graph_depth_per_node.items():
-        if depth in nodes_per_depth_level:
-            nodes_per_depth_level[depth].append(node_key)
-        else:
-            nodes_per_depth_level[depth] = [node_key]
-
-    return nodes_per_depth_level
-
-
-def calculate_max_graph_depth_per_node(links: list):
-    input_nodes = list(zip(*links))[0]
-    output_nodes = list(zip(*links))[1]
-    all_nodes = list(set(input_nodes).union(set(output_nodes)))
-
-    connections_per_node = _get_connections_per_node(connections=links, inverse_order=True)
-
-    # get depths_per_node
-    max_graph_depth_per_node = {}
-    for node_key in all_nodes:
-        depth = _get_depth_per_node(node_key=node_key, connections_per_node=connections_per_node,
-                                    max_graph_depth_per_node=max_graph_depth_per_node)
-        max_graph_depth_per_node[node_key] = depth
-
-    return max_graph_depth_per_node
-
-
-def _get_depth_per_node(node_key: int, connections_per_node: dict, max_graph_depth_per_node: dict):
-    if node_key not in connections_per_node:
-        return 0
-
-    # all parent nodes are negative
-    if _is_next_layer_input(layer_node_keys=connections_per_node[node_key]):
-        return 1
-
-    max_depth = 0
-    for parent_node_key in connections_per_node[node_key]:
-        if parent_node_key in max_graph_depth_per_node:
-            max_depth_candidate = max_graph_depth_per_node[parent_node_key] + 1
-        elif parent_node_key < 0:
-            max_depth_candidate = 0
-        else:
-            max_depth_candidate = _get_depth_per_node(node_key=parent_node_key,
-                                                      connections_per_node=connections_per_node,
-                                                      max_graph_depth_per_node=max_graph_depth_per_node) + 1
-
-        if max_depth_candidate > max_depth:
-            max_depth = max_depth_candidate
-    return max_depth
-
-
 def transform_genome_to_layers(genome: Genome) -> dict:
     layers = dict()
 
@@ -163,33 +72,50 @@ def transform_genome_to_layers(genome: Genome) -> dict:
     layer_node_keys = output_node_keys
 
     # TODO: fix problem when output nodes are not in the first layer.
-    nodes_per_depth_level = get_nodes_per_depth_level(links=list(connections.keys()))
-
-    # build layers
-    layer_counter = 0
-    is_not_finished = True
-    while is_not_finished:
+    # nodes_per_depth_level = get_nodes_per_depth_level(links=list(connections.keys()))
+    nodes_per_layer = calculate_nodes_per_layer(links=list(connections.keys()),
+                                                input_node_keys=genome.get_input_nodes_keys(),
+                                                output_node_keys=genome.get_output_nodes_keys())
+    layer_indices = list(nodes_per_layer.keys())
+    layer_indices.sort()
+    for layer_index in layer_indices[:-1]:
+        print(layer_index)
+        original_nodes_in_layer = nodes_per_layer[layer_index]
         layer = LayerBuilder(nodes=nodes,
                              connections=connections,
-                             layer_node_keys=layer_node_keys,
-                             nodes_per_depth_level=nodes_per_depth_level,
-                             layer_counter=layer_counter)\
-            .create()\
+                             layer_node_keys=original_nodes_in_layer,
+                             nodes_per_layer=nodes_per_layer,
+                             layer_counter=layer_index) \
+            .create() \
             .get_layer()
 
-        layer_node_keys = layer.get_original_input_keys()
-        layers[layer_counter] = layer
-        layer_counter += 1
-        if _is_next_layer_input(layer_node_keys):
-            is_not_finished = False
+        layers[layer_index] = layer
+
+    # # build layers
+    # layer_counter = 0
+    # is_not_finished = True
+    # while is_not_finished:
+    #     layer = LayerBuilder(nodes=nodes,
+    #                          connections=connections,
+    #                          layer_node_keys=layer_node_keys,
+    #                          nodes_per_depth_level=nodes_per_depth_level,
+    #                          layer_counter=layer_counter)\
+    #         .create()\
+    #         .get_layer()
+    #
+    #     layer_node_keys = layer.get_original_input_keys()
+    #     layers[layer_counter] = layer
+    #     layer_counter += 1
+    #     if _is_next_layer_input(layer_node_keys):
+    #         is_not_finished = False
 
     # enrich layers
     for layer_counter, layer in layers.items():
         logger.info(f'Layer: {layer_counter}')
         # add needed indices
         for node_key in layer.external_input_keys:
-            layer_counter_needed = _get_layer_counter(nodes_per_depth_level=nodes_per_depth_level,
-                                                      node_key=node_key)
+            layer_counter_needed = _get_layer_given_node(nodes_per_layer=nodes_per_layer,
+                                                         node_key=node_key)
             node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
             index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
             layer.indices_of_needed_nodes.append(index)
@@ -269,7 +195,7 @@ class Layer:
 
 class LayerBuilder:
 
-    def __init__(self, nodes, connections, layer_node_keys, nodes_per_depth_level, layer_counter):
+    def __init__(self, nodes, connections, layer_node_keys, nodes_per_layer, layer_counter):
         '''
             :param nodes: dictionary with all the nodes in the genome
             :param connections: dictionary with all the connections of the genome
@@ -278,9 +204,9 @@ class LayerBuilder:
         self.nodes = nodes
         self.connections = connections
         self.layer_node_keys = layer_node_keys
-        self.nodes_per_depth_level = nodes_per_depth_level
+        self.nodes_per_layer = nodes_per_layer
         self.layer_counter = layer_counter
-        self._total_number_of_layers = len(nodes_per_depth_level) - 1
+        self._total_number_of_layers = len(nodes_per_layer) - 1
 
         self.layer = None
 
@@ -305,7 +231,7 @@ class LayerBuilder:
 
         # sorted input keys
         logger.info(f'Layer: {self.layer_counter}')
-        original_input_keys = self._get_original_input_keys()
+        original_input_keys = self.nodes_per_layer[self.layer_counter+1]
         external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
         input_node_keys = original_input_keys + external_input_keys
         logger.info(f'   Input Keys: {input_node_keys}')
@@ -374,69 +300,12 @@ class LayerBuilder:
         bias_log_var = torch.tensor(bias_log_var_values)
         return bias_mean, bias_log_var
 
-    def _get_original_input_keys(self):
-        distances = list(self.nodes_per_depth_level.keys())
-        distances.sort(reverse=True)
-        distance_key = distances[self.layer_counter + 1]
-        original_input_keys = self.nodes_per_depth_level[distance_key]
-        original_input_keys.sort()
-        logger.info(f'   Original Input Keys: {original_input_keys}')
-        return original_input_keys
-
 
 def _generate_cache_index(layer_counter: int, index: int):
     return (layer_counter, index)
 
 
-def _get_layer_counter(nodes_per_depth_level, node_key):
-    for distance, node_keys in nodes_per_depth_level.items():
+def _get_layer_given_node(nodes_per_layer, node_key):
+    for layer, node_keys in nodes_per_layer.items():
         if node_key in node_keys:
-            layer_counter = len(nodes_per_depth_level) - distance - 2
-            return layer_counter
-
-# def build_layer_parameters(nodes, connections, layer_node_keys, max_graph_depth_per_node) -> dict:
-#     '''
-#     :param nodes: dictionary with all the nodes in the genome
-#     :param connections: dictionary with all the connections of the genome
-#     :param layer_node_keys: a list of keys of the nodes in a layer
-#     :return: dictionary with all parameters associated with a layer
-#     '''
-#     layer = dict()
-#
-#     layer_node_keys = _filter_nodes_without_input_connection(node_keys=layer_node_keys, connections=connections)
-#     layer_node_keys.sort()
-#     n_output = len(layer_node_keys)
-#
-#     layer_connections = dict()
-#     input_node_keys = set({})
-#     for connection_key, connection in connections.items():
-#         input_node_key, output_node_key = connection_key
-#         if output_node_key in layer_node_keys:
-#             input_node_keys = input_node_keys.union({input_node_key})
-#             if connection.enabled:
-#                 layer_connections[connection_key] = connections[connection_key]
-#
-#     input_node_keys = list(input_node_keys)
-#     n_input = len(input_node_keys)
-#
-#     weight_mean, weight_log_var = _build_weight_tensors(input_node_keys=input_node_keys,
-#                                                         layer_connections=layer_connections,
-#                                                         layer_node_keys=layer_node_keys,
-#                                                         n_input=n_input,
-#                                                         n_output=n_output)
-#
-#     bias_mean, bias_log_var = _build_bias_tensors(layer_node_keys, nodes)
-#
-#     # set parameters
-#     layer['n_input'] = n_input
-#     layer['n_output'] = n_output
-#     layer['input_keys'] = input_node_keys
-#     layer['output_keys'] = layer_node_keys
-#     layer['bias_mean'] = bias_mean
-#     layer['bias_log_var'] = bias_log_var
-#     layer['weight_mean'] = weight_mean
-#     layer['weight_log_var'] = weight_log_var
-#     return layer
-
-
-
+            return layer
