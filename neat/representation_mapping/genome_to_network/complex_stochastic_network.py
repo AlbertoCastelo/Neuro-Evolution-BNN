@@ -190,8 +190,9 @@ class LayerBuilder:
         self.layer = None
 
     def create(self):
-        layer_node_keys = _filter_nodes_without_input_connection(node_keys=self.layer_node_keys,
-                                                                 connections=self.connections)
+        # layer_node_keys = _filter_nodes_without_input_connection(node_keys=self.layer_node_keys,
+        #                                                          connections=self.connections)
+        layer_node_keys = self.nodes_per_layer[self.layer_counter]
         layer_node_keys.sort()
         n_output = len(layer_node_keys)
 

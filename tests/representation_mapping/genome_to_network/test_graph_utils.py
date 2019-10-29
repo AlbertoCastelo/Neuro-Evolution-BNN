@@ -73,6 +73,15 @@ class TestCalculateNodesPerLayer(TestCase):
                                     3: [-1, -2]}
         self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
 
+    def test_case_7(self):
+        links = ((-1, 1), (-2, 1))
+        nodes_per_layer = calculate_nodes_per_layer(links=links,
+                                                    output_node_keys=[0, 1],
+                                                    input_node_keys=[-1, -2])
+        expected_nodes_per_layer = {0: [0, 1],
+                                    1: [-1, -2]}
+        self.assertEqual(nodes_per_layer, expected_nodes_per_layer)
+
 
 class TestMaxGraphDepthPerNode(TestCase):
     def test_simple_case(self):

@@ -135,11 +135,28 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         self.assertEqual(layer_1.indices_of_nodes_to_cache, [0, 1])
         self.assertTrue(torch.allclose(layer_1.weight_mean, torch.tensor([[0.0, 1.0]]), atol=1e-02))
 
+    def test_network_structure_when_one_output_is_not_connected(self):
+        self.config.n_output = 2
+        graph = ((-1, 1), (-2, 1))
+        weights = (1, 1)
+        genome = generate_genome_given_graph(graph, weights)
+        layers = transform_genome_to_layers(genome=genome)
+
+        layer_0 = layers[0]
+        self.assertEqual(layer_0.input_keys, [-2, -1])
+        self.assertEqual(layer_0.output_keys, [0, 1])
+        self.assertEqual(layer_0.indices_of_needed_nodes, [])
+        self.assertEqual(layer_0.indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[0, 0],
+                                                                          [1.0, 1.0]]), atol=1e-02))
+
 
 class TestComplexStochasticNetwork(TestCase):
-    def test_network_structure_1(self):
+    def setUp(self) -> None:
         self.config = create_configuration(filename='/miso.json')
         self.config.node_activation = 'identity'
+
+    def test_network_structure_1(self):
         genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0)),
                                              connection_weights=(1.0, 2.0, 3.0))
         n_samples = 1
@@ -161,8 +178,6 @@ class TestComplexStochasticNetwork(TestCase):
         self.assertAlmostEqual(expected_y, y.numpy()[0][0])
 
     def test_network_structure_miso(self):
-        self.config = create_configuration(filename='/miso.json')
-        self.config.node_activation = 'identity'
         genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
                                              connection_weights=(1.0, 2.0, 3.0, 4.0))
         n_samples = 1
@@ -177,8 +192,6 @@ class TestComplexStochasticNetwork(TestCase):
         self.assertAlmostEqual(expected_y, y.numpy()[0][0])
 
     def test_network_structure_miso_2(self):
-        self.config = create_configuration(filename='/miso.json')
-        self.config.node_activation = 'identity'
         self.config.n_output = 2
         genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1),
                                                     (-1, 0), (-1, 1), (-2, 1), (-2, 0)),
@@ -204,9 +217,6 @@ class TestComplexStochasticNetwork(TestCase):
         self.assertTrue(torch.allclose(y, expected_y, atol=1e-02))
 
     def test_network_structure_miso_3(self):
-        self.config = create_configuration(filename='/miso.json')
-        self.config.node_activation = 'identity'
-
         graph = ((-1, 1), (-2, 1), (-1, 2), (-2, 2),
                  (1, 4), (1, 3), (2, 3), (2, 4), (-1, 3),
                  (3, 0), (4, 0), (-1, 0), (1, 0))
@@ -227,8 +237,6 @@ class TestComplexStochasticNetwork(TestCase):
         self.assertAlmostEqual(expected_y, y.mean().item(), delta=10)
 
     def test_network_structure_mimo_4(self):
-        self.config = create_configuration(filename='/miso.json')
-        self.config.node_activation = 'identity'
         self.config.n_output = 2
         graph = ((-1, 0), (-1, 1), (-2, 0), (-2, 2), (2, 1))
         weights = (1, 1, 1, 1, 1)
@@ -242,8 +250,6 @@ class TestComplexStochasticNetwork(TestCase):
         y, _ = model(input_data)
 
     def test_network_structure_mimo_5(self):
-        self.config = create_configuration(filename='/miso.json')
-        self.config.node_activation = 'identity'
         self.config.n_output = 2
         graph = ((-1, 1), (-2, 0), (-2, 1), (-1, 2), (2, 0), (-1, 0))
         weights = (1, 1, 1, 1, 1, 1)
@@ -256,13 +262,28 @@ class TestComplexStochasticNetwork(TestCase):
         input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
         y, _ = model(input_data)
 
+    def test_network_structure_without_all_output(self):
+        self.config.n_output = 2
+        graph = ((-1, 1), (-2, 1))
+        weights = (1, 1)
+        genome = generate_genome_given_graph(graph, weights)
+        model = ComplexStochasticNetwork(genome=genome)
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+        y, _ = model(input_data)
+
+
 def generate_genome_given_graph(graph, connection_weights):
+    genome = Genome(key='foo')
+
     unique_node_keys = []
     for connection in graph:
         for node_key in connection:
             if node_key not in unique_node_keys:
                 unique_node_keys.append(node_key)
 
+    unique_node_keys = list(set(unique_node_keys + genome.get_output_nodes_keys()))
     nodes = {}
     for node_key in unique_node_keys:
         node = NodeGene(key=node_key).random_initialization()
@@ -277,7 +298,7 @@ def generate_genome_given_graph(graph, connection_weights):
         connection.set_std(STD)
         connections[connection_key] = connection
 
-    genome = Genome(key='foo')
+
     genome.connection_genes = connections
     genome.node_genes = nodes
     return genome
