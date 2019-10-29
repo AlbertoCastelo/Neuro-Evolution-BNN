@@ -21,7 +21,7 @@ class _Logger:
 
     def __init__(self, path):
         logger = logging.getLogger()
-        # logger.setLevel(logging.DEBUG)
+        # logger.setLevel(logging.INFO)
         logger.handlers = []
 
         # stdout handle
@@ -53,6 +53,7 @@ class _Logger:
 
     def _get_stdout_handler(self, logger, formatter):
         handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger
