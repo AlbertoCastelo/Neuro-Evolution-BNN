@@ -14,6 +14,7 @@ from neat.dataset.regression_example import RegressionExample1Dataset, Regressio
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetwork
 from neat.utils import timeit
 
@@ -167,11 +168,9 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
     kl_posterior = 0
 
     kl_qw_pw = compute_kl_qw_pw(genome=genome)
-    # print(f'KL-prior: {kl_qw_pw}')
-    # print(f'kl_prior by sum: {compute_kl_qw_pw_by_sum(genome)}')
 
     # setup network
-    network = StochasticNetwork(genome=genome, n_samples=n_samples)
+    network = ComplexStochasticNetwork(genome=genome)
     if is_gpu:
         network.cuda()
 

@@ -74,7 +74,7 @@ def transform_genome_to_layers(genome: Genome) -> dict:
     layer_indices = list(nodes_per_layer.keys())
     layer_indices.sort()
     for layer_index in layer_indices[:-1]:
-        print(layer_index)
+        # print(layer_index)
         original_nodes_in_layer = nodes_per_layer[layer_index]
         layer = LayerBuilder(nodes=nodes,
                              connections=connections,
@@ -86,27 +86,9 @@ def transform_genome_to_layers(genome: Genome) -> dict:
 
         layers[layer_index] = layer
 
-    # # build layers
-    # layer_counter = 0
-    # is_not_finished = True
-    # while is_not_finished:
-    #     layer = LayerBuilder(nodes=nodes,
-    #                          connections=connections,
-    #                          layer_node_keys=layer_node_keys,
-    #                          nodes_per_depth_level=nodes_per_depth_level,
-    #                          layer_counter=layer_counter)\
-    #         .create()\
-    #         .get_layer()
-    #
-    #     layer_node_keys = layer.get_original_input_keys()
-    #     layers[layer_counter] = layer
-    #     layer_counter += 1
-    #     if _is_next_layer_input(layer_node_keys):
-    #         is_not_finished = False
-
     # enrich layers
     for layer_counter, layer in layers.items():
-        logger.info(f'Layer: {layer_counter}')
+        # logger.debug(f'Layer: {layer_counter}')
         # add needed indices
         for node_key in layer.external_input_keys:
             index = None
@@ -115,10 +97,6 @@ def transform_genome_to_layers(genome: Genome) -> dict:
                     index = (layer_2.key, layer_2.input_keys.index(node_key))
                     break
             assert index is not None
-            # layer_counter_needed = _get_layer_given_node(nodes_per_layer=nodes_per_layer,
-            #                                              node_key=node_key)
-            # node_index = _get_node_index_to_cache(node_key=node_key, layers=layers)
-            # index = _generate_cache_index(layer_counter=layer_counter_needed, index=node_index)
             layer.indices_of_needed_nodes.append(index)
             layer.needed_nodes[node_key] = index
 
@@ -141,8 +119,8 @@ def transform_genome_to_layers(genome: Genome) -> dict:
             assert len(sorted_indices_of_needed_nodes) == len(layer.indices_of_needed_nodes)
             layer.indices_of_needed_nodes = sorted_indices_of_needed_nodes
 
-        logger.info(f'Indices to cache: {layer.indices_of_nodes_to_cache}')
-        logger.info(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
+        logger.debug(f'Indices to cache: {layer.indices_of_nodes_to_cache}')
+        logger.debug(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
 
     return layers
 
@@ -231,12 +209,12 @@ class LayerBuilder:
         self.layer = Layer(key=self.layer_counter, n_input=n_input, n_output=n_output)
 
         # sorted input keys
-        logger.info(f'Layer: {self.layer_counter}')
+        logger.debug(f'Layer: {self.layer_counter}')
         original_input_keys = self.nodes_per_layer[self.layer_counter+1]
         original_input_keys.sort()
         external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
         input_node_keys = original_input_keys + external_input_keys
-        logger.info(f'   Input Keys: {input_node_keys}')
+        logger.debug(f'   Input Keys: {input_node_keys}')
 
         self.layer.input_keys = input_node_keys
         self.layer.original_input_keys = original_input_keys
@@ -259,7 +237,7 @@ class LayerBuilder:
     def _get_external_input_keys(self, input_node_key, original_input_keys):
         external_input_keys = list(set(input_node_key) - set(original_input_keys))
         external_input_keys.sort()
-        logger.info(f'   External Input Keys: {external_input_keys}')
+        logger.debug(f'   External Input Keys: {external_input_keys}')
         return external_input_keys
 
     def get_layer(self):
