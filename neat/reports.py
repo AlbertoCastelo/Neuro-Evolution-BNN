@@ -16,8 +16,11 @@ class EvolutionReport(BaseReport):
         best_individual_key = -1
         best_individual_fitness = -1000000
         fitness_all = []
+        all_n_parameters = []
+
         for key, genome in population.items():
             fitness_all.append(genome.fitness)
+            all_n_parameters.append(genome.calculate_number_of_parameters())
             if genome.fitness > best_individual_fitness:
                 best_individual_fitness = genome.fitness
                 best_individual_key = genome.key
@@ -29,8 +32,11 @@ class EvolutionReport(BaseReport):
                 'max': round(max(fitness_all), 3),
                 'mean': round(np.mean(fitness_all), 3),
                 }
+        best_n_parameters = population.get(best_individual_key).calculate_number_of_parameters()
         logger.info(f'Generation {generation}. Best fitness: {round(max(fitness_all), 3)}. '
-                     f'Mean fitness: {round(np.mean(fitness_all), 3)}')
+                     f'N-Parameters Best: {best_n_parameters}')
+        logger.info(f'                         Mean fitness: {round(np.mean(fitness_all), 3)}. '
+                    f'Mean N-Parameters: {round(np.mean(all_n_parameters), 3)}')
         self.generation_metrics[generation] = data
 
         if self.best_individual is None or self.best_individual.fitness < best_individual_fitness:
