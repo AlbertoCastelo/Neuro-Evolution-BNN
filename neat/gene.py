@@ -111,6 +111,9 @@ class Gene:
             return self._initialize_float(parameter_name=parameter_name, parameter_type=parameter_type)
         return value
 
+    def copy(self):
+        raise NotImplementedError
+
 
 class ConnectionGene(Gene):
     # crossover_attributes = ['mean', 'std']
@@ -162,6 +165,12 @@ class ConnectionGene(Gene):
                  '_weight_std': self._weight_std}
         return dict_
 
+    def copy(self):
+        connection_copy = ConnectionGene(key=self.key)
+        for attribute, value in self.__dict__.items():
+            setattr(connection_copy, attribute, value)
+        return connection_copy
+
 
 class NodeGene(Gene):
     # crossover_attributes = ['mean', 'std']
@@ -203,6 +212,12 @@ class NodeGene(Gene):
                  '_bias_mean': self._bias_mean,
                  '_bias_std': self._bias_std}
         return dict_
+
+    def copy(self):
+        node_copy = NodeGene(key=self.key)
+        for attribute, value in self.__dict__.items():
+            setattr(node_copy, attribute, value)
+        return node_copy
 
 
 class BiasConfig:

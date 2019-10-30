@@ -1,5 +1,6 @@
 import random
 
+from experiments.logger import logger
 from neat.configuration import get_configuration
 from neat.gene import ConnectionGene, Gene, NodeGene
 from neat.genome import Genome
@@ -25,6 +26,7 @@ class Crossover:
             cg2 = parent2.connection_genes.get(key)
             if cg2 is None:
                 # Excess or disjoint gene: copy from the fittest parent.
+                logger.debug('Use connection copy')
                 offspring.connection_genes[key] = cg1.copy()
             else:
                 # Homologous gene: combine genes from both parents.
@@ -36,6 +38,7 @@ class Crossover:
             assert key not in offspring.node_genes
             if ng2 is None:
                 # Extra gene: copy from the fittest parent
+                logger.debug('Use node copy')
                 offspring.node_genes[key] = ng1.copy()
             else:
                 # Homologous gene: combine genes from both parents.
