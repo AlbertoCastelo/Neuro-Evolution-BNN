@@ -150,6 +150,24 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[0, 0],
                                                                           [1.0, 1.0]]), atol=1e-02))
 
+    def test_network_structure_7(self):
+        self.config.n_output = 2
+
+        graph = ((-1, 0), (-1, 1), (-2, 0), (2, 1), (2, 0), (-2, 3), (3, 2))
+
+        weights = (1, 1, 1, 1, 1, 1, 1)
+        genome = generate_genome_given_graph(graph, weights)
+        layers = transform_genome_to_layers(genome=genome)
+        self.assertEqual(3, len(layers))
+
+        layer_0 = layers[0]
+        self.assertEqual(layer_0.input_keys, [2, -2, -1])
+        self.assertEqual(layer_0.output_keys, [0, 1])
+        self.assertEqual(layer_0.indices_of_needed_nodes, [(2, 0), (2, 1)])
+        self.assertEqual(layer_0.indices_of_nodes_to_cache, [])
+        self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[1.0, 1.0, 1.0],
+                                                                          [0.0, 1.0, 0.0]]), atol=1e-02))
+
 
 class TestComplexStochasticNetwork(TestCase):
     def setUp(self) -> None:
