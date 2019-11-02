@@ -4,6 +4,7 @@ from itertools import count
 import numpy as np
 
 from experiments.logger import logger
+from experiments.slack_client import Notifier
 from neat.configuration import get_configuration
 from neat.evaluation import EvaluationStochasticEngine
 from neat.evolution_operators.crossover import Crossover
@@ -17,7 +18,7 @@ from neat.utils import timeit
 
 class EvolutionEngine:
 
-    def __init__(self, report: EvolutionReport):
+    def __init__(self, report: EvolutionReport, notifier: Notifier):
         self.population_engine = PopulationEngine(stagnation_engine=Stagnation())
         self.speciation_engine = SpeciationEngine()
         self.evaluation_engine = EvaluationStochasticEngine()
@@ -30,6 +31,7 @@ class EvolutionEngine:
     @timeit
     def run(self):
         logger.info('Starting evolutionary process')
+        # try:
         # initialize population
         self.population = self.population_engine.initialize_population()
         self.speciation_engine.speciate(self.population, generation=0)
@@ -41,9 +43,11 @@ class EvolutionEngine:
 
         for generation in range(1, self.n_generations + 1):
             self._run_generation(generation)
-
-        self.report.generate_final_report()
         logger.info('Finishing evolutionary process')
+        # except Exception as e:
+        #     logger.error(f'Error: {e}')
+        self.report.generate_final_report()
+
 
     @timeit
     def _run_generation(self, generation):
