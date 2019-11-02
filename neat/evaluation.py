@@ -88,6 +88,7 @@ class EvaluationStochasticEngine:
                 #      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
+            # TODO: fix logging when using multiprocessing. Easy fix is to disable
             fitnesses = list(pool.imap(evaluate_genome_parallel, tasks, chunksize=len(population)//n_cpus))
 
             pool.close()
@@ -130,7 +131,7 @@ def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
     kl_qw_pw = compute_kl_qw_pw(genome=genome)
 
     # setup network
-    network = StochasticNetwork(genome=genome, n_samples=n_samples)
+    network = ComplexStochasticNetwork(genome=genome)
     if is_gpu:
         network.cuda()
 
