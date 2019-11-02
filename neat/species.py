@@ -55,12 +55,13 @@ class SpeciationEngine:
                 d = distances.get_distance(genome_0=specie.representative, genome_1=genome)
                 candidates.append((d, genome))
 
-            # The new representative is the genome closest to the current representative.
-            _, new_rep = min(candidates, key=lambda x: x[0])
-            new_rid = new_rep.key
-            new_representatives[species_key] = new_rid
-            new_members[species_key] = [new_rid]
-            unspeciated_genomes.remove(new_rid)
+            if self._enough_candidates(candidates):
+                # The new representative is the genome closest to the current representative.
+                _, new_rep = min(candidates, key=lambda x: x[0])
+                new_rid = new_rep.key
+                new_representatives[species_key] = new_rid
+                new_members[species_key] = [new_rid]
+                unspeciated_genomes.remove(new_rid)
 
         # Partition population into species based on genetic similarity.
         while unspeciated_genomes:
@@ -104,6 +105,9 @@ class SpeciationEngine:
         self.gdmean = distances.get_mean_distance()
         self.gdstdev = distances.get_std_distance()
         logger.debug(f'Number of species: {len(self.species)}')
+
+    def _enough_candidates(self, candidates):
+        return len(candidates) > 0
 
 
 class Specie:
