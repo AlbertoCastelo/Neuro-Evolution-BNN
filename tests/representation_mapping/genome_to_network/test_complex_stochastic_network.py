@@ -165,8 +165,25 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         self.assertEqual(layer_0.output_keys, [0, 1])
         self.assertEqual(layer_0.indices_of_needed_nodes, [(2, 0), (2, 1)])
         self.assertEqual(layer_0.indices_of_nodes_to_cache, [])
+        print(layer_0.weight_mean)
         self.assertTrue(torch.allclose(layer_0.weight_mean, torch.tensor([[1.0, 1.0, 1.0],
-                                                                          [0.0, 1.0, 0.0]]), atol=1e-02))
+                                                                          [1.0, 0.0, 1.0]]), atol=1e-02))
+
+        layer_1 = layers[1]
+        self.assertEqual(layer_1.input_keys, [3])
+        self.assertEqual(layer_1.output_keys, [2])
+        self.assertEqual(layer_1.indices_of_needed_nodes, [])
+        self.assertEqual(layer_1.indices_of_nodes_to_cache, [])
+        print(layer_1.weight_mean)
+        self.assertTrue(torch.allclose(layer_1.weight_mean, torch.tensor([[1.0]]), atol=1e-02))
+
+        layer_2 = layers[2]
+        self.assertEqual(layer_2.input_keys, [-2, -1])
+        self.assertEqual(layer_2.output_keys, [3])
+        self.assertEqual(layer_2.indices_of_needed_nodes, [])
+        self.assertEqual(layer_2.indices_of_nodes_to_cache, [0, 1])
+        print(layer_2.weight_mean)
+        self.assertTrue(torch.allclose(layer_2.weight_mean, torch.tensor([[1.0, 0.0]]), atol=1e-02))
 
 
 class TestComplexStochasticNetwork(TestCase):
@@ -286,6 +303,19 @@ class TestComplexStochasticNetwork(TestCase):
         weights = (1, 1)
         genome = generate_genome_given_graph(graph, weights)
         model = ComplexStochasticNetwork(genome=genome)
+        n_samples = 1
+        input_data = torch.tensor([[1.0, 1.0]])
+        input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
+        y, _ = model(input_data)
+
+    def test_network_structure_mimo_6(self):
+        self.config.n_output = 2
+        graph = ((-2, 1), (-1, 0), (-2, 0), (-1, 2), (2, 3), (3, 1), (3, 0))
+        weights = (1, 1, 1, 1, 1, 1, 1)
+
+        genome = generate_genome_given_graph(graph, weights)
+        model = ComplexStochasticNetwork(genome=genome)
+
         n_samples = 1
         input_data = torch.tensor([[1.0, 1.0]])
         input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)

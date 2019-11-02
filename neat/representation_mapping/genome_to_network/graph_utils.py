@@ -34,11 +34,12 @@ def calculate_nodes_per_layer(links: list or tuple, output_node_keys: list, inpu
     for layer_index in layers_indices[1:]:
         logger.debug(f'Layer index: {layer_index}')
         repeated_nodes = set(nodes_per_layer[layer_index]).intersection(node_keys)
-        if len(repeated_nodes) > 0:
-            logger.debug(f'Repeated_nodes: {layer_index}')
-            # remove repeated_nodes from layer
-            nodes_per_layer[layer_index] = list(set(nodes_per_layer[layer_index]) - repeated_nodes)
         node_keys = node_keys.union(set(nodes_per_layer[layer_index]))
+        # if len(repeated_nodes) > 0:
+        logger.debug(f'Repeated_nodes: {layer_index}')
+        # remove repeated_nodes from layer
+        nodes_per_layer[layer_index] = list(set(nodes_per_layer[layer_index]) - repeated_nodes)
+
     return nodes_per_layer
 
 
