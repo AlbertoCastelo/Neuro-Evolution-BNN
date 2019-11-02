@@ -1,0 +1,38 @@
+version: '3'
+services:
+  mlflow:
+#    image: mlflow:0.8.0
+#    image: mlflow:1.0.0-rc
+    image: mlflow:0.9.1
+    container_name: "ml-flow"
+    environment:
+      - MLFLOW_STATIC_PREFIX=/mlflow
+      - MLFLOW_S3_ENDPOINT_URL=http://127.0.0.1:9000
+      - AWS_ACCESS_KEY_ID=minioKey
+      - AWS_SECRET_ACCESS_KEY=minioSecret
+#    entrypoint: mlflow server
+#    entrypoint: tail -f /dev/null
+    volumes:
+      - mlflow-data:/mlflow_files
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+  minio:
+    image: minio/minio:latest
+    container_name: "minio"
+    environment:
+      - MINIO_ACCESS_KEY=minioKey
+      - MINIO_SECRET_KEY=minioSecret
+    volumes:
+      - minio-data:/data
+    entrypoint: minio server /data
+    ports:
+      - "9000:9000"
+
+
+volumes:
+  minio-data:
+    driver: local
+  mlflow-data:
+    driver: local

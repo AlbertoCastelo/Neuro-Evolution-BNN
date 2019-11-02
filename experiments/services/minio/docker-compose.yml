@@ -1,0 +1,17 @@
+version: '3'
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: "minio"
+    environment:
+      - MINIO_ACCESS_KEY=minioKey
+      - MINIO_SECRET_KEY=minioSecret
+    volumes:
+      - minio-data:/data
+    entrypoint: minio server /data
+    ports:
+      - "9000:9000"
+
+volumes:
+  minio-data:
+    driver: local
