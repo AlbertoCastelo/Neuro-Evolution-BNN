@@ -3,7 +3,12 @@ import os
 SLACK_TOKEN = 'SLACK_API_TOKEN'
 
 
-class SlackNotifier:
+class Notifier:
+    def send(self, message):
+        pass
+
+
+class SlackNotifier(Notifier):
     @staticmethod
     def create(channel):
         # get it here: https://api.slack.com/apps/APKLV82ER/oauth?
