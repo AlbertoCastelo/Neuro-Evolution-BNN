@@ -1,7 +1,13 @@
 import graphviz
 
 
-def plot_network(nodes, edges, input_nodes, output_nodes, view=False, filename='./network.png', fmt='svg', node_names=None, node_colors=None):
+def plot_network(nodes, edges, input_nodes, output_nodes, view=False,
+                 filename='./network.png', fmt='svg',
+                 node_names=None, node_colors=None):
+    '''
+    Most code taken from: https://github.com/CodeReclaimers/neat-python/blob/master/examples/xor/visualize.py
+    '''
+
     if node_names is None:
         node_names = {}
 
