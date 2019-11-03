@@ -9,6 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from neat.loss.vi_loss import get_loss
+from neat.plotting.plot_network import plot_network
 from tests.config_files.config_files import create_configuration
 
 config_file = '/classification-miso.json'
@@ -17,7 +18,7 @@ config = create_configuration(filename=config_file)
 
 def main():
 
-    genome_filename = f'./executions/10-20-2019, 10:19:01__classification-miso_v3.json'
+    genome_filename = f'./executions/11-02-2019, 19:12:46fcfd8573-5275-48ef-a92b-2ec41050c0de.json'
     genome_dict = read_json_file_to_dict(filename=genome_filename)
     genome = Genome.from_dict(genome_dict)
 
@@ -63,6 +64,11 @@ def main():
 
     print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
 
+    plot_network(nodes=list(genome.node_genes.keys()),
+                 edges=list(genome.connection_genes.keys()),
+                 input_nodes=genome.get_input_nodes_keys(),
+                 output_nodes=genome.get_output_nodes_keys(),
+                 view=True)
 
 if __name__ == '__main__':
     main()
