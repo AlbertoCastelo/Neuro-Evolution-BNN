@@ -1,5 +1,5 @@
 {
-  "parallel_evaluation": false,
+  "parallel_evaluation": true,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
@@ -76,7 +76,7 @@
   "replace_rate": 0.1,
 
   "node_add_prob": 0.2,
-  "node_delete_prob": 0.2,
+  "node_delete_prob": 0.1,
   "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.5
+  "connection_delete_prob": 0.25
 }

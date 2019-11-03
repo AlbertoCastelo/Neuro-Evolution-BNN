@@ -1,3 +1,5 @@
+import json
+
 import jsons
 
 from experiments.logger import logger
@@ -66,11 +68,15 @@ class ReportRepository:
             .get_table_path(table_name)
         read_df_from_parquet_in_s3(bucket=self.bucket, data_path=path)
 
-    def set_report(self, algorithm_version, dataset, execution_id, correlation_id, report: BaseReport):
+    def set_report(self, report: BaseReport):
+        algorithm_version = report.get('algorithm_version')
+        dataset = report.get('dataset')
+        execution_id = report.get('execution_id')
+        correlation_id = report.get('correlation_id')
         key = self._get_report_key(algorithm_version, correlation_id, dataset, execution_id)
-        data = jsons.dump(report.to_dict())
+        data = json.dumps(report.to_dict())
 
-        self.object_repository.set(key=key, content=data)
+        self.object_repository.set(key=key, content=str(data))
 
     def _get_report_key(self, algorithm_version, correlation_id, dataset, execution_id):
         path = ReportPathFactory.create(algorithm_version=algorithm_version,
