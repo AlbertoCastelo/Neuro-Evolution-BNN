@@ -202,7 +202,8 @@ class Genome:
     def __str__(self):
         general_data = ''.join([f'Total number of Parameters: {self.calculate_number_of_parameters()}\n',
                                 f'    N-Bias-Parameters: {self.n_bias_parameters}\n',
-                                f'    N-Weight-Parameters: {self.n_weight_parameters}\n'])
+                                f'    N-Weight-Parameters: {self.n_weight_parameters}\n',
+                                f'Fitness: {self.fitness}\n'])
 
         bias_data = []
         bias_data.append(''.join(['Node Key | Mean  | Std \n']))

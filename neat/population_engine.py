@@ -19,11 +19,14 @@ from neat.utils import timeit
 class EvolutionEngine:
 
     def __init__(self, report: EvolutionReport, notifier: Notifier):
+        self.report = report
+        self.notifier = notifier
+
         self.population_engine = PopulationEngine(stagnation_engine=Stagnation())
         self.speciation_engine = SpeciationEngine()
         self.evaluation_engine = EvaluationStochasticEngine()
         self.evolution_configuration = get_configuration()
-        self.report = report
+
         self.n_generations = self.evolution_configuration.n_generations
 
         self.population = None
@@ -47,6 +50,7 @@ class EvolutionEngine:
         # except Exception as e:
         #     logger.error(f'Error: {e}')
         self.report.generate_final_report()
+        self.notifier.send(str(self.report.get_best_individual()))
 
 
     @timeit
@@ -134,9 +138,7 @@ class PopulationEngine:
         remaining_species = []
         for stag_sid, stag_s, stagnant in self.stagnation_engine.get_stagnant_species(species, generation):
             if stagnant:
-                # TODO: log values
-                pass
-                # self.reporters.species_stagnant(stag_sid, stag_s)
+                logger.debug(f'Stagnant specie: {stag_sid} - {stag_s}')
             else:
                 all_fitnesses.extend(m.fitness for m in stag_s.members.values())
                 remaining_species.append(stag_s)
@@ -144,7 +146,8 @@ class PopulationEngine:
         # No species left.
         if not remaining_species:
             species.species = {}
-            return {}  # was []
+            raise ValueError('No species left. Reproduction failed...')
+            # return {}  # was []
 
         # Find minimum/maximum fitness across the entire population, for use in
         # species adjusted fitness computation.

@@ -4,9 +4,10 @@ from experiments.file_utils import write_json_file_from_dict
 from experiments.logger import logger
 from experiments.reporting.report import BaseReport
 from experiments.reporting.report_repository import ReportRepository
+from neat.genome import Genome
 
 
-class EvolutionReport(BaseReport):
+class EvolutionReport:
 
     @staticmethod
     def create(report_repository: ReportRepository, algorithm_version, dataset, correlation_id=None):
@@ -14,10 +15,16 @@ class EvolutionReport(BaseReport):
                                dataset=dataset, correlation_id=correlation_id)
 
     def __init__(self, report_repository: ReportRepository, algorithm_version, dataset, correlation_id=None):
-        super().__init__(correlation_id)
         self.report_repository = report_repository
         self.algorithm_version = algorithm_version
         self.dataset = dataset
+        self.correlation_id = correlation_id
+
+        self.report = BaseReport(correlation_id)
+        self.report.add('algorithm_version', algorithm_version)
+        self.report.add('dataset', dataset)
+        # super().__init__(correlation_id)
+
         self.generation_metrics = dict()
         self.best_individual = None
 
@@ -37,15 +44,11 @@ class EvolutionReport(BaseReport):
                          f'and {len(self.best_individual.connection_genes)} Connections')
 
     def generate_final_report(self):
-        self.add_data(name='generation_metrics', value=self.generation_metrics)
-        self.add_data(name='best_individual', value=self.get_best_individual().to_dict())
+        self.report.add_data(name='generation_metrics', value=self.generation_metrics)
+        self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
 
-        self.set_finish_time()
-        self.report_repository.set_report(algorithm_version=self.algorithm_version,
-                                          dataset=self.dataset,
-                                          correlation_id=self.correlation_id,
-                                          execution_id=self.execution_id,
-                                          report=self)
+        self.report.set_finish_time()
+        self.report_repository.set_report(report=self.report)
         # best_individual =
         # filename = f'./executions/{self.execution_id}.json'
         #
@@ -54,7 +57,7 @@ class EvolutionReport(BaseReport):
     # def persist(self):
     #     pass
 
-    def get_best_individual(self):
+    def get_best_individual(self) -> Genome:
         return self.best_individual
 
 

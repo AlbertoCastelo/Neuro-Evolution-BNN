@@ -21,7 +21,7 @@ class Stagnation:
         self.species_elitism = self.config.species_elitism
         self.max_stagnation = self.config.max_stagnation
 
-    def get_stagnant_species(self, species, generation):
+    def get_stagnant_species(self, species: dict, generation):
 
         species_data = []
         for sid, s in species.items():
