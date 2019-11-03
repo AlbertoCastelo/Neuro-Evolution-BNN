@@ -42,7 +42,9 @@ class EvolutionEngine:
         self.population = self.evaluation_engine.evaluate(population=self.population)
 
         # report
-        self.report.report_new_generation(0, self.population)
+        self.report.report_new_generation(generation=0,
+                                          population=self.population,
+                                          species=self.speciation_engine.species)
 
         for generation in range(1, self.n_generations + 1):
             self._run_generation(generation)
@@ -65,8 +67,10 @@ class EvolutionEngine:
         # evaluate
         self.population = self.evaluation_engine.evaluate(population=self.population)
 
-        # final generation report
-        self.report.report_new_generation(generation, self.population)
+        # generation report
+        self.report.report_new_generation(generation=generation,
+                                          population=self.population,
+                                          species=self.speciation_engine.species)
 
 
 class PopulationEngine:

@@ -12,7 +12,7 @@ logger = get_logger(path='./')
 
 # TODO: better mechanism for override
 config.n_generations = 500
-config.pop_size = 25
+# config.pop_size = 25
 
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'toy-classification'
@@ -21,19 +21,28 @@ CORRELATION_ID = 'parameters_grid'
 
 @timeit
 def main():
-
     report_repository = ReportRepository.create(project='neuro-evolution')
     notifier = SlackNotifier.create(channel='batch-jobs')
+    failed = 0
+    total = 0
     for pop_size in range(25, 201, 25):
         for retry in range(5):
+            config.pop_size = pop_size
+            total += 1
+            try:
+                report = EvolutionReport(report_repository=report_repository,
+                                         algorithm_version=ALGORITHM_VERSION,
+                                         dataset=DATASET,
+                                         correlation_id=CORRELATION_ID)
+                print(report.report.execution_id)
+                evolution_engine = EvolutionEngine(report=report, notifier=notifier)
+                evolution_engine.run()
+            except Exception as e:
+                print(e)
+                logger.error(e)
+                failed += 1
+    print(f'It failed {failed} times out of {total}')
 
-            report = EvolutionReport(report_repository=report_repository,
-                                     algorithm_version=ALGORITHM_VERSION,
-                                     dataset=DATASET,
-                                     correlation_id=CORRELATION_ID)
-
-            evolution_engine = EvolutionEngine(report=report, notifier=notifier)
-            evolution_engine.run()
     # return evolution_engine
 
 

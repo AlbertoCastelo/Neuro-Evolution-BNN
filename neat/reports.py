@@ -28,8 +28,8 @@ class EvolutionReport:
         self.generation_metrics = dict()
         self.best_individual = None
 
-    def report_new_generation(self, generation: int, population: dict):
-        generation_report = GenerationReport.create(population=population, generation=generation).run()
+    def report_new_generation(self, generation: int, population: dict, species: dict):
+        generation_report = GenerationReport.create(population=population, generation=generation, species=species).run()
         generation_data = generation_report.generation_data
 
         self._update_best(generation_report=generation_report, population=population)
@@ -46,16 +46,10 @@ class EvolutionReport:
     def generate_final_report(self):
         self.report.add_data(name='generation_metrics', value=self.generation_metrics)
         self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
-
+        self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
+        self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
         self.report.set_finish_time()
         self.report_repository.set_report(report=self.report)
-        # best_individual =
-        # filename = f'./executions/{self.execution_id}.json'
-        #
-        # write_json_file_from_dict(data=best_individual, filename=filename)
-
-    # def persist(self):
-    #     pass
 
     def get_best_individual(self) -> Genome:
         return self.best_individual
@@ -63,20 +57,27 @@ class EvolutionReport:
 
 class GenerationReport:
     @staticmethod
-    def create(population, generation: int):
-        return GenerationReport(population, generation)
+    def create(population: dict, species: dict, generation: int):
+        return GenerationReport(population=population,
+                                generation=generation,
+                                species=species)
 
-    def __init__(self, population, generation: int):
+    def __init__(self, population: dict, species: dict, generation: int):
         self.population = population
+        self.species = species
         self.generation = generation
         self.generation_data = {}
 
     def run(self):
+        self._prepare_population_report()
+        self._prepare_species_report()
+        return self
+
+    def _prepare_population_report(self):
         self.best_individual_key = -1
         self.best_individual_fitness = -1000000
         fitness_all = []
         all_n_parameters = []
-
         for key, genome in self.population.items():
             fitness_all.append(genome.fitness)
             all_n_parameters.append(genome.calculate_number_of_parameters())
@@ -85,6 +86,7 @@ class GenerationReport:
                 self.best_individual_key = genome.key
         self.generation_data['best_individual_fitness'] = self.best_individual_fitness
         self.generation_data['best_individual_key'] = self.best_individual_key
+        self.generation_data['best_individual_graph'] = self.population.get(self.best_individual_key).get_graph()
         self.generation_data['all_fitness'] = fitness_all
         self.generation_data['min_fitness'] = round(min(fitness_all), 3)
         self.generation_data['max_fitness'] = round(max(fitness_all), 3)
@@ -97,4 +99,16 @@ class GenerationReport:
         logger.info(f'                         Mean fitness: {round(np.mean(fitness_all), 3)}. '
                     f'Mean N-Parameters: {round(np.mean(all_n_parameters), 3)}')
 
-        return self
+    def _prepare_species_report(self):
+        self.generation_data['n_species'] = len(self.species)
+        self.best_specie_key = -1
+        self.best_specie_fitness = -10000000
+        fitness_all = []
+        genomes_fitness_all = {}
+        genomes_per_specie = {}
+        for key, specie in self.species.items():
+            fitness_all.append(specie.fitness)
+            genomes_per_specie[key] = list(specie.members.keys())
+            genomes_fitness_all[key] = [genome.fitness for genome in list(specie.members.values())]
+        self.generation_data['genomes_per_specie'] = genomes_per_specie
+        self.generation_data['genomes_fitness_per_specie'] = genomes_fitness_all
