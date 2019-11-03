@@ -89,7 +89,7 @@ class ReportRepository:
 
     def get_report(self, algorithm_version, dataset, correlation_id, execution_id) -> BaseReport:
         key = self._get_report_key(algorithm_version, correlation_id, dataset, execution_id)
-        report_dict = self.object_repository.get(key)
+        report_dict = json.loads(self.object_repository.get(key))
         return BaseReport.from_dict(report_dict)
 
     @staticmethod
