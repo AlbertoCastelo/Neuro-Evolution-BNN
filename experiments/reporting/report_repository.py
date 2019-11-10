@@ -29,7 +29,7 @@ class ReportPathFactory:
         return data_path
 
     def get_report_path(self):
-        data_path = f'{S3_BASE_PATH_TABLES}/version={self.algorithm_version}/dataset={self.dataset}/' \
+        data_path = f'{S3_BASE_PATH_REPORTS}/version={self.algorithm_version}/dataset={self.dataset}/' \
                     f'correlation_id={self.correlation_id}/' \
                     f'execution_id={self.execution_id}'
         return data_path
