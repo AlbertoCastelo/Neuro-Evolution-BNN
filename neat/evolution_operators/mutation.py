@@ -96,7 +96,7 @@ class Mutation:
         # Careful: neat-python disable the connection instead of deleting
         # conn_to_split.enabled = False
         del genome.connection_genes[connection_to_split_key]
-        logger.debug(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
+        logger.network(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
         return genome
 
     def mutate_delete_node(self, genome: Genome):
@@ -119,7 +119,7 @@ class Mutation:
 
         # delete node
         del genome.node_genes[del_key]
-        logger.debug(f'Genome {genome.key}. Mutation: Delete a Node: {del_key}')
+        logger.network(f'Genome {genome.key}. Mutation: Delete a Node: {del_key}')
         return genome
 
     def mutate_add_connection(self, genome: Genome):
@@ -137,7 +137,7 @@ class Mutation:
 
         new_connection = ConnectionGene(key=new_connection_key).random_initialization()
         genome.connection_genes[new_connection_key] = new_connection
-        logger.debug(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
+        logger.network(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
         return genome
 
     def mutate_delete_connection(self, genome: Genome):
@@ -145,7 +145,7 @@ class Mutation:
         if len(possible_connections_to_delete) > 1:
             key = random.choice(possible_connections_to_delete)
             del genome.connection_genes[key]
-            logger.debug(f'Genome {genome.key}. Mutation: Delete a Connection: {key}')
+            logger.network(f'Genome {genome.key}. Mutation: Delete a Connection: {key}')
         return genome
 
     @staticmethod

@@ -24,8 +24,8 @@ class _Logger:
         self._initialize_log_directory()
 
         # initialize custom levels
-        for level in levels:
-            setattr(logging.Logger, level, add_debug_level(15, name=level.upper()))
+        for i, level in enumerate(levels):
+            setattr(logging.Logger, level, add_debug_level(10 + i, name=level.upper()))
         logger = logging.getLogger()
 
         # logger.setLevel(logging.INFO)
@@ -35,12 +35,14 @@ class _Logger:
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         logger = self._get_stdout_handler(logger=logger, formatter=formatter)
 
+        if path:
+            logger = self.add_new_file_handler(formatter, 'debug', logger)
+
         # add handlers for custom levels if they are activated
         for level, activated in levels.items():
             if activated:
                 logger = self.add_new_file_handler(formatter, level, logger)
-
-        logger.setLevel(logging.NOTSET)
+        logger.setLevel(logging.DEBUG)
 
         _Logger._instance = logger
 

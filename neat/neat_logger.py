@@ -2,7 +2,9 @@
 from experiments.logger import logger, get_logger
 from neat.configuration import get_configuration
 
-NEAT_LEVELS = ['network', 'time', 'population']
+# log-levels to the left will include the ones to the right.
+# For instance, 'time' will only include TIME and INFO
+NEAT_LEVELS = ['network', 'population', 'time']
 
 
 def get_neat_logger(path=None):
@@ -18,5 +20,3 @@ def get_neat_logger(path=None):
 
     logger = get_logger(path=path, levels=levels)
     return logger
-
-

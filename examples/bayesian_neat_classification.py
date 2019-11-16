@@ -1,6 +1,6 @@
-from experiments.logger import get_logger
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
+from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
 from neat.reports import EvolutionReport
 from neat.utils import timeit
@@ -8,7 +8,7 @@ from tests.config_files.config_files import create_configuration
 
 config_file = 'classification-miso'
 config = create_configuration(filename=f'/{config_file}.json')
-logger = get_logger(path='./')
+logger = get_neat_logger(path='./')
 
 # TODO: better mechanism for override
 config.n_generations = 500
