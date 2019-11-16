@@ -11,7 +11,7 @@ config = create_configuration(filename=f'/{config_file}.json')
 logger = get_neat_logger(path='./')
 
 # TODO: better mechanism for override
-config.n_generations = 500
+config.n_generations = 5000
 config.max_stagnation = 30
 config.node_add_prob = 0.5
 # config.pop_size = 25
@@ -19,7 +19,7 @@ config.node_add_prob = 0.5
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'toy-classification'
 # CORRELATION_ID = 'parameters_grid'
-CORRELATION_ID = 'test'
+CORRELATION_ID = 'many-generations'
 
 
 @timeit
@@ -42,6 +42,7 @@ def main():
             evolution_engine.run()
         except Exception as e:
             print(e)
+            notifier.send(e)
             logger.error(e)
             failed += 1
     print(f'It failed {failed} times out of {total}')

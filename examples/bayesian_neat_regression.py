@@ -11,6 +11,7 @@ config = create_configuration(filename=f'/{config_file}.json')
 logger = get_neat_logger(path='./')
 
 # TODO: better mechanism for override
+config.pop_size = 150
 config.n_generations = 500
 config.max_stagnation = 30
 config.node_add_prob = 0.5
