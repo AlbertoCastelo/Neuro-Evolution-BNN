@@ -133,7 +133,6 @@ def evaluate_genome2(genome: Genome, dataset, loss, beta_type, problem_type,
 
     # calculate Data log-likelihood (p(y*|x*,D))
     x_batch, y_batch = dataset.x, dataset.y
-
     x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
                                            y_batch=y_batch,
                                            problem_type=problem_type,

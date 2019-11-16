@@ -50,6 +50,9 @@ class RegressionExample1Dataset(NeatTestingDataset):
             self.x = x[:512]
             self.y = y[:512]
 
+        self.x = torch.tensor(self.x).float()
+        self.y = torch.tensor(self.y).float()
+
     def _get_x_y(self, x, noise):
         dataset_size = x.shape[0]
         # y = 0.1 + 0.5 * (x + np.random.normal(noise[0], noise[1], dataset_size)) + \
@@ -116,6 +119,9 @@ class RegressionExample2Dataset(NeatTestingDataset):
         if self.is_debug:
             self.x = self.x[:512]
             self.y = self.y[:512]
+
+        self.x = torch.tensor(self.x).float()
+        self.y = torch.tensor(self.y).float()
 
     def _get_x_y(self, x_1, x_2, noise):
         x = np.array(list(zip(x_1, x_2)))
