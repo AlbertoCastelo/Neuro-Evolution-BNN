@@ -1,6 +1,6 @@
 from unittest import TestCase, skip
 
-from neat.evaluation import EvaluationEngine, EvaluationAlternativeEngine, EvaluationStochasticEngine
+from neat.evaluation import EvaluationStochasticEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
@@ -9,7 +9,7 @@ class TestEvaluationAlternative(TestCase):
 
     def test_happy_path_siso(self):
         # Single-Input Single-Output
-        self.config = create_configuration(filename='/siso.json')
+        self.config = create_configuration(filename='/regression-siso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
@@ -21,7 +21,7 @@ class TestEvaluationAlternative(TestCase):
 
     def test_happy_path_miso(self):
         # Multiple-Input Single-Output
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
@@ -36,7 +36,7 @@ class TestEvaluationStochasticNetworkOld(TestCase):
 
     def test_happy_path_siso(self):
         # Single-Input Single-Output
-        self.config = create_configuration(filename='/siso.json')
+        self.config = create_configuration(filename='/regression-siso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
@@ -48,7 +48,7 @@ class TestEvaluationStochasticNetworkOld(TestCase):
 
     def test_happy_path_miso(self):
         # Multiple-Input Single-Output
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
@@ -63,7 +63,7 @@ class TestEvaluationStochasticNetwork(TestCase):
 
     def test_happy_path_siso(self):
         # Single-Input Single-Output
-        self.config = create_configuration(filename='/siso.json')
+        self.config = create_configuration(filename='/regression-siso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 
@@ -75,7 +75,7 @@ class TestEvaluationStochasticNetwork(TestCase):
 
     def test_happy_path_miso(self):
         # Multiple-Input Single-Output
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
 

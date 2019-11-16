@@ -14,8 +14,6 @@ def compute_kl_qw_pw(genome: Genome):
     qw = get_qw(genome)
 
     kl_qw_pw = kl_divergence(qw, pw).sum()
-    # TODO: remove division by 100
-    # return kl_qw_pw / 100
     return kl_qw_pw
 
 
@@ -62,11 +60,11 @@ def compute_kl_qw_pw_by_sum(genome: Genome):
 
     for key, node in genome.node_genes.items():
         pb = Normal(loc=config.bias_mean_prior, scale=config.bias_std_prior)
-        qb = Normal(loc=node.bias_mean, scale=np.exp(1.0 + node.bias_std))
+        qb = Normal(loc=node.get_mean(), scale=np.exp(1.0 + node.get_std()))
         kl_qw_pw += kl_divergence(qb, pb)
 
     for key, connection in genome.connection_genes.items():
         pw = Normal(loc=config.weight_mean_prior, scale=config.weight_std_prior)
-        qw = Normal(loc=connection.weight_mean, scale=np.exp(1.0 + connection.weight_std))
+        qw = Normal(loc=connection.get_mean(), scale=np.exp(1.0 + connection.get_std()))
         kl_qw_pw += kl_divergence(qw, pw)
     return kl_qw_pw

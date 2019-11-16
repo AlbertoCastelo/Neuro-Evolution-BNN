@@ -8,7 +8,7 @@ from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
 
-config = create_configuration(filename='/siso.json')
+config = create_configuration(filename='/regression-siso.json')
 N_SAMPLES = 50
 std = 0.2
 n_neurons_per_layer = 10

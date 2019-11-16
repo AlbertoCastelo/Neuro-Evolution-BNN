@@ -15,7 +15,7 @@ class TestPriorKLDivergence(TestCase):
     '''
     def setUp(self) -> None:
         path = get_config_files_path()
-        filename = ''.join([path, '/miso.json'])
+        filename = ''.join([path, '/regression-miso.json'])
         config = get_configuration(filename=filename)
         self.genome = generate_genome_with_hidden_units(n_input=config.n_input,
                                                         n_output=config.n_output)

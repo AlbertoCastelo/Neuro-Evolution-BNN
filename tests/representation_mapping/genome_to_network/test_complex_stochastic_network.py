@@ -13,13 +13,13 @@ STD = 0.00000001
 
 class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
     def setUp(self) -> None:
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
 
     def test_network_structure_0(self):
         '''
         1 layers
         '''
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         self.config.node_activation = 'identity'
         genome = generate_genome_given_graph(graph=((-1, 0), (-2, 0)),
                                              connection_weights=(1.0, 2.0))
@@ -36,7 +36,7 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
         '''
         2 layers
         '''
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         self.config.node_activation = 'identity'
         genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0)),
                                              connection_weights=(1.0, 2.0, 3.0))
@@ -111,7 +111,7 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
                                                                           [4.0, 3.0]]), atol=1e-02))
 
     def test_network_structure_5(self):
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         self.config.node_activation = 'identity'
         self.config.n_output = 2
         graph = ((-1, 1), (-2, 0), (-2, 1), (-1, 2), (2, 0), (-1, 0))
@@ -188,7 +188,7 @@ class TestTransformGenomeWithMultiHopJumpsToLayers(TestCase):
 
 class TestComplexStochasticNetwork(TestCase):
     def setUp(self) -> None:
-        self.config = create_configuration(filename='/miso.json')
+        self.config = create_configuration(filename='/regression-miso.json')
         self.config.node_activation = 'identity'
 
     def test_network_structure_1(self):

@@ -7,7 +7,7 @@ import pymc3 as pm
 
 
 def main():
-    config = create_configuration(filename='/siso.json')
+    config = create_configuration(filename='/regression-siso.json')
     dataset = get_dataset(config.dataset_name, testing=False)
 
     # %%

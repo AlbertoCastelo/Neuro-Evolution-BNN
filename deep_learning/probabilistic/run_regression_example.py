@@ -7,7 +7,7 @@ from tests.config_files.config_files import create_configuration
 import matplotlib.pyplot as plt
 from deep_learning.standard.train_eval import EvaluateStandardDL
 
-config_file = '/siso.json'
+config_file = '/regression-siso.json'
 dataset = RegressionExample1Dataset()
 network_filename = f'network-probabilistic-regression_1.pt'
 
