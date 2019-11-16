@@ -175,11 +175,12 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
     chunks_y_true = []
     # calculate Data log-likelihood (p(y*|x*,D))
     for batch_idx, (x_batch, y_batch) in enumerate(data_loader):
-        x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
 
-        y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
-        if is_gpu:
-            x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+        x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                               y_batch=y_batch,
+                                               is_gpu=is_gpu,
+                                               n_input=genome.n_input,
+                                               n_samples=n_samples)
 
         with torch.no_grad():
             # forward pass
@@ -201,6 +202,15 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
         y_true = torch.cat(chunks_y_true, dim=0)
         return x, y_true, y_pred, loss_value
     return loss_value
+
+
+@timeit
+def _prepare_batch_data(is_gpu, n_input, n_samples, x_batch, y_batch):
+    x_batch = x_batch.view(-1, n_input).repeat(n_samples, 1)
+    y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
+    if is_gpu:
+        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+    return x_batch, y_batch
 
 
 def get_dataset(dataset_name, testing=False):
