@@ -82,7 +82,7 @@ class EvaluationStochasticEngine:
             tasks = []
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
-                x = (genome, self.dataset, self.loss, self.config.beta_type,
+                x = (genome, self.dataset, self.loss, self.config.beta_type, self.config.problem_type,
                      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
@@ -97,6 +97,7 @@ class EvaluationStochasticEngine:
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 genome.fitness = - evaluate_genome(genome=genome,
+                                                   problem_type=self.config.problem_type,
                                                    data_loader=self.data_loader,
                                                    loss=self.loss,
                                                    beta_type=self.config.beta_type,
@@ -111,7 +112,7 @@ def evaluate_genome_parallel(x):
     return - evaluate_genome2(*x)
 
 
-def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
+def evaluate_genome2(genome: Genome, dataset, loss, beta_type, problem_type,
                      batch_size=10000, n_samples=10, is_gpu=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
@@ -132,11 +133,14 @@ def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
 
     # calculate Data log-likelihood (p(y*|x*,D))
     x_batch, y_batch = dataset.x, dataset.y
-    x_batch = x_batch.view(-1, genome.n_input).repeat(n_samples, 1)
 
-    y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
-    if is_gpu:
-        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+    x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                           y_batch=y_batch,
+                                           problem_type=problem_type,
+                                           is_gpu=is_gpu,
+                                           n_input=genome.n_input,
+                                           n_output=genome.n_output,
+                                           n_samples=n_samples)
 
     with torch.no_grad():
         # forward pass
@@ -151,7 +155,7 @@ def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
 
 
 @timeit
-def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
+def evaluate_genome(genome: Genome, data_loader, loss, beta_type, problem_type,
                     batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
@@ -173,21 +177,24 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
     chunks_x = []
     chunks_y_pred = []
     chunks_y_true = []
+
     # calculate Data log-likelihood (p(y*|x*,D))
     for batch_idx, (x_batch, y_batch) in enumerate(data_loader):
 
         x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
                                                y_batch=y_batch,
+                                               problem_type=problem_type,
                                                is_gpu=is_gpu,
                                                n_input=genome.n_input,
+                                               n_output=genome.n_output,
                                                n_samples=n_samples)
 
         with torch.no_grad():
             # forward pass
             output, _ = network(x_batch)
-            # print(self.config.beta_type)
+
             beta = get_beta(beta_type=beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
-            # print(f'Beta: {beta}')
+
             kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
             if return_all:
                 chunks_x.append(x_batch)
@@ -205,11 +212,18 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
 
 
 @timeit
-def _prepare_batch_data(is_gpu, n_input, n_samples, x_batch, y_batch):
+def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_type, n_samples):
     x_batch = x_batch.view(-1, n_input).repeat(n_samples, 1)
-    y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
+    if problem_type == 'classification':
+        y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
+    elif problem_type == 'regression':
+        y_batch = y_batch.view(-1, n_output).repeat(n_samples, 1)
+    else:
+        raise ValueError(f'Problem Type is not correct: {problem_type}')
+
     if is_gpu:
         x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+
     return x_batch, y_batch
 
 
