@@ -112,5 +112,14 @@ venv.bak/
 # cma_es algorithm
 outcmaes
 
-# avoid saving environment.env
+# environmental variables
 environment.env
+
+# executions results
+executions/*.json
+
+# execution best graph
+.png
+
+# logs
+.log*
