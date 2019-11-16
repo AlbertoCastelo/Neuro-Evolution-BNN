@@ -12,5 +12,5 @@ def timeit(func):
         finally:
             end_ = round(time(), 3) - start
             message = f"         Total Time in {func.__name__}: {end_} s"
-            logger.debug(message)
+            logger.time(message)
     return _time_it

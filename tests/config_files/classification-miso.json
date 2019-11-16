@@ -1,14 +1,18 @@
 {
-  "parallel_evaluation": true,
+  "parallel_evaluation": false,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
   "fix_std": false,
   "fix_architecture": false,
-  "n_initial_hidden_neurons": 0,
+  "log_network": false,
+  "log_time": true,
 
   "feed_forward": true,
+  "n_initial_hidden_neurons": 0,
+
+
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,

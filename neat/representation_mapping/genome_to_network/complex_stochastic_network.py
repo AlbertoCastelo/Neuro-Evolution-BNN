@@ -8,6 +8,7 @@ from neat.representation_mapping.genome_to_network.layers import StochasticLinea
     ComplexStochasticLinear
 from neat.representation_mapping.genome_to_network.stochastic_network import _filter_nodes_without_input_connection
 from neat.representation_mapping.genome_to_network.utils import get_activation
+from neat.utils import timeit
 
 
 class ComplexStochasticNetwork(nn.Module):
@@ -63,6 +64,7 @@ class ComplexStochasticNetwork(nn.Module):
             setattr(self, f'activation_{layer_key}', self.activation)
 
 
+@timeit
 def transform_genome_to_layers(genome: Genome) -> dict:
     layers = dict()
     nodes = genome.node_genes

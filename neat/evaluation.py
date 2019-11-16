@@ -84,8 +84,6 @@ class EvaluationStochasticEngine:
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome, self.dataset, self.loss, self.config.beta_type,
                      self.batch_size, n_samples, self.is_gpu)
-                # x = (genome, self.data_loader, self.loss, self.config.beta_type,
-                #      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
             # TODO: fix logging when using multiprocessing. Easy fix is to disable
@@ -93,8 +91,6 @@ class EvaluationStochasticEngine:
 
             pool.close()
             for i, genome in enumerate(population.values()):
-                # genome.fitness = next(fitnesses)
-
                 genome.fitness = fitnesses[i]
 
         else:
@@ -111,15 +107,10 @@ class EvaluationStochasticEngine:
         return population
 
 
-# def evaluate_genome_parallel(x):
-#     return - evaluate_genome(*x)
-
-
 def evaluate_genome_parallel(x):
     return - evaluate_genome2(*x)
 
 
-# @timeit
 def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
                      batch_size=10000, n_samples=10, is_gpu=False):
     '''
@@ -159,7 +150,7 @@ def evaluate_genome2(genome: Genome, dataset, loss, beta_type,
     return loss_value
 
 
-# @timeit
+@timeit
 def evaluate_genome(genome: Genome, data_loader, loss, beta_type,
                     batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
     '''

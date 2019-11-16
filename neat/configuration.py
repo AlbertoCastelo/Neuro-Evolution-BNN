@@ -25,6 +25,11 @@ class DefaultConfiguration(BaseConfiguration):
         self.fix_std = True
         self.fix_architecture = True
 
+        # logging levels
+        self.log_network = False
+        self.log_time = False
+        self.log_population = False
+
         # evaluation parameters
         self.batch_size = 10000
         self.parallel_evaluation = True

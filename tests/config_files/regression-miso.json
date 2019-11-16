@@ -1,43 +1,48 @@
-{"batch_size": 10000,
+{"parallel_evaluation": false,
+  "is_gpu": false,
+  "batch_size": 100000000,
   "beta_type": "other",
 
   "fix_std": true,
+  "fix_architecture": false,
+
+  "log_network": true,
+  "log_time": true,
 
   "feed_forward": true,
-  "single_structural_mutation": true,
-  "mutate_rate": 0.2,
-  "mutate_power": 0.5,
-  "replace_rate": 0.1,
+  "n_initial_hidden_neurons": 0,
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
   "bias_mean_max_value": 30.0,
   "bias_mean_min_value": -30.0,
   "bias_mean_prior": 0.0,
-  "bias_mutate_power": 0.5,
-  "bias_mutate_rate": 0.7,
-  "bias_replace_rate": 0.1,
+
   "bias_std_init_mean": 1.0,
   "bias_std_init_std": 0.0,
   "bias_std_max_value": 2,
   "bias_std_min_value": 0,
   "bias_std_prior": 1.0,
 
+  "bias_mutate_power": 0.5,
+  "bias_mutate_rate": 0.7,
+  "bias_replace_rate": 0.1,
+
   "compatibility_threshold": 3.0,
   "compatibility_weight_coefficient": 0.5,
   "compatibility_disjoint_coefficient": 1.0,
 
   "dataset_name": "regression_example_2",
-  "initial_hidden": false,
-  "is_gpu": false,
   "n_generations": 200,
   "n_input": 2,
   "n_output": 1,
   "n_samples": 100,
-  "node_activation": "sigmoid",
+
+  "node_activation": "tanh",
   "node_aggregation": "sum",
   "pop_size": 150,
   "problem_type": "regression",
+
   "response_init_mean": 1.0,
   "response_init_std": 0.0,
   "response_max_value": 30.0,
@@ -45,13 +50,34 @@
   "response_mutate_power": 0.0,
   "response_mutate_rate": 0.0,
   "response_replace_rate": 0.0,
+
   "weight_mean_init_mean": 0,
   "weight_mean_init_std": 1,
   "weight_mean_max_value": 10,
   "weight_mean_min_value": -10,
   "weight_mean_prior": 0.0,
+
   "weight_std_init_mean": 1,
   "weight_std_init_std": 0,
   "weight_std_max_value": 2,
   "weight_std_min_value": 0,
-  "weight_std_prior": 1.0}
+  "weight_std_prior": 1.0,
+
+  "species_fitness_function": "max",
+  "species_elitism": 2,
+  "max_stagnation": 20,
+
+  "elitism": 2,
+  "survival_threshold": 0.2,
+  "min_species_size": 2,
+
+  "single_structural_mutation": false,
+  "mutate_power": 0.5,
+  "mutate_rate": 0.8,
+  "replace_rate": 0.1,
+
+  "node_add_prob": 0.2,
+  "node_delete_prob": 0.1,
+  "connection_add_prob": 0.5,
+  "connection_delete_prob": 0.25
+}
