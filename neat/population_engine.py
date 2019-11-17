@@ -33,27 +33,29 @@ class EvolutionEngine:
 
     @timeit
     def run(self):
-        logger.info('Starting evolutionary process')
-        # try:
-        # initialize population
-        self.population = self.population_engine.initialize_population()
-        self.speciation_engine.speciate(self.population, generation=0)
+        logger.info('Started evolutionary process')
+        try:
+            # initialize population
+            self.population = self.population_engine.initialize_population()
+            self.speciation_engine.speciate(self.population, generation=0)
 
-        self.population = self.evaluation_engine.evaluate(population=self.population)
+            self.population = self.evaluation_engine.evaluate(population=self.population)
 
-        # report
-        self.report.report_new_generation(generation=0,
-                                          population=self.population,
-                                          species=self.speciation_engine.species)
+            # report
+            self.report.report_new_generation(generation=0,
+                                              population=self.population,
+                                              species=self.speciation_engine.species)
 
-        for generation in range(1, self.n_generations + 1):
-            self._run_generation(generation)
-        logger.info('Finishing evolutionary process')
-        # except Exception as e:
-        #     logger.error(f'Error: {e}')
-        self.report.generate_final_report()
-        self.notifier.send(str(self.report.get_best_individual()))
-
+            for generation in range(1, self.n_generations + 1):
+                self._run_generation(generation)
+        except Exception as e:
+            logger.exception(str(e))
+            self.notifier.send(str(e))
+        finally:
+            self.report.generate_final_report().persist_report()
+            self.report.persist_logs()
+            self.notifier.send(str(self.report.get_best_individual()))
+        logger.info('Finished evolutionary process')
 
     @timeit
     def _run_generation(self, generation):

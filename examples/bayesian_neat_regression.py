@@ -6,13 +6,15 @@ from neat.reports import EvolutionReport
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
-config_file = 'regression-miso'
-config = create_configuration(filename=f'/{config_file}.json')
-logger = get_neat_logger(path='./')
+CONFIG_FILE = 'regression-miso'
+config = create_configuration(filename=f'/{CONFIG_FILE}.json')
+
+LOGS_PATH = './'
+logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.pop_size = 150
-config.n_generations = 500
+config.n_generations = 1
 config.max_stagnation = 30
 config.node_add_prob = 0.5
 # config.pop_size = 25
@@ -25,7 +27,7 @@ CORRELATION_ID = 'test'
 
 @timeit
 def main():
-    report_repository = ReportRepository.create(project='neuro-evolution')
+    report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     notifier = SlackNotifier.create(channel='batch-jobs')
     failed = 0
     total = 0

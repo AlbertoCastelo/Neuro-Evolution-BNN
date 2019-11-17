@@ -1,4 +1,5 @@
 import json
+from os import walk
 
 import jsons
 
@@ -9,6 +10,7 @@ from experiments.reporting.report import BaseReport
 
 S3_BASE_PATH_TABLES = 'tables'
 S3_BASE_PATH_REPORTS = 'reports'
+S3_BASE_PATH_LOGS = 'logs'
 
 
 class ReportPathFactory:
@@ -34,20 +36,27 @@ class ReportPathFactory:
                     f'execution_id={self.execution_id}'
         return data_path
 
+    def get_logs_path(self):
+        data_path = f'{S3_BASE_PATH_LOGS}/version={self.algorithm_version}/dataset={self.dataset}/' \
+                    f'correlation_id={self.correlation_id}/' \
+                    f'execution_id={self.execution_id}'
+        return data_path
+
 
 class ReportRepository:
     @staticmethod
-    def create(project: str, object_repository: ObjectRepository = None):
+    def create(project: str, logs_path: str, object_repository: ObjectRepository = None):
         if object_repository is None:
             bucket = ReportRepository.build_bucket_name(project)
             object_repository = ObjectRepository(bucket=bucket, logger=logger)
             if not object_repository.bucket_exists():
                 object_repository.create_bucket()
 
-        return ReportRepository(project=project, object_repository=object_repository)
+        return ReportRepository(project=project, logs_path=logs_path, object_repository=object_repository)
 
-    def __init__(self, project: str, object_repository: ObjectRepository):
+    def __init__(self, project: str, logs_path: str, object_repository: ObjectRepository):
         self.project = project
+        self.logs_path = logs_path
         self.bucket = None
         self.object_repository = object_repository
 
@@ -91,6 +100,29 @@ class ReportRepository:
         key = self._get_report_key(algorithm_version, correlation_id, dataset, execution_id)
         report_dict = json.loads(self.object_repository.get(key))
         return BaseReport.from_dict(report_dict)
+
+    def persist_logs(self, algorithm_version, dataset, correlation_id, execution_id):
+        object_store_path = ReportPathFactory.create(algorithm_version=algorithm_version,
+                                                     dataset=dataset,
+                                                     correlation_id=correlation_id,
+                                                     execution_id=execution_id) \
+            .get_logs_path()
+        # get all files in path
+        for (dirpath, dirname, filename) in walk(self.logs_path):
+            self.object_repository.set_from_file(key=object_store_path + '/' + filename,
+                                                 data_path=self.logs_path + '/' + filename)
+
+    def download_logs(self, algorithm_version, dataset, correlation_id, execution_id, local_log_path='./'):
+        object_store_path = ReportPathFactory.create(algorithm_version=algorithm_version,
+                                                     dataset=dataset,
+                                                     correlation_id=correlation_id,
+                                                     execution_id=execution_id) \
+            .get_logs_path()
+        remote_files = self.object_repository.tree(key=object_store_path)
+        # get all files in path
+        for remote_file in remote_files:
+            self.object_repository.get_to_file(key=object_store_path + '/' + remote_file,
+                                               data_path=local_log_path + '/' + remote_file)
 
     @staticmethod
     def build_bucket_name(project):

@@ -49,10 +49,19 @@ class EvolutionReport:
         self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
         self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
         self.report.set_finish_time()
+        return self
+
+    def persist_report(self):
         self.report_repository.set_report(report=self.report)
+        return self
+
+    def persist_logs(self):
+        self.report_repository.persist_logs(algorithm_version=self.algorithm_version, dataset=self.dataset,
+                                            correlation_id=self.correlation_id, execution_id=self.report.execution_id)
 
     def get_best_individual(self) -> Genome:
         return self.best_individual
+
 
 
 class GenerationReport:
