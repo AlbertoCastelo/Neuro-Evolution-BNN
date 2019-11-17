@@ -14,7 +14,9 @@ LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.pop_size = 150
+config.pop_size = 100
+config.n_samples = 20
+
 config.n_generations = 500
 config.max_stagnation = 30
 config.node_add_prob = 0.5

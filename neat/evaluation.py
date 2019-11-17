@@ -112,6 +112,7 @@ def evaluate_genome_parallel(x):
     return - evaluate_genome2(*x)
 
 
+@timeit
 def evaluate_genome2(genome: Genome, dataset, loss, beta_type, problem_type,
                      batch_size=10000, n_samples=10, is_gpu=False):
     '''
@@ -210,7 +211,7 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type, problem_type,
     return loss_value
 
 
-@timeit
+# @timeit
 def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_type, n_samples):
     x_batch = x_batch.view(-1, n_input).repeat(n_samples, 1)
     if problem_type == 'classification':

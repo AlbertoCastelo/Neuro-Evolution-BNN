@@ -5,6 +5,7 @@ from experiments.logger import logger
 from experiments.reporting.report import BaseReport
 from experiments.reporting.report_repository import ReportRepository
 from neat.genome import Genome
+from neat.utils import timeit
 
 
 class EvolutionReport:
@@ -27,6 +28,7 @@ class EvolutionReport:
         self.generation_metrics = dict()
         self.best_individual = None
 
+    @timeit
     def report_new_generation(self, generation: int, population: dict, species: dict):
         generation_report = GenerationReport.create(population=population, generation=generation, species=species).run()
         generation_data = generation_report.generation_data
@@ -47,8 +49,8 @@ class EvolutionReport:
             return True
         return False
 
-    def generate_final_report(self):
-        self._generate_report()
+    def generate_final_report(self, end_condition):
+        self._generate_report(end_condition)
         return self
 
     def _generate_report(self, end_condition='normal'):

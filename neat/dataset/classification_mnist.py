@@ -1,3 +1,4 @@
+import os
 from PIL import Image
 from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
@@ -14,7 +15,8 @@ class MNISTReducedDataset(NeatTestingDataset, MNIST):
 
         self.transform = transforms.Compose([transforms.ToTensor(),
                                              transforms.Normalize((0.1307,), (0.3081,))])
-        MNIST.__init__(self, root='./', train=self.train, download=True, transform=self.transform)
+        path = os.path.realpath(__file__)
+        MNIST.__init__(self, root='/', train=self.train, download=True, transform=self.transform)
 
     def generate_data(self):
         pass
