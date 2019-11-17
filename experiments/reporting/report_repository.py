@@ -3,6 +3,7 @@ from os import walk
 
 import jsons
 
+from experiments.file_utils import read_file
 from experiments.logger import logger
 from experiments.object_repository.object_repository import ObjectRepository
 from experiments.object_repository.s3_utils import save_df_to_parquet_in_s3, read_df_from_parquet_in_s3
@@ -56,7 +57,6 @@ class ReportRepository:
 
     def __init__(self, project: str, logs_path: str, object_repository: ObjectRepository):
         self.project = project
-        self.logs_path = logs_path
         self.bucket = None
         self.object_repository = object_repository
 
@@ -108,9 +108,16 @@ class ReportRepository:
                                                      execution_id=execution_id) \
             .get_logs_path()
         # get all files in path
-        for (dirpath, dirname, filename) in walk(self.logs_path):
-            self.object_repository.set_from_file(key=object_store_path + '/' + filename,
-                                                 data_path=self.logs_path + '/' + filename)
+        log_path = logger.log_base_path
+        for (dirpaths, dirnames, filenames) in walk(log_path):
+            for filename in filenames:
+                key = object_store_path + '/' + filename
+                filename_complete = log_path + '/' + filename
+
+                data = read_file(filename=filename_complete)
+                self.object_repository.set(key=key, content=data)
+                # self.object_repository.set_from_file(key=,
+                #                                      data_path=)
 
     def download_logs(self, algorithm_version, dataset, correlation_id, execution_id, local_log_path='./'):
         object_store_path = ReportPathFactory.create(algorithm_version=algorithm_version,

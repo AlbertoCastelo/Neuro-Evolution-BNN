@@ -1,3 +1,4 @@
+import os
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
@@ -9,11 +10,11 @@ from tests.config_files.config_files import create_configuration
 CONFIG_FILE = 'regression-miso'
 config = create_configuration(filename=f'/{CONFIG_FILE}.json')
 
-LOGS_PATH = './'
+LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.pop_size = 150
+config.pop_size = 25
 config.n_generations = 1
 config.max_stagnation = 30
 config.node_add_prob = 0.5

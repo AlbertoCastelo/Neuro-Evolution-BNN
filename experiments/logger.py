@@ -27,8 +27,6 @@ class _Logger:
         for i, level in enumerate(levels):
             setattr(logging.Logger, level, add_debug_level(10 + i, name=level.upper()))
         logger = logging.getLogger()
-
-        # logger.setLevel(logging.INFO)
         logger.handlers = []
 
         # stdout handle
@@ -36,6 +34,7 @@ class _Logger:
         logger = self._get_stdout_handler(logger=logger, formatter=formatter)
 
         if path:
+            setattr(logger, 'log_base_path', self.path)
             logger = self.add_new_file_handler(formatter, 'debug', logger)
 
         # add handlers for custom levels if they are activated
