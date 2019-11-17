@@ -23,7 +23,6 @@ class EvolutionReport:
         self.report = BaseReport(correlation_id)
         self.report.add('algorithm_version', algorithm_version)
         self.report.add('dataset', dataset)
-        # super().__init__(correlation_id)
 
         self.generation_metrics = dict()
         self.best_individual = None
@@ -32,9 +31,12 @@ class EvolutionReport:
         generation_report = GenerationReport.create(population=population, generation=generation, species=species).run()
         generation_data = generation_report.generation_data
 
-        self._update_best(generation_report=generation_report, population=population)
+        is_best_updated = self._update_best(generation_report=generation_report, population=population)
 
         self.generation_metrics[generation] = generation_data
+
+        if is_best_updated:
+            self._generate_report(end_condition='checkpoint')
 
     def _update_best(self, generation_report, population):
         if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
@@ -42,14 +44,20 @@ class EvolutionReport:
             logger.debug(f'    New best individual found:{round(self.best_individual.fitness, 3)}')
             logger.debug(f'         best individual has {len(self.best_individual.node_genes)} Nodes '
                          f'and {len(self.best_individual.connection_genes)} Connections')
+            return True
+        return False
 
     def generate_final_report(self):
+        self._generate_report()
+        return self
+
+    def _generate_report(self, end_condition='normal'):
         self.report.add_data(name='generation_metrics', value=self.generation_metrics)
         self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
         self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
         self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
+        self.report.add_data(name='end_condition', value=end_condition)
         self.report.set_finish_time()
-        return self
 
     def persist_report(self):
         self.report_repository.set_report(report=self.report)
