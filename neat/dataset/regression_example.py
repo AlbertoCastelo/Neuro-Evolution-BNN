@@ -71,8 +71,8 @@ class RegressionExample1Dataset(NeatTestingDataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.x[idx]).float()
-        y = torch.tensor(self.y[idx]).float()
+        x = self.x[idx]
+        y = self.y[idx]
         return x, y
 
 
@@ -140,6 +140,6 @@ class RegressionExample2Dataset(NeatTestingDataset):
         return len(self.x)
 
     def __getitem__(self, idx):
-        x = torch.tensor(self.x[idx]).float()
-        y = torch.tensor(self.y[idx]).float()
+        x = self.x[idx]
+        y = self.y[idx]
         return x, y

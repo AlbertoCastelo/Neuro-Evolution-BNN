@@ -1,3 +1,4 @@
+import os
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
@@ -10,7 +11,7 @@ from tests.config_files.config_files import create_configuration
 config_file = 'classification-miso'
 config = create_configuration(filename=f'/{config_file}.json')
 
-LOGS_PATH = './'
+LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
