@@ -24,6 +24,7 @@ class SlackNotifier(Notifier):
         self.channel = channel
 
     def send(self, message):
+        result = None
         try:
             slack_client = WebClient(token=self.slack_token)
             result = slack_client.chat_postMessage(
