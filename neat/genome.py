@@ -46,6 +46,7 @@ class Genome:
         return Genome.from_dict(genome_dict)
 
     def __init__(self, key, id=None, genome_config=None):
+        self.describe_with_parameters = False
         self.key = key
         self.id = str(uuid.uuid4()) if id is None else id
 
@@ -205,19 +206,20 @@ class Genome:
                                 f'    N-Weight-Parameters: {self.n_weight_parameters}\n',
                                 f'Fitness: {self.fitness}\n'])
 
-        bias_data = []
-        bias_data.append(''.join(['Node Key | Mean  | Std \n']))
-        for key, node in self.node_genes.items():
-            bias_data.append(''.join([str(key), ':     ', str(round(node.get_mean(), 4)), '  |  ',
-                                      str(round(node.get_std(), 4)), ' \n']))
-        bias_str = ''.join(bias_data)
+        if self.describe_with_parameters:
+            bias_data = []
+            bias_data.append(''.join(['Node Key | Mean  | Std \n']))
+            for key, node in self.node_genes.items():
+                bias_data.append(''.join([str(key), ':     ', str(round(node.get_mean(), 4)), '  |  ',
+                                          str(round(node.get_std(), 4)), ' \n']))
+            bias_str = ''.join(bias_data)
 
-        weights_data = []
-        weights_data.append(''.join(['Connection Key | Mean  | Std \n']))
-        for key, connection in self.connection_genes.items():
-            weights_data.append(''.join([str(key), ': ', str(round(connection.get_mean(), 4)), '  |  ',
-                                         str(round(connection.get_std(), 4)), ' \n']))
-        weight_str = ''.join(weights_data)
+            weights_data = []
+            weights_data.append(''.join(['Connection Key | Mean  | Std \n']))
+            for key, connection in self.connection_genes.items():
+                weights_data.append(''.join([str(key), ': ', str(round(connection.get_mean(), 4)), '  |  ',
+                                             str(round(connection.get_std(), 4)), ' \n']))
+            weight_str = ''.join(weights_data)
 
-        genome_str = ''.join([general_data, '\n', bias_str, '\n', weight_str])
-        return genome_str
+            general_data = ''.join([general_data, '\n', bias_str, '\n', weight_str])
+        return general_data
