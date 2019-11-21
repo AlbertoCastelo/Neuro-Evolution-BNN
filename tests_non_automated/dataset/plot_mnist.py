@@ -1,9 +1,9 @@
-from neat.dataset.classification_mnist import MNISTReducedDataset
+from neat.dataset.classification_mnist import MNISTDataset
 import matplotlib.pyplot as plt
 
 
 def main():
-    dataset = MNISTReducedDataset(dataset_type='test')
+    dataset = MNISTDataset(dataset_type='test')
     print(dataset)
 
     x, y = dataset.__getitem__(1)

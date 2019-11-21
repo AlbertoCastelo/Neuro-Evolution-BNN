@@ -1,6 +1,6 @@
 import math
-import multiprocessing
-from multiprocessing.pool import Pool
+from torch.multiprocessing import Process, cpu_count
+from torch.multiprocessing.pool import Pool
 from time import time
 
 import torch
@@ -9,13 +9,12 @@ from torch.utils.data import DataLoader, Dataset
 from experiments.logger import logger
 from neat.configuration import ConfigError, get_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
-from neat.dataset.classification_mnist import MNISTReducedDataset
+from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
-from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetwork
 from neat.utils import timeit
 
 
@@ -36,7 +35,7 @@ class CustomeDataLoader:
         return len(self.dataset)
 
 
-class NoDaemonProcess(multiprocessing.Process):
+class NoDaemonProcess(Process):
     # make 'daemon' attribute always return False
     def _get_daemon(self):
         return False
@@ -45,7 +44,7 @@ class NoDaemonProcess(multiprocessing.Process):
     daemon = property(_get_daemon, _set_daemon)
 
 
-class MyPool(multiprocessing.pool.Pool):
+class MyPool(Pool):
     Process = NoDaemonProcess
 
 
@@ -77,7 +76,7 @@ class EvaluationStochasticEngine:
         # TODO: make n_samples increase with generation number
         n_samples = self.config.n_samples
         if self.parallel_evaluation:
-            n_cpus = multiprocessing.cpu_count()
+            n_cpus = cpu_count()
             pool = MyPool(min(n_cpus//2, 8))
             tasks = []
             for genome in population.values():
@@ -245,8 +244,8 @@ def get_dataset(dataset_name, testing=False):
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
         dataset.generate_data()
         return dataset
-    elif dataset_name == 'classification_mnist_reduced':
-        dataset = MNISTReducedDataset(dataset_type=dataset_type)
+    elif dataset_name == 'mnist':
+        dataset = MNISTDataset(dataset_type=dataset_type)
         dataset.generate_data()
         return dataset
     else:

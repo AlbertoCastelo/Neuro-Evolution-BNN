@@ -3,10 +3,10 @@
   "batch_size": 100000000,
   "beta_type": "other",
 
-  "fix_std": true,
+  "fix_std": false,
   "fix_architecture": false,
 
-  "log_network": true,
+  "log_network": false,
   "log_time": true,
 
   "feed_forward": true,
