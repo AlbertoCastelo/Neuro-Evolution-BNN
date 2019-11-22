@@ -24,11 +24,13 @@ class MNISTDataset(NeatTestingDataset, MNIST):
         MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
 
     def generate_data(self):
+
         if self.train:
             self.x = self.train_data.float()
             self.y = self.train_labels.short()
         else:
             self.x = self.test_data.float()
             self.y = self.test_labels.short()
-            # self.x = self.test_data
-            # self.y = self.test_labels
+
+        # self.x = self.x[:1]
+        # self.y = self.y[:1]

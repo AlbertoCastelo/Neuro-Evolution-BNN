@@ -1,6 +1,8 @@
 import math
-from torch.multiprocessing import Process, cpu_count
-from torch.multiprocessing.pool import Pool
+# from torch.multiprocessing import Process, cpu_count
+# from torch.multiprocessing.pool import Pool
+from multiprocessing import Process, cpu_count
+from multiprocessing.pool import Pool
 from time import time
 
 import torch
@@ -18,7 +20,7 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network im
 from neat.utils import timeit
 
 
-class CustomeDataLoader:
+class CustomDataLoader:
     def __init__(self, dataset: Dataset, shuffle=True):
         self.dataset = dataset
         self.shuffle = shuffle
@@ -54,7 +56,7 @@ def get_data_loader(dataset: Dataset, batch_size=None):
     if not parallel_evaluation:
         return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=1)
     else:
-        return CustomeDataLoader(dataset, shuffle=True)
+        return CustomDataLoader(dataset, shuffle=True)
 
 
 class EvaluationStochasticEngine:
