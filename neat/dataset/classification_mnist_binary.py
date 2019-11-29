@@ -26,19 +26,23 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
 
     def generate_data(self):
+        mask_1 = self.targets == 1
+        mask_0 = self.targets == 0
+        mask_or = mask_1 + mask_0
+        self.targets = self.targets[mask_or]
+        self.data = self.data[mask_or]
 
-        if self.train:
-            self.x = self.train_data.float()
-            self.y = self.train_labels.short()
-        else:
-            self.x = self.test_data.float()
-            self.y = self.test_labels.short()
+        self.x = self.data.float()
+        self.y = self.targets.short()
 
-        mask_1 = self.y == 1
-        mask_2 = self.y == 2
-        mask_or = mask_1 + mask_2
-        self.y = self.y[mask_or]
-        self.x = self.x[mask_or]
+        # if self.train:
+        #     self.x = self.train_data.float()
+        #     self.y = self.train_labels.short()
+        # else:
+        #     self.x = self.test_data.float()
+        #     self.y = self.test_labels.short()
+
+
 
         # self.x = self.x[:1]
         # self.y = self.y[:1]
