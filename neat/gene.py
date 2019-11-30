@@ -24,6 +24,7 @@ class Gene:
         self.mutation_attributes = copy.deepcopy(MUTATION_ATTRIBUTES)
 
         self.config = get_configuration()
+        self.is_discrete = self.config.is_discrete
         self.fix_std = self.config.fix_std
         if not self.fix_std:
             self.mutation_attributes.append('std')
@@ -95,18 +96,32 @@ class Gene:
                              a_min=min_,
                              a_max=max_))
 
-    def _initialize_float(self, parameter_name, parameter_type):
+    def _initialize_float(self, parameter_name: str, parameter_type: str):
+        if self.is_discrete:
+            return self._sample_discrete_float(parameter_name, parameter_type)
+        return self._initialize_continuous_float(parameter_name, parameter_type)
+
+    def _mutate_float(self, value, parameter_name: str, parameter_type: str):
+        if self.is_discrete:
+            return self._sample_discrete_float(parameter_name, parameter_type)
+        return self._mutate_continuous_float(parameter_name, parameter_type, value)
+
+    def _sample_discrete_float(self, parameter_name, parameter_type):
+        possible_values = getattr(self.config, f'{parameter_name}_{parameter_type}_discrete')
+        value = np.random.choice(possible_values, size=1)
+        return value
+
+    def _initialize_continuous_float(self, parameter_name, parameter_type):
         mean = getattr(self.config, f'{parameter_name}_{parameter_type}_init_mean')
         std = getattr(self.config, f'{parameter_name}_{parameter_type}_init_std')
         value = np.random.normal(loc=mean, scale=std)
         return value
 
-    def _mutate_float(self, value, parameter_name: str, parameter_type: str):
+    def _mutate_continuous_float(self, parameter_name, parameter_type, value):
         r = random.random()
         if r < self.mutate_rate:
             mutated_value = value + random.gauss(0.0, self.mutate_power)
             return mutated_value
-
         if r < self.replace_rate + self.mutate_rate:
             return self._initialize_float(parameter_name=parameter_name, parameter_type=parameter_type)
         return value

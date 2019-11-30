@@ -21,6 +21,8 @@ class DefaultConfiguration(BaseConfiguration):
         self.dataset_name = 'regression_example_1'
         self.problem_type = 'regression'
 
+        self.is_discrete = True
+
         # Degrees of Freedom
         self.fix_std = True
         self.fix_architecture = True

@@ -28,6 +28,8 @@ DATASET = 'mnist'
 # CORRELATION_ID = 'parameters_grid'
 CORRELATION_ID = 'many-generations'
 
+CORRELATION_ID = 'test'
+
 
 @timeit
 def main():
