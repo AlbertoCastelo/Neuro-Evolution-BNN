@@ -16,7 +16,7 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.n_generations = 1000
-config.pop_size = 200
+config.pop_size = 20
 config.n_samples = 20
 
 config.max_stagnation = 30

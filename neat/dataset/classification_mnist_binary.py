@@ -29,8 +29,11 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         mask_1 = self.targets == 1
         mask_0 = self.targets == 0
         mask_or = mask_1 + mask_0
-        self.targets = self.targets[mask_or]
         self.data = self.data[mask_or]
+        self.targets = self.targets[mask_or]
+
+        self.data = self.data.float()
+        self.targets = self.targets.short()
 
         self.x = self.data.float()
         self.y = self.targets.short()
