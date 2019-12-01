@@ -39,6 +39,7 @@ class EvolutionReport:
 
         if is_best_updated:
             self._generate_report(end_condition='checkpoint')
+            self.persist_report()
 
     def _update_best(self, generation_report, population):
         if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
@@ -71,7 +72,6 @@ class EvolutionReport:
 
     def get_best_individual(self) -> Genome:
         return self.best_individual
-
 
 
 class GenerationReport:
