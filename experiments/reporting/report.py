@@ -21,7 +21,7 @@ class BaseReport:
         self.duration = None
 
     def to_dict(self):
-        result = self.__dict__
+        result = copy.deepcopy(self.__dict__)
         result['start_time'] = str(self.start_time)
         result['finish_time'] = str(self.finish_time)
         result['duration'] = str(self.duration)
