@@ -20,7 +20,7 @@ def compute_kl_qw_pw(genome: Genome):
 def get_pw(genome: Genome) -> Distribution:
 
     # get prior configuration
-    config = get_configuration()
+    config = genome.genome_config
     means = []
     stds = []
     for key, node in genome.node_genes.items():
