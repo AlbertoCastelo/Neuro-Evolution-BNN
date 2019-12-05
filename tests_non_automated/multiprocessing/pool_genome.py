@@ -10,6 +10,7 @@ from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.neat_logger import get_neat_logger
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
 config = create_configuration(filename='/mnist_binary.json')
@@ -31,15 +32,20 @@ def evaluate_genome_parallel(x):
     return evaluate_genome(*x)
 
 
+def process_initialization(dataset_name, testing):
+    global dataset
+    dataset = get_dataset(dataset_name, testing=testing)
+    dataset.generate_data()
+
+@timeit
 def evaluate_genome(genome: Genome, loss, beta_type, problem_type,
                     batch_size=10000, n_samples=10, is_gpu=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
     Uses the VariationalInferenceLoss class (not the alternative)
-    '''
-    dataset = get_dataset(genome.genome_config.dataset_name, testing=True)
-    dataset.generate_data()
-
+    # '''
+    # dataset = get_dataset(genome.genome_config.dataset_name, testing=True)
+    # dataset.generate_data()
     kl_posterior = 0
 
     kl_qw_pw = compute_kl_qw_pw(genome=genome)
@@ -80,8 +86,7 @@ def evaluate_genome(genome: Genome, loss, beta_type, problem_type,
 tasks = []
 
 
-
-pool = Pool(N_PROCESSES)
+pool = Pool(processes=N_PROCESSES, initializer=process_initialization, initargs=(config.dataset_name, True))
 for genome in genomes:
     logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
 
