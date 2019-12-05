@@ -19,8 +19,8 @@ class ComplexStochasticNetwork(nn.Module):
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
-
-        self.activation = get_activation()
+        self.config = genome.genome_config
+        self.activation = get_activation(config=self.config)
         self.layers = transform_genome_to_layers(genome=genome)
         self.n_layers = len(self.layers)
         self._set_network_layers(layers=self.layers)
@@ -40,11 +40,9 @@ class ComplexStochasticNetwork(nn.Module):
             for index_needed in self.layers[i].indices_of_needed_nodes:
                 chunks.append(self._cache[index_needed])
             x = torch.cat(chunks, 1)
-
             x = getattr(self, f'layer_{i}')(x)
             if i > 0:
                 x = getattr(self, f'activation_{i}')(x)
-
         return x, kl_qw_pw
 
     def _set_network_layers(self, layers: dict):
