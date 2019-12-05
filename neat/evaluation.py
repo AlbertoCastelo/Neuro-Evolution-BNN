@@ -1,9 +1,6 @@
 import math
 from multiprocessing import cpu_count, Queue, Manager, Pool
-
 import torch
-from torch.utils.data import DataLoader, Dataset
-
 from experiments.logger import logger
 from experiments.multiprocessing_utils import Worker
 from neat.configuration import ConfigError, get_configuration
