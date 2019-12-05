@@ -49,6 +49,7 @@ class EvolutionEngine:
 
         for generation in range(1, self.n_generations + 1):
             self._run_generation(generation)
+        self.evaluation_engine.close()
         # except Exception as e:
         #     end_condition = 'exception'
         #     logger.exception(str(e))

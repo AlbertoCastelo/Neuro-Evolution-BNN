@@ -1,10 +1,5 @@
 import math
-# from torch.multiprocessing import Process, cpu_count
-# from torch.multiprocessing.pool import Pool
-import sys
-from multiprocessing import Process, cpu_count, Queue, Manager, SimpleQueue
-from multiprocessing.pool import Pool
-from time import time
+from multiprocessing import cpu_count, Queue, Manager, Pool
 
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -15,51 +10,13 @@ from neat.configuration import ConfigError, get_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
+from neat.dataset.custom_dataloader import get_data_loader
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.utils import timeit
-
-
-class CustomDataLoader:
-    def __init__(self, dataset: Dataset, shuffle=True):
-        self.dataset = dataset
-        self.shuffle = shuffle
-
-        self.iterator = self._get_iterator()
-
-    def _get_iterator(self):
-        return self.dataset.x, self.dataset.y
-
-    def __iter__(self):
-        return self.iterator
-
-    def __len__(self):
-        return len(self.dataset)
-
-
-class NoDaemonProcess(Process):
-    # make 'daemon' attribute always return False
-    def _get_daemon(self):
-        return False
-    def _set_daemon(self, value):
-        pass
-    daemon = property(_get_daemon, _set_daemon)
-
-
-class MyPool(Pool):
-    Process = NoDaemonProcess
-
-
-def get_data_loader(dataset: Dataset, batch_size=None):
-    config = get_configuration()
-    parallel_evaluation = config.parallel_evaluation
-    if not parallel_evaluation:
-        return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=1)
-    else:
-        return CustomDataLoader(dataset, shuffle=True)
 
 
 class EvaluationStochasticEngine:
@@ -74,84 +31,27 @@ class EvaluationStochasticEngine:
         self.data_loader = None
         self.loss = None
 
+        if self.parallel_evaluation:
+            self.n_processes = min(cpu_count() // 2, 8)
+            self.pool = Pool(processes=self.n_processes, initializer=process_initialization, initargs=(self.config.dataset_name, True))
+
     @timeit
     def evaluate(self, population: dict):
         # TODO: make n_samples increase with generation number
         n_samples = self.config.n_samples
         if self.parallel_evaluation:
-            n_cpus = min(cpu_count()//2, 8)
-            # # create workers
-            # manager = Manager()
-            # task_queue = manager.Queue()
-            # exit_queue = manager.Queue()
-            # exception_queue = manager.Queue()
-            # results_queue = manager.Queue()
-            # # task_queue = SimpleQueue()
-            # # exit_queue = SimpleQueue()
-            # # exception_queue = SimpleQueue()
-            # # results_queue = SimpleQueue()
-            # workers = []
-            # for i in range(n_cpus):
-            #     worker = Worker(task_queue=task_queue,
-            #                     exit_queue=exit_queue,
-            #                     exception_queue=exception_queue,
-            #                     results_queue=results_queue)
-            #     worker.start()
-            #     workers.append(worker)
-            #
-            # for genome in population.values():
-            #     task_queue.put(Task(genome=genome.copy(), dataset=None,
-            #                         x=torch.zeros((2, 784)).float(),
-            #                         y=torch.zeros(2).short(),
-            #                         # x=self.dataset.x.clone().detach(),
-            #                         # y=self.dataset.y.clone().detach(),
-            #                         loss=get_loss('classification'),
-            #                         beta_type='other',
-            #                         problem_type='classification',
-            #                         batch_size=100000,
-            #                         n_samples=20,
-            #                         is_gpu=False))
-            #                         # loss=self.loss,
-            #                         # beta_type=self.config.beta_type, problem_type=self.config.problem_type,
-            #                         # batch_size=self.batch_size, n_samples=n_samples, is_gpu=self.is_gpu))
-            #
-            # while not task_queue.empty():
-            #     print('reading results from workers')
-            #     print(task_queue.qsize())
-            #     # for worker in workers:
-            #     #     print(f'Is alive: {worker.is_alive()}')
-            #     # print('reading results from workers')
-            #     # print(task_queue.qsize())
-            #     if not exception_queue.empty():
-            #         exception = exception_queue.get()
-            #         raise exception
-            #     results = results_queue.get()
-            #     print(results)
-            #     population[results[0]].fitness = - results[1]
-            #
-            # # sys.exit()
-            #
-            # # terminate workers
-            # # TODO: workers can live during the whole process
-            # for i in range(n_cpus):
-            #     print('sending exit conditions')
-            #     exit_queue.put(1)
-
             tasks = []
-            pool = MyPool(min(n_cpus//2, 8))
+
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome.copy(), get_loss(problem_type=self.config.problem_type),
                      self.config.beta_type, self.config.problem_type,
                      self.batch_size, n_samples, self.is_gpu)
-                # x = (genome, self.dataset, self.loss, self.config.beta_type, self.config.problem_type,
-                #      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
             # TODO: fix logging when using multiprocessing. Easy fix is to disable
-            fitnesses = list(pool.imap(evaluate_genome_parallel, tasks, chunksize=len(population)//n_cpus))
+            fitnesses = list(self.pool.imap(evaluate_genome_task, tasks, chunksize=len(population)//self.n_processes))
 
-            pool.close()
             for i, genome in enumerate(population.values()):
                 genome.fitness = fitnesses[i]
 
@@ -172,6 +72,64 @@ class EvaluationStochasticEngine:
 
         return population
 
+    def close(self):
+        if self.parallel_evaluation:
+            self.pool.close()
+
+    def _parallelize_with_workers(self, n_cpus, population):
+        # create workers
+        manager = Manager()
+        task_queue = manager.Queue()
+        exit_queue = manager.Queue()
+        exception_queue = manager.Queue()
+        results_queue = manager.Queue()
+        # task_queue = SimpleQueue()
+        # exit_queue = SimpleQueue()
+        # exception_queue = SimpleQueue()
+        # results_queue = SimpleQueue()
+        workers = []
+        for i in range(n_cpus):
+            worker = Worker(task_queue=task_queue,
+                            exit_queue=exit_queue,
+                            exception_queue=exception_queue,
+                            results_queue=results_queue)
+            worker.start()
+            workers.append(worker)
+        for genome in population.values():
+            task_queue.put(Task(genome=genome.copy(), dataset=None,
+                                x=torch.zeros((2, 784)).float(),
+                                y=torch.zeros(2).short(),
+                                # x=self.dataset.x.clone().detach(),
+                                # y=self.dataset.y.clone().detach(),
+                                loss=get_loss('classification'),
+                                beta_type='other',
+                                problem_type='classification',
+                                batch_size=100000,
+                                n_samples=20,
+                                is_gpu=False))
+            # loss=self.loss,
+            # beta_type=self.config.beta_type, problem_type=self.config.problem_type,
+            # batch_size=self.batch_size, n_samples=n_samples, is_gpu=self.is_gpu))
+        while not task_queue.empty():
+            print('reading results from workers')
+            print(task_queue.qsize())
+            # for worker in workers:
+            #     print(f'Is alive: {worker.is_alive()}')
+            # print('reading results from workers')
+            # print(task_queue.qsize())
+            if not exception_queue.empty():
+                exception = exception_queue.get()
+                raise exception
+            results = results_queue.get()
+            print(results)
+            population[results[0]].fitness = - results[1]
+        # sys.exit()
+        # terminate workers
+        # TODO: workers can live during the whole process
+        for i in range(n_cpus):
+            print('sending exit conditions')
+            exit_queue.put(1)
+
     def _get_dataset(self):
         if self.dataset is None:
             self.dataset = get_dataset(self.config.dataset_name, testing=self.testing)
@@ -190,8 +148,14 @@ class EvaluationStochasticEngine:
         return self.loss
 
 
-def evaluate_genome_parallel(x):
-    return - evaluate_genome3(*x)
+def process_initialization(dataset_name, testing):
+    global dataset
+    dataset = get_dataset(dataset_name, testing=testing)
+    dataset.generate_data()
+
+
+def evaluate_genome_task(x):
+    return - _evaluate_genome_parallel(*x)
 
 
 class Task:
@@ -263,14 +227,12 @@ class Task:
         return self.result
 
 
-def evaluate_genome3(genome: Genome, loss, beta_type, problem_type,
-                    batch_size=10000, n_samples=10, is_gpu=False):
+def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
+                              batch_size=10000, n_samples=10, is_gpu=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
     Uses the VariationalInferenceLoss class (not the alternative)
     '''
-    dataset = get_dataset(genome.genome_config.dataset_name, testing=True)
-    dataset.generate_data()
 
     kl_posterior = 0
 
@@ -281,50 +243,6 @@ def evaluate_genome3(genome: Genome, loss, beta_type, problem_type,
     if is_gpu:
         network.cuda()
     m = math.ceil(len(dataset.x) / batch_size)
-
-    network.eval()
-
-    # calculate Data log-likelihood (p(y*|x*,D))
-    x_batch, y_batch = dataset.x, dataset.y
-    x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
-                                           y_batch=y_batch,
-                                           problem_type=problem_type,
-                                           is_gpu=is_gpu,
-                                           n_input=genome.n_input,
-                                           n_output=genome.n_output,
-                                           n_samples=n_samples)
-
-    if is_gpu:
-        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
-
-    with torch.no_grad():
-        # forward pass
-        output, _ = network(x_batch)
-        # print(self.config.beta_type)
-        beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
-        # print(f'Beta: {beta}')
-        kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
-
-    loss_value = kl_posterior.item()
-    return loss_value
-
-# @timeit
-def evaluate_genome2(genome: Genome, dataset, loss, beta_type, problem_type,
-                     batch_size=10000, n_samples=10, is_gpu=False):
-    '''
-    Calculates: KL-Div(q(w)||p(w|D))
-    Uses the VariationalInferenceLoss class (not the alternative)
-    '''
-    kl_posterior = 0
-
-    kl_qw_pw = compute_kl_qw_pw(genome=genome)
-
-    # setup network
-    network = ComplexStochasticNetwork(genome=genome)
-    if is_gpu:
-        network.cuda()
-
-    m = math.ceil(len(dataset) / batch_size)
 
     network.eval()
 
@@ -410,20 +328,11 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type, problem_type,
     return loss_value
 
 
-# @timeit
 def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_type, n_samples):
-    # print(f'x-shape: {x_batch.shape}')
-    # print(f'x-type: {x_batch.type()}')
     x_batch = x_batch.view(-1, n_input).repeat(n_samples, 1)
-    # print(f'x-shape: {x_batch.shape}')
-    # print(f'n-samples: {n_samples}')
-    # x_batch = x_batch.repeat(n_samples, 1)
-    # print(f'x-shape: {x_batch.shape}')
-    # sys.exit()
+
     if problem_type == 'classification':
-        # print(f'y-shape: {y_batch.shape}')
         y_batch = y_batch.view(-1, 1).repeat(n_samples, 1).squeeze()
-        # print(f'y-shape: {y_batch.shape}')
     elif problem_type == 'regression':
         y_batch = y_batch.view(-1, n_output).repeat(n_samples, 1)
     else:
