@@ -6,6 +6,7 @@ import jsons
 
 from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
+from neat.utils import timeit
 
 
 class GenomeSample:
@@ -89,6 +90,7 @@ class Genome:
 
         return dict_
 
+    @timeit
     def copy(self):
         return Genome.from_dict(copy.deepcopy(self.to_dict()))
 

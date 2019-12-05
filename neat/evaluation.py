@@ -38,10 +38,9 @@ class EvaluationStochasticEngine:
         n_samples = self.config.n_samples
         if self.parallel_evaluation:
             tasks = []
-
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
-                x = (genome.copy(), get_loss(problem_type=self.config.problem_type),
+                x = (genome, get_loss(problem_type=self.config.problem_type),
                      self.config.beta_type, self.config.problem_type,
                      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
@@ -136,7 +135,6 @@ class EvaluationStochasticEngine:
     def _get_dataloader(self):
         if self.data_loader is None:
             self.data_loader = get_data_loader(dataset=self.dataset, batch_size=self.batch_size)
-            # self.m = math.ceil(len(self.data_loader) / self.batch_size)
         return self.data_loader
 
     def _get_loss(self):
@@ -151,6 +149,7 @@ def process_initialization(dataset_name, testing):
     dataset.generate_data()
 
 
+@timeit
 def evaluate_genome_task(x):
     return - _evaluate_genome_parallel(*x)
 
@@ -237,7 +236,6 @@ def evaluate_genome(genome: Genome, data_loader, loss, beta_type, problem_type,
         with torch.no_grad():
             # forward pass
             output, _ = network(x_batch)
-            print(f'output-shape: {output.shape}')
             beta = get_beta(beta_type=beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
 
             kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
