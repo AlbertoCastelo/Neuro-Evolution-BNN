@@ -158,75 +158,6 @@ def evaluate_genome_task(x):
     return - _evaluate_genome_parallel(*x)
 
 
-class Task:
-    def __init__(self, genome: Genome, dataset, x, y, loss, beta_type, problem_type,
-                 # config,
-                 batch_size=10000, n_samples=10, is_gpu=False, queue: Queue = None):
-        # super().__init__()
-        self.queue = queue
-        self.genome = genome
-        self.dataset = dataset
-        self.x = x
-        self.y = y
-        self.loss = loss
-        self.beta_type = beta_type
-        self.problem_type = problem_type
-        self.batch_size = batch_size
-        self.n_samples = n_samples
-        self.is_gpu = False
-        self.config = genome.genome_config
-
-        self.result = None
-
-    def __str__(self):
-        return f'Genome: {self.genome.key}'
-
-    def run(self) -> None:
-        '''
-            Calculates: KL-Div(q(w)||p(w|D))
-            Uses the VariationalInferenceLoss class (not the alternative)
-            '''
-        # from experiments.multiprocessing_utils import ForkedPdb; ForkedPdb().set_trace()
-        kl_posterior = 0
-
-        kl_qw_pw = compute_kl_qw_pw(genome=self.genome)
-
-        # setup network
-        network = ComplexStochasticNetwork(genome=self.genome)
-
-        # m = math.ceil(len(self.dataset) / self.batch_size)
-        m = math.ceil(len(self.x) / self.batch_size)
-
-        network.eval()
-
-        # calculate Data log-likelihood (p(y*|x*,D))
-        # x_batch, y_batch = self.dataset.x, self.dataset.y
-        x_batch, y_batch = self.x, self.y
-        x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
-                                               y_batch=y_batch,
-                                               problem_type=self.problem_type,
-                                               is_gpu=self.is_gpu,
-                                               n_input=self.genome.n_input,
-                                               n_output=self.genome.n_output,
-                                               n_samples=self.n_samples)
-        print('running forward pass')
-        with torch.no_grad():
-            # forward pass
-            output, _ = network(x_batch)
-            print('forward pass completed')
-            # print(self.config.beta_type)
-            beta = get_beta(beta_type=self.beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
-            # print(f'Beta: {beta}')
-            kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
-
-        loss_value = kl_posterior.item()
-        self.result = (self.genome.key, loss_value)
-        # self.queue.put()
-
-    def get_results(self):
-        return self.result
-
-
 def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
                               batch_size=10000, n_samples=10, is_gpu=False):
     '''
@@ -364,3 +295,74 @@ def get_dataset(dataset_name, testing=False):
         raise ConfigError(f'Dataset Name is incorrect: {dataset_name}')
     dataset.generate_data()
     return dataset
+
+
+# TODO: this could be removed as it is not used
+class Task:
+    def __init__(self, genome: Genome, dataset, x, y, loss, beta_type, problem_type,
+                 # config,
+                 batch_size=10000, n_samples=10, is_gpu=False, queue: Queue = None):
+        # super().__init__()
+        self.queue = queue
+        self.genome = genome
+        self.dataset = dataset
+        self.x = x
+        self.y = y
+        self.loss = loss
+        self.beta_type = beta_type
+        self.problem_type = problem_type
+        self.batch_size = batch_size
+        self.n_samples = n_samples
+        self.is_gpu = False
+        self.config = genome.genome_config
+
+        self.result = None
+
+    def __str__(self):
+        return f'Genome: {self.genome.key}'
+
+    def run(self) -> None:
+        '''
+            Calculates: KL-Div(q(w)||p(w|D))
+            Uses the VariationalInferenceLoss class (not the alternative)
+            '''
+        # from experiments.multiprocessing_utils import ForkedPdb; ForkedPdb().set_trace()
+        kl_posterior = 0
+
+        kl_qw_pw = compute_kl_qw_pw(genome=self.genome)
+
+        # setup network
+        network = ComplexStochasticNetwork(genome=self.genome)
+
+        # m = math.ceil(len(self.dataset) / self.batch_size)
+        m = math.ceil(len(self.x) / self.batch_size)
+
+        network.eval()
+
+        # calculate Data log-likelihood (p(y*|x*,D))
+        # x_batch, y_batch = self.dataset.x, self.dataset.y
+        x_batch, y_batch = self.x, self.y
+        x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                               y_batch=y_batch,
+                                               problem_type=self.problem_type,
+                                               is_gpu=self.is_gpu,
+                                               n_input=self.genome.n_input,
+                                               n_output=self.genome.n_output,
+                                               n_samples=self.n_samples)
+        print('running forward pass')
+        with torch.no_grad():
+            # forward pass
+            output, _ = network(x_batch)
+            print('forward pass completed')
+            # print(self.config.beta_type)
+            beta = get_beta(beta_type=self.beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
+            # print(f'Beta: {beta}')
+            kl_posterior += self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
+
+        loss_value = kl_posterior.item()
+        self.result = (self.genome.key, loss_value)
+        # self.queue.put()
+
+    def get_results(self):
+        return self.result
+
