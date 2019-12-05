@@ -1,5 +1,6 @@
 {
   "parallel_evaluation": true,
+  "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
@@ -12,7 +13,11 @@
   "feed_forward": true,
   "n_initial_hidden_neurons": 0,
 
+  "bias_mean_discrete": [-1.0, 0.0, 1.0],
+  "bias_std_discrete": [0.1, 0.5, 1.0],
 
+  "weight_mean_discrete": [-1.0, 0.0, 1.0],
+  "weight_std_discrete": [0.1, 0.5, 1.0],
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
