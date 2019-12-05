@@ -1,3 +1,4 @@
+import copy
 import uuid
 from itertools import count
 
@@ -87,6 +88,9 @@ class Genome:
             dict_['node_genes'][str(key)] = node_gene.to_dict()
 
         return dict_
+
+    def copy(self):
+        return Genome.from_dict(copy.deepcopy(self.to_dict()))
 
     def save_genome(self, filename=None):
         filename = ''.join([str(uuid.uuid4()), '.json']) if filename is None else filename
