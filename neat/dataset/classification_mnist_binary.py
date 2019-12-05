@@ -33,10 +33,12 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         self.targets = self.targets[mask_or]
 
         self.data = self.data.float()
-        self.targets = self.targets.short()
+        self.targets = self.targets.long()
 
-        self.x = self.data.float()
-        self.y = self.targets.short()
+        # print(f'data: {self.data.shape}')
+
+        self.x = self.data
+        self.y = self.targets
 
         # if self.train:
         #     self.x = self.train_data.float()
@@ -44,8 +46,6 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         # else:
         #     self.x = self.test_data.float()
         #     self.y = self.test_labels.short()
-
-
 
         # self.x = self.x[:1]
         # self.y = self.y[:1]

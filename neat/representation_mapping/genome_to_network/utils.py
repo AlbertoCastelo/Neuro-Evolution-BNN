@@ -4,8 +4,9 @@ from torch.nn import Module
 from neat.configuration import get_configuration, ConfigError
 
 
-def get_activation():
-    config = get_configuration()
+def get_activation(config=None):
+    if config is None:
+        config = get_configuration()
 
     activation = config.node_activation
     if activation == 'sigmoid':
