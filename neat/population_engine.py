@@ -2,6 +2,7 @@ import math
 import random
 from itertools import count
 import numpy as np
+from numba import njit, jit
 
 from experiments.logger import logger
 from experiments.slack_client import Notifier
@@ -95,6 +96,7 @@ class PopulationEngine:
         self.ancestors = {}
 
     @timeit
+    @jit
     def initialize_population(self):
         population = {}
         for i in range(self.pop_size):
@@ -107,6 +109,7 @@ class PopulationEngine:
         return population
 
     @staticmethod
+    @jit
     def compute_spawn(adjusted_fitness, previous_sizes, pop_size, min_species_size):
         """Compute the proper number of offspring per species (proportional to fitness)."""
         af_sum = sum(adjusted_fitness)
@@ -139,6 +142,7 @@ class PopulationEngine:
         return spawn_amounts
 
     @timeit
+    @jit
     def reproduce(self, species, pop_size, generation):
         """
         Disclaimer: this is taken from Python-NEAT
@@ -149,9 +153,12 @@ class PopulationEngine:
         remaining_species = []
         for stag_sid, stag_s, stagnant in self.stagnation_engine.get_stagnant_species(species, generation):
             if stagnant:
-                logger.debug(f'Stagnant specie: {stag_sid} - {stag_s}')
+                # logger.debug(f'Stagnant specie: {stag_sid} - {stag_s}')
+                pass
             else:
-                all_fitnesses.extend(m.fitness for m in stag_s.members.values())
+                for m in stag_s.members.values():
+                    all_fitnesses.append(m.fitness)
+                # all_fitnesses.extend(m.fitness for m in stag_s.members.values())
                 remaining_species.append(stag_s)
 
         # No species left.
@@ -174,7 +181,7 @@ class PopulationEngine:
             afs.adjusted_fitness = af
 
         adjusted_fitnesses = [s.adjusted_fitness for s in remaining_species]
-        avg_adjusted_fitness = np.mean(adjusted_fitnesses)  # type: float
+        # avg_adjusted_fitness = np.mean(adjusted_fitnesses)  # type: float
         # TODO: LOG
         # self.reporters.info("Average adjusted fitness: {:.3f}".format(avg_adjusted_fitness))
 
@@ -201,31 +208,39 @@ class PopulationEngine:
             s.members = {}
             species[s.key] = s
 
+            # Only use the survival threshold fraction to use as parents for the next generation.
+            repro_cutoff = int(math.ceil(self.survival_threshold *
+                                         len(old_members)))
+            # Use at least two parents no matter what the threshold fraction result is.
+            repro_cutoff = max(repro_cutoff, 2)
+
             # Sort members in order of descending fitness.
-            old_members.sort(reverse=True, key=lambda x: x[1].fitness)
+            # old_members.sort(reverse=True, key=lambda x: x[1].fitness)
+            old_members_sorted = self.calculate_fitter_members(members=old_members, n=max(self.elitism, repro_cutoff))
 
             # Transfer elites to new generation.
             if self.elitism > 0:
-                for i, m in old_members[:self.elitism]:
+                for i, m in old_members_sorted[:self.elitism]:
                     new_population[i] = m
                     spawn -= 1
 
             if spawn <= 0:
                 continue
 
-            # Only use the survival threshold fraction to use as parents for the next generation.
-            repro_cutoff = int(math.ceil(self.survival_threshold *
-                                         len(old_members)))
-            # Use at least two parents no matter what the threshold fraction result is.
-            repro_cutoff = max(repro_cutoff, 2)
-            old_members = old_members[:repro_cutoff]
+            # # Only use the survival threshold fraction to use as parents for the next generation.
+            # repro_cutoff = int(math.ceil(self.survival_threshold *
+            #                              len(old_members)))
+            # # Use at least two parents no matter what the threshold fraction result is.
+            # repro_cutoff = max(repro_cutoff, 2)
+
+            parent_pool = old_members_sorted[:repro_cutoff]
 
             # Randomly choose parents and produce the number of offspring allotted to the species.
             while spawn > 0:
                 spawn -= 1
 
-                parent1_id, parent1 = random.choice(old_members)
-                parent2_id, parent2 = random.choice(old_members)
+                parent1_id, parent1 = random.choice(parent_pool)
+                parent2_id, parent2 = random.choice(parent_pool)
 
                 # Note that if the parents are not distinct, crossover will produce a
                 # genetically identical clone of the parent (but with a different ID).
@@ -237,3 +252,12 @@ class PopulationEngine:
                 self.ancestors[key] = (parent1_id, parent2_id)
 
         return new_population
+
+    @jit
+    def calculate_fitter_members(self, members, n):
+        fitter_members = []
+        fitness = [member.fitness for (id, member) in members]
+        for i in range(n):
+            index = np.argmax(fitness)
+            fitter_members.append(members[index])
+        return fitter_members

@@ -1,5 +1,7 @@
 import sys
 import numpy as np
+from numba import njit, jit
+
 from neat.configuration import get_configuration
 
 
@@ -21,6 +23,7 @@ class Stagnation:
         self.species_elitism = self.config.species_elitism
         self.max_stagnation = self.config.max_stagnation
 
+    @jit
     def get_stagnant_species(self, species: dict, generation):
 
         species_data = []
@@ -39,7 +42,8 @@ class Stagnation:
             species_data.append((sid, s))
 
         # Sort in ascending fitness order.
-        species_data.sort(key=lambda x: x[1].fitness)
+        species_data_sorted = self.sort_species_by_fitness(species_data)
+        # species_data.sort(key=lambda x: x[1].fitness)
 
         result = []
         species_fitnesses = []
@@ -72,3 +76,12 @@ class Stagnation:
             return np.mean
         else:
             raise ValueError(f'Species Fitness Function not defined correctly: {function_name}')
+
+    @jit
+    def sort_species_by_fitness(self, species_data):
+        species_data_sorted = []
+        fitness = [specie.fitness for (_, specie) in species_data]
+        for i in range(len(species_data)):
+            index = np.argmax(fitness)
+            species_data_sorted.append(species_data[index])
+        return species_data_sorted

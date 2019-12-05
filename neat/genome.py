@@ -3,6 +3,8 @@ import uuid
 from itertools import count
 
 import jsons
+from numba import jitclass, int32, boolean, int16, float32
+from numba.typed import Dict
 
 from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
@@ -19,6 +21,22 @@ class GenomeSample:
         self.fitness = None
 
 
+genome_spec = [
+    ('key', int32),
+    ('describe_with_parameters', boolean),
+    ('n_input', int16),
+    ('n_output', int16),
+    ('output_nodes_keys', int16[:]),
+    ('input_nodes_keys', int16[:]),
+    ('connection_genes', Dict),
+    ('node_genes', Dict),
+    ('n_weight_parameters', int16),
+    ('n_bias_parameters', int16),
+    ('fitness', float32)
+]
+
+
+# @jitclass(spec=genome_spec)
 class Genome:
     @staticmethod
     def from_dict(genome_dict: dict):

@@ -1,5 +1,7 @@
 from itertools import count
 import numpy as np
+from numba import jitclass, int32, float32, int16
+from numba.typed import Dict
 
 from experiments.logger import logger
 from neat.configuration import get_configuration
@@ -110,6 +112,18 @@ class SpeciationEngine:
         return len(candidates) > 0
 
 
+# specie_spec = [
+#     ('key', int32),
+#     ('created', int16),
+#     ('last_improved', int16),
+#     ('representative', Genome.class_type.instance_type),
+#     ('members', Dict),
+#     ('fitness', float32),
+#     ('fitness_history', float32[:])
+# ]
+
+
+# @jitclass(specie_spec)
 class Specie:
     def __init__(self, key, generation):
         self.key = key
@@ -118,7 +132,7 @@ class Specie:
         self.representative = None
         self.members = {}
         self.fitness = None
-        self.adjusted_fitness = None
+        # self.adjusted_fitness = None
         self.fitness_history = []
 
     def update(self, representative, members):
