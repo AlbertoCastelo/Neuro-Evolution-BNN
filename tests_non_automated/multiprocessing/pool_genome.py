@@ -4,7 +4,7 @@ from multiprocessing.pool import Pool
 
 import torch
 
-from neat.evaluation import MyPool, _prepare_batch_data, get_dataset
+from neat.evaluation.evaluation_engine import _prepare_batch_data, get_dataset
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta

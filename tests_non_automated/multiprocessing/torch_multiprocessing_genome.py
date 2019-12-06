@@ -3,7 +3,7 @@ import os
 import torch
 
 from experiments.multiprocessing_utils import Worker
-from neat.evaluation import Task
+from neat.evaluation.evaluation_engine import Task
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
