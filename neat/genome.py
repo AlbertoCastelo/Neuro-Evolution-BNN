@@ -1,4 +1,5 @@
 import copy
+import random
 import uuid
 from itertools import count
 
@@ -162,12 +163,31 @@ class Genome:
         return str(connections)
 
     def _initialize_connections(self):
-        # initialize fully connected network with no recurrent connections
-        for input_node, output_node in self._compute_full_connections():
+        if self.genome_config.is_initial_fully_connected:
+            # initialize fully connected network with no recurrent connections
+            connections = self._compute_full_connections()
+        else:
+            # initialize network with only a few connections between input-output nodes
+            N_INITIAL_CONNECTIONS = min(1, self.n_input * self.n_output)
+            connections = self._compute_random_connections(n_initial_connections=N_INITIAL_CONNECTIONS)
+
+        for input_node, output_node in connections:
             key = (input_node, output_node)
             connection = ConnectionGene(key=key)
             connection.random_initialization()
             self.connection_genes[key] = connection
+
+    def _compute_random_connections(self, n_initial_connections):
+        connections = []
+        i = 0
+        while i != n_initial_connections:
+            input_node = random.choice(self.input_nodes_keys)
+            output_node = random.choice(self.output_nodes_keys)
+            connection = (input_node, output_node)
+            if connection not in connections:
+                connections.append(connection)
+                i += 1
+        return connections
 
     def _compute_full_connections(self):
         connections = []
