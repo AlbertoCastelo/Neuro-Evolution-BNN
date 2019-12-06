@@ -7,6 +7,7 @@ from neat.configuration import get_configuration, BaseConfiguration
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.graph_utils import adds_multihop_jump, exist_cycle
+from neat.utils import timeit
 
 
 class Mutation:
@@ -25,6 +26,7 @@ class Mutation:
         self.connection_add_prob = self.config.connection_add_prob
         self.connection_delete_prob = self.config.connection_delete_prob
 
+    @timeit
     def mutate(self, genome: Genome):
         if not self.fix_architecture:
             genome = self._mutate_architecture(genome)

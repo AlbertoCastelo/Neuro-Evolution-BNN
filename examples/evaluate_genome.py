@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 
 from neat.configuration import read_json_file_to_dict
-from neat.evaluation.evaluation import evaluate_genome, get_dataset
+from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
 from neat.genome import Genome
 import pandas as pd
 import numpy as np

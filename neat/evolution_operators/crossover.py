@@ -4,6 +4,7 @@ from experiments.logger import logger
 from neat.configuration import get_configuration
 from neat.gene import ConnectionGene, Gene, NodeGene
 from neat.genome import Genome
+from neat.utils import timeit
 
 
 class Crossover:
@@ -11,6 +12,7 @@ class Crossover:
     def __init__(self):
         self.config = get_configuration()
 
+    @timeit
     def get_offspring(self, offspring_key, genome1: Genome, genome2: Genome):
         assert isinstance(genome1.fitness, (int, float))
         assert isinstance(genome2.fitness, (int, float))

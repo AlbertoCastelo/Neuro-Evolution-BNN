@@ -1,17 +1,18 @@
 {
-  "parallel_evaluation": false,
+  "parallel_evaluation": true,
   "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
   "fix_std": false,
-  "fix_architecture": false,
+  "fix_architecture": true,
   "log_network": true,
   "log_time": true,
 
   "feed_forward": true,
-  "n_initial_hidden_neurons": 0,
+  "is_initial_fully_connected": true,
+  "n_initial_hidden_neurons": 10,
 
   "dataset_name": "mnist_binary",
   "n_generations": 1000,
