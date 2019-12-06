@@ -25,7 +25,8 @@ config.node_add_prob = 0.5
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'toy-classification'
 # CORRELATION_ID = 'parameters_grid'
-CORRELATION_ID = 'many-generations'
+# CORRELATION_ID = 'many-generations'
+CORRELATION_ID = 'tests'
 
 
 @timeit

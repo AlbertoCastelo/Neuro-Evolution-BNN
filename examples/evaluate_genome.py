@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 
 from neat.configuration import read_json_file_to_dict
-from neat.evaluation import evaluate_genome, get_dataset
+from neat.evaluation.evaluation import evaluate_genome, get_dataset
 from neat.genome import Genome
 import pandas as pd
 import numpy as np
@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from neat.loss.vi_loss import get_loss
-from neat.plotting.plot_network import plot_network, plot_genome_network
+from neat.plotting.plot_network import plot_genome_network
 from tests.config_files.config_files import create_configuration
 
 config_file = '/classification-miso.json'

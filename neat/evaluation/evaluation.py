@@ -149,7 +149,6 @@ def process_initialization(dataset_name, testing):
     dataset.generate_data()
 
 
-@timeit
 def evaluate_genome_task(x):
     return - _evaluate_genome_parallel(*x)
 

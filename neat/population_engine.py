@@ -6,7 +6,7 @@ import numpy as np
 from experiments.logger import logger
 from experiments.slack_client import Notifier
 from neat.configuration import get_configuration
-from neat.evaluation import EvaluationStochasticEngine
+from neat.evaluation.evaluation import EvaluationStochasticEngine
 from neat.evolution_operators.crossover import Crossover
 from neat.evolution_operators.mutation import Mutation
 from neat.genome import Genome

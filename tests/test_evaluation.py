@@ -1,6 +1,6 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 
-from neat.evaluation import EvaluationStochasticEngine
+from neat.evaluation.evaluation import EvaluationStochasticEngine
 from tests.config_files.config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
