@@ -44,7 +44,8 @@ class EvolutionReport:
     def _update_best(self, generation_report, population):
         if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
             self.best_individual = population.get(generation_report.best_individual_key)
-            logger.debug(f'    New best individual found:{round(self.best_individual.fitness, 3)}')
+            logger.info(f'    New best individual ({self.best_individual.key}) found '
+                        f'with fitness {round(self.best_individual.fitness, 3)}')
             logger.debug(f'         best individual has {len(self.best_individual.node_genes)} Nodes '
                          f'and {len(self.best_individual.connection_genes)} Connections')
             return True

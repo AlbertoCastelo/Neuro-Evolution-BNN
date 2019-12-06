@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from neat.configuration import get_configuration
+from neat.utils import timeit
 
 
 class Stagnation:
@@ -21,6 +22,7 @@ class Stagnation:
         self.species_elitism = self.config.species_elitism
         self.max_stagnation = self.config.max_stagnation
 
+    @timeit
     def get_stagnant_species(self, species: dict, generation):
 
         species_data = []

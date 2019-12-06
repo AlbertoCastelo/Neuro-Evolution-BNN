@@ -107,6 +107,7 @@ class PopulationEngine:
         return population
 
     @staticmethod
+    @timeit
     def compute_spawn(adjusted_fitness, previous_sizes, pop_size, min_species_size):
         """Compute the proper number of offspring per species (proportional to fitness)."""
         af_sum = sum(adjusted_fitness)
@@ -188,6 +189,12 @@ class PopulationEngine:
         spawn_amounts = self.compute_spawn(adjusted_fitnesses, previous_sizes,
                                            pop_size, min_species_size)
 
+        new_population = self._create_new_population(remaining_species, spawn_amounts)
+
+        return new_population
+
+    @timeit
+    def _create_new_population(self, remaining_species, spawn_amounts):
         new_population = {}
         species = {}
         for spawn, s in zip(spawn_amounts, remaining_species):
@@ -235,5 +242,4 @@ class PopulationEngine:
 
                 new_population[key] = mutated_offspring
                 self.ancestors[key] = (parent1_id, parent2_id)
-
         return new_population
