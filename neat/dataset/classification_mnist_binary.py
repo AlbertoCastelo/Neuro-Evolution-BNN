@@ -1,4 +1,6 @@
 import os
+
+import torch
 from PIL import Image
 from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
@@ -32,7 +34,15 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         self.data = self.data[mask_or]
         self.targets = self.targets[mask_or]
 
+        def _data_generator(x_data: torch.Tensor):
+            for i in range(len(x_data)):
+                img = Image.fromarray(x_data[i].numpy(), mode='L')
+                img_trans = self.transform(img)
+                yield img_trans
+
         self.data = self.data.float()
+        self.data = torch.cat(tuple(_data_generator(x_data=self.data)), 0)
+        # self.data = self.transform(self.data.numpy())
         self.targets = self.targets.long()
 
         # print(f'data: {self.data.shape}')
