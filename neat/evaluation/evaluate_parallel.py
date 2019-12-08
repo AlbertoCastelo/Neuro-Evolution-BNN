@@ -52,15 +52,10 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
     if is_gpu:
         x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
 
-    print(len(x_batch))
-    print(f'x_batch sum: {x_batch.sum()}')
     with torch.no_grad():
         # forward pass
         output, _ = network(x_batch)
-        print(f'Output sum: {output.sum()}')
-        # print(self.config.beta_type)
         beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
-        print(f'Beta: {beta}')
         kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
 
     loss_value = kl_posterior.item()
