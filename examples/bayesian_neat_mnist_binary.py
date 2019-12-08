@@ -35,7 +35,7 @@ def main():
     notifier = SlackNotifier.create(channel='batch-jobs')
     failed = 0
     total = 0
-    for pop_size in range(20, 201, 50):
+    for pop_size in range(100, 201, 50):
         # for n_samples in [20, 50, 100]:
         for retry in range(2):
             # config.n_samples = n_samples
