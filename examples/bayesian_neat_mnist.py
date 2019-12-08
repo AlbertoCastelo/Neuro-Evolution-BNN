@@ -16,8 +16,8 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.n_generations = 2
-config.pop_size = 20
-config.n_samples = 20
+config.pop_size = 150
+config.n_samples = 40
 
 config.max_stagnation = 30
 config.node_add_prob = 0.5
@@ -37,7 +37,7 @@ def main():
     notifier = SlackNotifier.create(channel='batch-jobs')
     failed = 0
     total = 0
-    # for pop_size in range(25, 201, 25):
+    # for pop_size in range(150, 201, 25):
     #     for n_samples in [20, 50, 100]:
     #         for retry in range(2):
     #             config.n_samples = n_samples
