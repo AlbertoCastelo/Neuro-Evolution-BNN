@@ -56,13 +56,13 @@ class EvaluationStochasticEngine:
 
         else:
             self.dataset = self._get_dataset()
-            self.data_loader = self._get_dataloader()
+            # self.data_loader = self._get_dataloader()
             self.loss = self._get_loss()
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 genome.fitness = - evaluate_genome(genome=genome,
                                                    problem_type=self.config.problem_type,
-                                                   data_loader=self.data_loader,
+                                                   dataset=self.dataset,
                                                    loss=self.loss,
                                                    beta_type=self.config.beta_type,
                                                    batch_size=self.batch_size,
