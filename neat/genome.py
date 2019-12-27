@@ -168,8 +168,7 @@ class Genome:
             connections = self._compute_full_connections()
         else:
             # initialize network with only a few connections between input-output nodes
-            N_INITIAL_CONNECTIONS = min(1, self.n_input * self.n_output)
-            connections = self._compute_random_connections(n_initial_connections=N_INITIAL_CONNECTIONS)
+            connections = self._compute_random_connections(n_initial_connections=self.n_output)
 
         for input_node, output_node in connections:
             key = (input_node, output_node)
@@ -179,10 +178,9 @@ class Genome:
 
     def _compute_random_connections(self, n_initial_connections):
         connections = []
-        i = 0
-        while i != n_initial_connections:
+        for i in range(n_initial_connections):
+            output_node = i
             input_node = random.choice(self.input_nodes_keys)
-            output_node = random.choice(self.output_nodes_keys)
             connection = (input_node, output_node)
             if connection not in connections:
                 connections.append(connection)
