@@ -32,8 +32,14 @@ class EvaluationStochasticEngine:
         self.loss = None
 
         if self.parallel_evaluation:
-            self.n_processes = min(cpu_count() // 2, 8)
+            self.n_processes = self._get_n_processes()
             self.pool = Pool(processes=self.n_processes, initializer=process_initialization, initargs=(self.config.dataset_name, True))
+
+    def _get_n_processes(self):
+        if self.config.n_processes is not None:
+            return int(self.config.n_processes)
+        return min(cpu_count() // 2, 8)
+
 
     @timeit
     def evaluate(self, population: dict):
