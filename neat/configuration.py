@@ -18,7 +18,7 @@ class BaseConfiguration:
 class DefaultConfiguration(BaseConfiguration):
     def __init__(self):
         # problem definition
-        self.dataset_name = 'regression_example_1'
+        self.dataset = 'regression_example_1'
         self.problem_type = 'regression'
 
         self.is_discrete = True

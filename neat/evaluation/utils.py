@@ -21,23 +21,23 @@ def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_typ
     return x_batch, y_batch
 
 
-def get_dataset(dataset_name, testing=False):
+def get_dataset(dataset, testing=False):
     if testing:
         dataset_type = 'test'
     else:
         dataset_type = 'train'
 
-    if dataset_name == 'regression_example_1':
+    if dataset == 'regression_example_1':
         dataset = RegressionExample1Dataset(dataset_type=dataset_type)
-    elif dataset_name == 'regression_example_2':
+    elif dataset == 'regression_example_2':
         dataset = RegressionExample2Dataset(dataset_type=dataset_type)
-    elif dataset_name == 'classification_example_1':
+    elif dataset == 'classification_example_1':
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
-    elif dataset_name == 'mnist':
+    elif dataset == 'mnist':
         dataset = MNISTDataset(dataset_type=dataset_type)
-    elif dataset_name == 'mnist_binary':
+    elif dataset == 'mnist_binary':
         dataset = MNISTBinaryDataset(dataset_type=dataset_type)
     else:
-        raise ConfigError(f'Dataset Name is incorrect: {dataset_name}')
+        raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()
     return dataset

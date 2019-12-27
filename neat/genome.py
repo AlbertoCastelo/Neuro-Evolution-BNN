@@ -22,6 +22,36 @@ class GenomeSample:
 
 class Genome:
     @staticmethod
+    def create_from_julia_dict(genome_dict: dict):
+        config = get_configuration()
+        genome = Genome(key=genome_dict["key"], id=None, genome_config=config)
+
+        # reconstruct nodes and connections
+        connection_genes_dict = genome_dict['connections']
+        for key_str, connection_gene_dict in connection_genes_dict.items():
+            connection_key = Genome._get_connection_key_from_key_str(key_str)
+            connection_gene = ConnectionGene(key=connection_key)
+            connection_gene.set_mean(connection_gene_dict['mean_weight'])
+            connection_gene.set_std(connection_gene_dict['std_weight'])
+            genome.connection_genes[connection_gene.key] = connection_gene
+
+        node_genes_dict = genome_dict['nodes']
+        for key_str, node_gene_dict in node_genes_dict.items():
+            node_key = int(key_str)
+            node_gene = NodeGene(key=node_key)
+            node_gene.set_mean(node_gene_dict['mean_bias'])
+            node_gene.set_std(node_gene_dict['std_bias'])
+            genome.node_genes[node_gene.key] = node_gene
+
+        genome.calculate_number_of_parameters()
+        return genome
+
+    @staticmethod
+    def _get_connection_key_from_key_str(key_str):
+        node_keys_str = key_str[1:-1].split(',')
+        return (int(node_keys_str[0]), int(node_keys_str[1]))
+
+    @staticmethod
     def from_dict(genome_dict: dict):
         genome_config_dict = genome_dict['config']
         genome_config = jsons.load(genome_config_dict, BaseConfiguration)

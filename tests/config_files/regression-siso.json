@@ -33,7 +33,7 @@
   "compatibility_weight_coefficient": 0.5,
   "compatibility_disjoint_coefficient": 1.0,
 
-  "dataset_name": "regression_example_1",
+  "dataset": "regression_example_1",
   "initial_hidden": false,
   "is_gpu": false,
   "n_generations": 200,

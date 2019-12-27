@@ -93,14 +93,11 @@ def evaluate_genome_with_dataloader(genome: Genome, data_loader, loss, beta_type
                                                n_input=genome.n_input,
                                                n_output=genome.n_output,
                                                n_samples=n_samples)
-        print(len(x_batch))
-        print(f'x_batch sum: {x_batch.sum()}')
+
         with torch.no_grad():
             # forward pass
             output, _ = network(x_batch)
-            print(f'Output sum: {output.sum()}')
             beta = get_beta(beta_type=beta_type, m=m, batch_idx=batch_idx, epoch=1, n_epochs=1)
-            print(f'Beta: {beta}')
             kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
             if return_all:
                 chunks_x.append(x_batch)

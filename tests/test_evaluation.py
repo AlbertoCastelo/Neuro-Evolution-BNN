@@ -72,7 +72,7 @@ class TestEvaluationStochasticNetwork(TestCase):
 
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
-        dataset = get_dataset(dataset_name=self.config.dataset_name)
+        dataset = get_dataset(dataset=self.config.dataset)
         dataset.generate_data()
 
         data_loader = DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=4)
@@ -90,7 +90,7 @@ class TestEvaluationStochasticNetwork(TestCase):
         self.config = create_configuration(filename='/regression-miso.json')
         genome = generate_genome_with_hidden_units(n_input=self.config.n_input,
                                                    n_output=self.config.n_output)
-        dataset = get_dataset(dataset_name=self.config.dataset_name)
+        dataset = get_dataset(dataset=self.config.dataset)
         dataset.generate_data()
 
         data_loader = DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=4)
