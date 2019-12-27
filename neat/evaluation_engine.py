@@ -36,18 +36,7 @@ class JupyNeatEvaluationEngine:
 
         '''launch Python Evaluation service'''
         for generation in range(0, self.configuration.n_generations + 1):
-            logger.info(f'Genaration {generation}')
-            # read
-            population = self._read_population(generation=generation)
-
-            population = self.evaluation_engine.evaluate(population=population)
-
-            self._write_fitness(population=population, generation=generation)
-
-            # report
-            self.report.report_new_generation(generation=0,
-                                              population=population,
-                                              species=None)
+            self._run_generation(generation)
         self.evaluation_engine.close()
         # except Exception as e:
         #     end_condition = 'exception'
@@ -59,6 +48,18 @@ class JupyNeatEvaluationEngine:
         self.report.persist_logs()
         self.notifier.send(str(self.report.get_best_individual()))
         logger.info('Finished evolutionary process')
+
+    @timeit
+    def _run_generation(self, generation):
+        logger.info(f'Genaration {generation}')
+        # read
+        population = self._read_population(generation=generation)
+        population = self.evaluation_engine.evaluate(population=population)
+        self._write_fitness(population=population, generation=generation)
+        # report
+        self.report.report_new_generation(generation=generation,
+                                          population=population,
+                                          species=None)
 
     def _launch_evolutionary_service(self):
         self._save_configuration()
@@ -73,6 +74,7 @@ class JupyNeatEvaluationEngine:
         config_dict = jsons.dump(self.configuration)
         write_json_file_from_dict(data=config_dict, filename=f'{file_dir}/configuration.json')
 
+    @timeit
     def _read_population(self, generation):
         file_dir = self._get_configuration_directory()
         filename = f'{file_dir}/generation_{generation}_population.json'

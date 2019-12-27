@@ -1,5 +1,6 @@
 {
   "parallel_evaluation": true,
+  "n_processes": 12,
   "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
@@ -11,7 +12,7 @@
   "log_time": true,
 
   "feed_forward": true,
-  "is_initial_fully_connected": false,
+  "is_initial_fully_connected": true,
   "n_initial_hidden_neurons": 10,
 
   "dataset": "mnist_binary",
