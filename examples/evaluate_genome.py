@@ -24,7 +24,7 @@ def main():
 
     is_cuda = False
 
-    dataset = get_dataset(config.dataset_name, testing=False)
+    dataset = get_dataset(config.dataset, testing=False)
     dataset.generate_data()
     data_loader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=4)
 

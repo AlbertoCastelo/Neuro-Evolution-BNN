@@ -1,21 +1,11 @@
-import math
-from multiprocessing import cpu_count, Queue, Manager, Pool
-import torch
+from multiprocessing import cpu_count, Pool
 from experiments.logger import logger
-from experiments.multiprocessing_utils import Worker
-from neat.configuration import ConfigError, get_configuration
-from neat.dataset.classification_example import ClassificationExample1Dataset
-from neat.dataset.classification_mnist import MNISTDataset
-from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
+from neat.configuration import get_configuration
 from neat.dataset.custom_dataloader import get_data_loader
-from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 from neat.evaluation.evaluate_parallel import evaluate_genome_task, process_initialization
 from neat.evaluation.evaluate_simple import evaluate_genome
 from neat.evaluation.utils import get_dataset
-from neat.fitness.kl_divergence import compute_kl_qw_pw
-from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
-from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.utils import timeit
 
 
@@ -33,7 +23,8 @@ class EvaluationStochasticEngine:
 
         if self.parallel_evaluation:
             self.n_processes = min(cpu_count() // 2, 8)
-            self.pool = Pool(processes=self.n_processes, initializer=process_initialization, initargs=(self.config.dataset_name, True))
+            self.pool = Pool(processes=self.n_processes, initializer=process_initialization,
+                             initargs=(self.config.dataset, True))
 
     @timeit
     def evaluate(self, population: dict):
@@ -77,7 +68,7 @@ class EvaluationStochasticEngine:
 
     def _get_dataset(self):
         if self.dataset is None:
-            self.dataset = get_dataset(self.config.dataset_name, testing=self.testing)
+            self.dataset = get_dataset(self.config.dataset, testing=self.testing)
             self.dataset.generate_data()
         return self.dataset
 

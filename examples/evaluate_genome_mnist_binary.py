@@ -43,7 +43,7 @@ def main():
 
     is_cuda = False
 
-    dataset = get_dataset(config.dataset_name, testing=True)
+    dataset = get_dataset(config.dataset, testing=True)
     dataset.generate_data()
     data_loader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=4)
 
@@ -72,7 +72,7 @@ def main():
 
 def evaluate_with_parallel(genome, loss, config):
 
-    process_initialization(dataset_name=config.dataset_name, testing=True)
+    process_initialization(dataset=config.dataset, testing=True)
     loss_value = _evaluate_genome_parallel(genome=genome, loss=loss, beta_type=config.beta_type,
                                            problem_type=config.problem_type,
                                            batch_size=100000, n_samples=20)

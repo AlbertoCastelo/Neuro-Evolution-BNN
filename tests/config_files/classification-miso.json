@@ -40,7 +40,7 @@
   "compatibility_weight_coefficient": 0.5,
   "compatibility_disjoint_coefficient": 1.0,
 
-  "dataset_name": "classification_example_1",
+  "dataset": "classification_example_1",
   "n_generations": 200,
   "n_input": 2,
   "n_output": 2,

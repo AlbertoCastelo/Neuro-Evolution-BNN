@@ -1,5 +1,5 @@
 {
-  "parallel_evaluation": true,
+  "parallel_evaluation": false,
   "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
@@ -11,13 +11,13 @@
   "log_time": true,
 
   "feed_forward": true,
-  "is_initial_fully_connected": false,
-  "n_initial_hidden_neurons": 0,
+  "is_initial_fully_connected": true,
+  "n_initial_hidden_neurons": 10,
 
-  "dataset_name": "mnist",
+  "dataset": "mnist",
   "n_generations": 1000,
   "node_activation": "tanh",
-  "pop_size": 150,
+  "pop_size": 5,
 
   "problem_type": "classification",
   "n_input": 784,

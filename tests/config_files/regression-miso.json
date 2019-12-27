@@ -39,7 +39,7 @@
   "compatibility_weight_coefficient": 0.5,
   "compatibility_disjoint_coefficient": 1.0,
 
-  "dataset_name": "regression_example_2",
+  "dataset": "regression_example_2",
   "n_generations": 200,
   "n_input": 2,
   "n_output": 1,
