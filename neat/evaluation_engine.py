@@ -30,14 +30,11 @@ class JupyNeatEvaluationEngine:
     def run(self):
         end_condition = 'normal'
         logger.info('Started evolutionary process')
-        '''launch Julia Evolutionary service'''
-        self._save_configuration()
 
-        # run julia script
-        self._start_julia_service()
+        '''launch Julia Evolutionary service'''
+        self._launch_evolutionary_service()
 
         '''launch Python Evaluation service'''
-
         for generation in range(0, self.configuration.n_generations + 1):
             logger.info(f'Genaration {generation}')
             # read
@@ -48,9 +45,9 @@ class JupyNeatEvaluationEngine:
             self._write_fitness(population=population, generation=generation)
 
             # report
-            # self.report.report_new_generation(generation=0,
-            #                                   population=self.population,
-            #                                   species=self.speciation_engine.species)
+            self.report.report_new_generation(generation=0,
+                                              population=population,
+                                              species=None)
         self.evaluation_engine.close()
         # except Exception as e:
         #     end_condition = 'exception'
@@ -62,6 +59,11 @@ class JupyNeatEvaluationEngine:
         self.report.persist_logs()
         self.notifier.send(str(self.report.get_best_individual()))
         logger.info('Finished evolutionary process')
+
+    def _launch_evolutionary_service(self):
+        self._save_configuration()
+        # run julia script
+        self._start_julia_service()
 
     def _save_configuration(self):
         file_dir = self._get_configuration_directory()

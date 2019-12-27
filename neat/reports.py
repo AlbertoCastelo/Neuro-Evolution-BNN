@@ -90,7 +90,8 @@ class GenerationReport:
 
     def run(self):
         self._prepare_population_report()
-        self._prepare_species_report()
+        if self.species is not None:
+            self._prepare_species_report()
         return self
 
     def _prepare_population_report(self):
