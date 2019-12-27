@@ -12,7 +12,7 @@ from neat.reports import EvolutionReport
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.utils import timeit
 
-JULIA_BASE_PATH = '/home/alberto/Desktop/repos/random/NeatJulia'
+JULIA_BASE_PATH = os.getenv("JULIA_BASE_PATH")
 
 
 class JupyNeatEvaluationEngine:
