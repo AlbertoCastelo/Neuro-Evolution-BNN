@@ -4,7 +4,8 @@ from multiprocessing.pool import Pool
 
 import torch
 
-from neat.evaluation.evaluation_engine import _prepare_batch_data, get_dataset
+from neat.evaluation.evaluation_engine import get_dataset
+from neat.evaluation.utils import _prepare_batch_data
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss, get_beta
@@ -44,7 +45,7 @@ def evaluate_genome(genome: Genome, loss, beta_type, problem_type,
     Calculates: KL-Div(q(w)||p(w|D))
     Uses the VariationalInferenceLoss class (not the alternative)
     # '''
-    # dataset = get_dataset(genome.genome_config.dataset_name, testing=True)
+    # dataset = get_dataset(genome.genome_config.dataset, testing=True)
     # dataset.generate_data()
     kl_posterior = 0
 
@@ -86,7 +87,7 @@ def evaluate_genome(genome: Genome, loss, beta_type, problem_type,
 tasks = []
 
 
-pool = Pool(processes=N_PROCESSES, initializer=process_initialization, initargs=(config.dataset_name, True))
+pool = Pool(processes=N_PROCESSES, initializer=process_initialization, initargs=(config.dataset, True))
 for genome in genomes:
     logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
 
