@@ -30,23 +30,23 @@ class JupyNeatEvaluationEngine:
     def run(self):
         end_condition = 'normal'
         logger.info('Started evolutionary process')
+        try:
+            '''launch Julia Evolutionary service'''
+            self._launch_evolutionary_service()
 
-        '''launch Julia Evolutionary service'''
-        self._launch_evolutionary_service()
-
-        '''launch Python Evaluation service'''
-        for generation in range(0, self.configuration.n_generations + 1):
-            self._run_generation(generation)
-        self.evaluation_engine.close()
-        # except Exception as e:
-        #     end_condition = 'exception'
-        #     logger.exception(str(e))
-        #     self.notifier.send(str(e))
-        # finally:
-        self.report.generate_final_report(end_condition=end_condition) \
-            .persist_report()
-        self.report.persist_logs()
-        self.notifier.send(str(self.report.get_best_individual()))
+            '''launch Python Evaluation service'''
+            for generation in range(0, self.configuration.n_generations + 1):
+                self._run_generation(generation)
+            self.evaluation_engine.close()
+        except Exception as e:
+            end_condition = 'exception'
+            logger.exception(str(e))
+            self.notifier.send(str(e))
+        finally:
+            self.report.generate_final_report(end_condition=end_condition) \
+                .persist_report()
+            self.report.persist_logs()
+            self.notifier.send(str(self.report.get_best_individual()))
         logger.info('Finished evolutionary process')
 
     @timeit

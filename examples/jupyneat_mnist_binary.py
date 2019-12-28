@@ -15,9 +15,9 @@ LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.n_generations = 3
-config.pop_size = 200
-config.n_samples = 20
+config.n_generations = 1000
+config.pop_size = 20
+config.n_samples = 40
 
 config.max_stagnation = 30
 config.node_add_prob = 0.5
@@ -30,19 +30,22 @@ CORRELATION_ID = 'test'
 def main():
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     notifier = SlackNotifier.create(channel='batch-jobs')
+    for retry in range(3):
+        print('###################################################')
+        print('###################################################')
+        print('###################################################')
+        report = EvolutionReport(report_repository=report_repository,
+                                 algorithm_version=ALGORITHM_VERSION,
+                                 dataset=DATASET,
+                                 correlation_id=CORRELATION_ID)
+        print(report.report.execution_id)
 
-    report = EvolutionReport(report_repository=report_repository,
-                             algorithm_version=ALGORITHM_VERSION,
-                             dataset=DATASET,
-                             correlation_id=CORRELATION_ID)
-    print(report.report.execution_id)
-
-    config.experiment = CORRELATION_ID
-    config.dataset = DATASET
-    config.execution = report.report.execution_id
-    # execute scenario
-    evaluation_engine = JupyNeatEvaluationEngine.create(report=report, notifier=notifier)
-    evaluation_engine.run()
+        config.experiment = CORRELATION_ID
+        config.dataset = DATASET
+        config.execution = report.report.execution_id
+        # execute scenario
+        evaluation_engine = JupyNeatEvaluationEngine.create(report=report, notifier=notifier)
+        evaluation_engine.run()
 
 
 main()
