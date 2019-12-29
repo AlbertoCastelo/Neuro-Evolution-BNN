@@ -1,7 +1,7 @@
 import os
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
-from neat.evaluation_engine import JupyNeatEvaluationEngine
+from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
 from neat.reports import EvolutionReport
 from neat.utils import timeit
@@ -44,7 +44,7 @@ def main():
     config.dataset = DATASET
     config.execution = report.report.execution_id
     # execute scenario
-    evaluation_engine = JupyNeatEvaluationEngine.create(report=report, notifier=notifier)
+    evaluation_engine = JupyNeatFSEvaluationEngine.create(report=report, notifier=notifier)
     evaluation_engine.run()
 
 

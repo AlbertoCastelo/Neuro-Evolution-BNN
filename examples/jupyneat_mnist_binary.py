@@ -1,7 +1,7 @@
 import os
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
-from neat.evaluation_engine import JupyNeatEvaluationEngine
+from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
 from neat.reports import EvolutionReport
 from neat.utils import timeit
@@ -26,6 +26,7 @@ ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'mnist_binary'
 CORRELATION_ID = 'test'
 
+
 @timeit
 def main():
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
@@ -44,7 +45,7 @@ def main():
         config.dataset = DATASET
         config.execution = report.report.execution_id
         # execute scenario
-        evaluation_engine = JupyNeatEvaluationEngine.create(report=report, notifier=notifier)
+        evaluation_engine = JupyNeatFSEvaluationEngine.create(report=report, notifier=notifier)
         evaluation_engine.run()
 
 

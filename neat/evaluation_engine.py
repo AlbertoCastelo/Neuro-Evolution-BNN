@@ -7,6 +7,7 @@ from experiments.file_utils import write_json_file_from_dict, read_json_file_to_
 from experiments.logger import logger
 from experiments.slack_client import Notifier
 from neat.configuration import get_configuration
+from neat.evaluation.evaluation_engine_jupyneat import EvaluationStochasticEngineJupyneat
 from neat.genome import Genome
 from neat.reports import EvolutionReport
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
@@ -18,7 +19,7 @@ JULIA_BASE_PATH = os.getenv("JULIA_BASE_PATH")
 class JupyNeatFSEvaluationEngine:
     @staticmethod
     def create(report: EvolutionReport, notifier: Notifier):
-        return JupyNeatFSEvaluationEngine(report, notifier, EvaluationStochasticEngine())
+        return JupyNeatFSEvaluationEngine(report, notifier, EvaluationStochasticEngineJupyneat())
 
     def __init__(self, report: EvolutionReport, notifier: Notifier, evaluation_engine: EvaluationStochasticEngine):
         self.report = report

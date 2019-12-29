@@ -4,13 +4,13 @@ from neat.configuration import get_configuration
 from neat.dataset.custom_dataloader import get_data_loader
 from neat.evaluation.evaluate_parallel import evaluate_genome_task, process_initialization, \
     evaluate_genome_task_jupyneat
-from neat.evaluation.evaluate_simple import evaluate_genome
+from neat.evaluation.evaluate_simple import evaluate_genome, evaluate_genome_jupyneat
 from neat.evaluation.utils import get_dataset
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.utils import timeit
 
 
-class EvaluationStochasticEngine:
+class EvaluationStochasticEngineJupyneat:
     def __init__(self, testing=False, batch_size=None):
         self.config = get_configuration()
         self.testing = testing
@@ -44,32 +44,32 @@ class EvaluationStochasticEngine:
         if self.parallel_evaluation:
             tasks = []
             for genome in population.values():
-                logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
+                # logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome, get_loss(problem_type=self.config.problem_type),
-                     self.config.beta_type, self.config.problem_type,
+                     self.config.beta_type, self.config.problem_type, self.config,
                      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
             # TODO: fix logging when using multiprocessing. Easy fix is to disable
-            fitnesses = list(self.pool.imap(evaluate_genome_task, tasks, chunksize=len(population)//self.n_processes))
+            fitnesses = list(self.pool.imap(evaluate_genome_task_jupyneat, tasks,
+                                            chunksize=len(population)//self.n_processes))
 
             for i, genome in enumerate(population.values()):
-                genome.fitness = fitnesses[i]
+                genome['fitness'] = fitnesses[i]
 
         else:
             self.dataset = self._get_dataset()
-            # self.data_loader = self._get_dataloader()
             self.loss = self._get_loss()
             for genome in population.values():
-                logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
-                genome.fitness = - evaluate_genome(genome=genome,
-                                                   problem_type=self.config.problem_type,
-                                                   dataset=self.dataset,
-                                                   loss=self.loss,
-                                                   beta_type=self.config.beta_type,
-                                                   batch_size=self.batch_size,
-                                                   n_samples=n_samples,
-                                                   is_gpu=self.is_gpu)
+                genome['fitness'] = - evaluate_genome_jupyneat(genome=genome,
+                                                               problem_type=self.config.problem_type,
+                                                               config=self.config,
+                                                               dataset=self.dataset,
+                                                               loss=self.loss,
+                                                               beta_type=self.config.beta_type,
+                                                               batch_size=self.batch_size,
+                                                               n_samples=n_samples,
+                                                               is_gpu=self.is_gpu)
 
         return population
 
