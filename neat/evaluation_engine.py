@@ -15,10 +15,10 @@ from neat.utils import timeit
 JULIA_BASE_PATH = os.getenv("JULIA_BASE_PATH")
 
 
-class JupyNeatEvaluationEngine:
+class JupyNeatFSEvaluationEngine:
     @staticmethod
     def create(report: EvolutionReport, notifier: Notifier):
-        return JupyNeatEvaluationEngine(report, notifier, EvaluationStochasticEngine())
+        return JupyNeatFSEvaluationEngine(report, notifier, EvaluationStochasticEngine())
 
     def __init__(self, report: EvolutionReport, notifier: Notifier, evaluation_engine: EvaluationStochasticEngine):
         self.report = report
@@ -30,30 +30,32 @@ class JupyNeatEvaluationEngine:
     def run(self):
         end_condition = 'normal'
         logger.info('Started evolutionary process')
-        try:
-            '''launch Julia Evolutionary service'''
-            self._launch_evolutionary_service()
+        # try:
+        '''launch Julia Evolutionary service'''
+        self._launch_evolutionary_service()
 
-            '''launch Python Evaluation service'''
-            for generation in range(0, self.configuration.n_generations + 1):
-                self._run_generation(generation)
-            self.evaluation_engine.close()
-        except Exception as e:
-            end_condition = 'exception'
-            logger.exception(str(e))
-            self.notifier.send(str(e))
-        finally:
-            self.report.generate_final_report(end_condition=end_condition) \
-                .persist_report()
-            self.report.persist_logs()
-            self.notifier.send(str(self.report.get_best_individual()))
+        '''launch Python Evaluation service'''
+        for generation in range(0, self.configuration.n_generations + 1):
+            self._run_generation(generation)
+        self.evaluation_engine.close()
+        # except Exception as e:
+        #     end_condition = 'exception'
+        #     logger.exception(str(e))
+        #     self.notifier.send(str(e))
+        # finally:
+        #     self.report.generate_final_report(end_condition=end_condition) \
+        #         .persist_report()
+        #     self.report.persist_logs()
+        #     self.notifier.send(str(self.report.get_best_individual()))
         logger.info('Finished evolutionary process')
 
     @timeit
     def _run_generation(self, generation):
         logger.info(f'Genaration {generation}')
         # read
-        population = self._read_population(generation=generation)
+        # population = self._read_population(generation=generation)
+        population = self._read_population_dict(generation=generation)
+
         population = self.evaluation_engine.evaluate(population=population)
         self._write_fitness(population=population, generation=generation)
         # report
@@ -86,6 +88,18 @@ class JupyNeatEvaluationEngine:
             population[genome.key] = genome
         return population
 
+    @timeit
+    def _read_population_dict(self, generation):
+        file_dir = self._get_configuration_directory()
+        filename = f'{file_dir}/generation_{generation}_population.json'
+        _wait_for_file_to_be_available(filename=filename, timeout=60)
+        genomes = read_json_file_to_dict(filename=filename)
+        population = {}
+        for genome_dict in genomes:
+            genome_key = genome_dict['key']
+            population[genome_key] = genome_dict
+        return population
+
     def _get_execution_path(self):
         """dataset=$(configuration.dataset)/experiment=$(configuration.experiment)/
         execution=$(configuration.execution_id)
@@ -103,11 +117,14 @@ class JupyNeatEvaluationEngine:
     def _get_configuration_directory(self):
         return f'./{self._get_execution_path()}'
 
+    @timeit
     def _write_fitness(self, population, generation):
         file_dir = self._get_configuration_directory()
         filename = f'{file_dir}/generation_{generation}_fitness.json'
 
-        fitnesses = [genome.fitness for genome in population.values()]
+        # fitnesses = [genome.fitness for genome in population.values()]
+        fitnesses = [genome['fitness'] for genome in population.values()]
+
         fitness_dict = dict(zip(list(population.keys()), fitnesses))
 
         write_json_file_from_dict(data=fitness_dict, filename=filename)

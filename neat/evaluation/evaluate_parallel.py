@@ -9,6 +9,8 @@ from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_beta, get_loss
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+from neat.representation_mapping.genome_to_network.complex_stochastic_network_jupyneat import \
+    ComplexStochasticNetworkJupyneat
 
 
 def process_initialization(dataset_name, testing):
@@ -19,6 +21,10 @@ def process_initialization(dataset_name, testing):
 
 def evaluate_genome_task(x):
     return - _evaluate_genome_parallel(*x)
+
+
+def evaluate_genome_task_jupyneat(x):
+    return - _evaluate_genome_parallel_jupyneat(*x)
 
 
 def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
@@ -47,6 +53,48 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
                                            is_gpu=is_gpu,
                                            n_input=genome.n_input,
                                            n_output=genome.n_output,
+                                           n_samples=n_samples)
+
+    if is_gpu:
+        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
+
+    with torch.no_grad():
+        # forward pass
+        output, _ = network(x_batch)
+        beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
+        kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
+
+    loss_value = kl_posterior.item()
+    return loss_value
+
+
+def _evaluate_genome_parallel_jupyneat(genome: dict, loss, beta_type, problem_type, config,
+                                       batch_size=10000, n_samples=10, is_gpu=False):
+    '''
+    Calculates: KL-Div(q(w)||p(w|D))
+    Uses the VariationalInferenceLoss class (not the alternative)
+    '''
+
+    kl_posterior = 0
+    # TODO: fix
+    # kl_qw_pw = compute_kl_qw_pw(genome=genome)
+    kl_qw_pw = 0.0
+
+    # setup network
+    network = ComplexStochasticNetworkJupyneat(genome=genome, config=config)
+    if is_gpu:
+        network.cuda()
+    m = math.ceil(len(dataset.x) / batch_size)
+    network.eval()
+
+    # calculate Data log-likelihood (p(y*|x*,D))
+    x_batch, y_batch = dataset.x, dataset.y
+    x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                           y_batch=y_batch,
+                                           problem_type=problem_type,
+                                           is_gpu=is_gpu,
+                                           n_input=config.n_input,
+                                           n_output=config.n_output,
                                            n_samples=n_samples)
 
     if is_gpu:
