@@ -93,7 +93,7 @@ class JupyNeatFSEvaluationEngine:
     def _read_population_dict(self, generation):
         file_dir = self._get_configuration_directory()
         filename = f'{file_dir}/generation_{generation}_population.json'
-        _wait_for_file_to_be_available(filename=filename, timeout=60)
+        _wait_for_file_to_be_available(filename=filename, timeout=120)
         genomes = read_json_file_to_dict(filename=filename)
         population = {}
         for genome_dict in genomes:
