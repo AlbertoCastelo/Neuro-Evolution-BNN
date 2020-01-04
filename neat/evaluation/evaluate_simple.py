@@ -65,8 +65,8 @@ def evaluate_genome(genome: Genome, dataset, loss, beta_type, problem_type,
 
 
 @timeit
-def evaluate_genome_jupyneat(genome: dict, dataset, loss, beta_type, problem_type, config,
-                    batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
+def evaluate_genome_jupyneat(genome: dict, dataset, loss, beta_type, problem_type, n_input, n_output, activation_type,
+                             batch_size=10000, n_samples=10, is_gpu=False, return_all=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
     Uses the VariationalInferenceLoss class (not the alternative)
@@ -77,7 +77,8 @@ def evaluate_genome_jupyneat(genome: dict, dataset, loss, beta_type, problem_typ
     kl_qw_pw = 0.0
 
     # setup network
-    network = ComplexStochasticNetworkJupyneat(genome=genome, config=config)
+    network = ComplexStochasticNetworkJupyneat(genome=genome, n_input=n_input, n_output=n_output,
+                                               activation_type=activation_type)
     if is_gpu:
         network.cuda()
     m = math.ceil(len(dataset) / batch_size)
@@ -93,8 +94,8 @@ def evaluate_genome_jupyneat(genome: dict, dataset, loss, beta_type, problem_typ
                                            y_batch=y_batch,
                                            problem_type=problem_type,
                                            is_gpu=is_gpu,
-                                           n_input=config.n_input,
-                                           n_output=config.n_output,
+                                           n_input=n_input,
+                                           n_output=n_output,
                                            n_samples=n_samples)
 
     with torch.no_grad():

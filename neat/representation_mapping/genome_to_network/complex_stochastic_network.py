@@ -20,7 +20,7 @@ class ComplexStochasticNetwork(nn.Module):
         self.nodes = genome.node_genes
         self.connections = genome.connection_genes
         self.config = genome.genome_config
-        self.activation = get_activation(config=self.config)
+        self.activation = get_activation(activation=self.config.node_activation)
         self.layers = transform_genome_to_layers(genome=genome)
         self.n_layers = len(self.layers)
         self._set_network_layers(layers=self.layers)

@@ -1,5 +1,6 @@
 import torch
 from experiments.reporting.report_repository import ReportRepository
+from neat.configuration import get_configuration
 from neat.evaluation.evaluate_parallel import _evaluate_genome_parallel, process_initialization
 from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
 from neat.genome import Genome
@@ -7,10 +8,13 @@ import os
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
 from neat.plotting.plot_network import plot_genome_network
-
+from tests.config_files.config_files import create_configuration
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
+
+config_file = 'mnist_binary'
+config = create_configuration(filename=f'/{config_file}.json')
 
 
 def main():
@@ -23,6 +27,7 @@ def main():
     # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
     execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2
     execution_id = 'a91761a0-6201-4a1d-9293-5e713f305fbf' # fitness -0.86
+    execution_id = '991b275d-6282-4f7d-8e97-3908baf94726'
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
                                           dataset=DATASET,
@@ -32,8 +37,8 @@ def main():
     best_individual_fitness = report.data['best_individual_fitness']
     print(f'Fitness of best individual: {best_individual_fitness}')
 
-    genome = Genome.from_dict(genome_dict)
-    config = genome.genome_config
+    genome = Genome.create_from_julia_dict(genome_dict)
+    # config = get_configuration()
     print(f'Execution id: {execution_id}')
 
     loss = get_loss(problem_type=config.problem_type)

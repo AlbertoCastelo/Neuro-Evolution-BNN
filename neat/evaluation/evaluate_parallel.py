@@ -68,7 +68,7 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
     return loss_value
 
 
-def _evaluate_genome_parallel_jupyneat(genome: dict, loss, beta_type, problem_type, config,
+def _evaluate_genome_parallel_jupyneat(genome: dict, loss, beta_type, problem_type, n_input, n_output, activation,
                                        batch_size=10000, n_samples=10, is_gpu=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
@@ -81,7 +81,8 @@ def _evaluate_genome_parallel_jupyneat(genome: dict, loss, beta_type, problem_ty
     kl_qw_pw = 0.0
 
     # setup network
-    network = ComplexStochasticNetworkJupyneat(genome=genome, config=config)
+    network = ComplexStochasticNetworkJupyneat(genome=genome, n_input=n_input, n_output=n_output,
+                                               activation_type=activation)
     if is_gpu:
         network.cuda()
     m = math.ceil(len(dataset.x) / batch_size)
@@ -93,8 +94,8 @@ def _evaluate_genome_parallel_jupyneat(genome: dict, loss, beta_type, problem_ty
                                            y_batch=y_batch,
                                            problem_type=problem_type,
                                            is_gpu=is_gpu,
-                                           n_input=config.n_input,
-                                           n_output=config.n_output,
+                                           n_input=n_input,
+                                           n_output=n_output,
                                            n_samples=n_samples)
 
     if is_gpu:

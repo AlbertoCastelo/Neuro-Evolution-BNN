@@ -46,8 +46,8 @@ class EvaluationStochasticEngineJupyneat:
             for genome in population.values():
                 # logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome, get_loss(problem_type=self.config.problem_type),
-                     self.config.beta_type, self.config.problem_type, self.config,
-                     self.batch_size, n_samples, self.is_gpu)
+                     self.config.beta_type, self.config.problem_type, self.config.n_input, self.config.n_output,
+                     self.config.node_activation, self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
             # TODO: fix logging when using multiprocessing. Easy fix is to disable
@@ -63,7 +63,9 @@ class EvaluationStochasticEngineJupyneat:
             for genome in population.values():
                 genome['fitness'] = - evaluate_genome_jupyneat(genome=genome,
                                                                problem_type=self.config.problem_type,
-                                                               config=self.config,
+                                                               n_input=self.config.n_input,
+                                                               n_output=self.config.n_output,
+                                                               activation_type=self.config.node_activation,
                                                                dataset=self.dataset,
                                                                loss=self.loss,
                                                                beta_type=self.config.beta_type,

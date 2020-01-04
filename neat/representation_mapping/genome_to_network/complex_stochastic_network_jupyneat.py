@@ -11,15 +11,14 @@ from neat.utils import timeit
 
 
 class ComplexStochasticNetworkJupyneat(nn.Module):
-    def __init__(self, genome: dict, config):
+    def __init__(self, genome: dict, n_input, n_output, activation_type):
         super(ComplexStochasticNetworkJupyneat, self).__init__()
-        self.config = config
-        self.n_output = config.n_output
-        self.n_input = config.n_input
+        self.n_output = n_output
+        self.n_input = n_input
         self.nodes = genome['nodes']
         self.connections = genome['connections']
-        self.activation = get_activation(config=self.config)
-        self.layers = transform_genome_to_layers(genome=genome, config=self.config)
+        self.activation = get_activation(activation=activation_type)
+        self.layers = transform_genome_to_layers(genome=genome, n_input=n_input, n_output=n_output)
         self.n_layers = len(self.layers)
         self._set_network_layers(layers=self.layers)
         self._cache = {}
@@ -68,15 +67,15 @@ def _get_output_node_keys(n_output):
     return list(range(0, n_output))
 
 
-def transform_genome_to_layers(genome: dict, config) -> dict:
+def transform_genome_to_layers(genome: dict, n_input, n_output) -> dict:
     layers = dict()
     nodes = genome['nodes']
     connections = genome['connections']
 
     links = [Genome._get_connection_key_from_key_str(key_str) for key_str in connections.keys()]
     nodes_per_layer = calculate_nodes_per_layer(links=links,
-                                                input_node_keys=_get_input_node_keys(n_input=config.n_input),
-                                                output_node_keys=_get_output_node_keys(n_output=config.n_output))
+                                                input_node_keys=_get_input_node_keys(n_input=n_input),
+                                                output_node_keys=_get_output_node_keys(n_output=n_output))
     layer_indices = list(nodes_per_layer.keys())
     layer_indices.sort()
     for layer_index in layer_indices[:-1]:
