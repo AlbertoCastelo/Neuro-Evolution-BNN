@@ -42,20 +42,12 @@ class EvolutionReport:
             self.persist_report()
 
     def _update_best(self, generation_report, population):
-        # if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
-        #     self.best_individual = population.get(generation_report.best_individual_key)
-        #     logger.info(f'    New best individual ({self.best_individual.key}) found '
-        #                 f'with fitness {round(self.best_individual.fitness, 3)}')
-        #     logger.debug(f'         best individual has {len(self.best_individual.node_genes)} Nodes '
-        #                  f'and {len(self.best_individual.connection_genes)} Connections')
-        #     return True
-        # return False
-        if self.best_individual is None or self.best_individual['fitness'] < generation_report.best_individual_fitness:
+        if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
             self.best_individual = population.get(generation_report.best_individual_key)
-            logger.info(f'''    New best individual ({self.best_individual['key']}) found '''
-                        f'''with fitness {round(self.best_individual['fitness'], 3)}''')
-            logger.debug(f'''         best individual has {len(self.best_individual['nodes'])} Nodes '''
-                         f'''and {len(self.best_individual['connections'])} Connections''')
+            logger.info(f'    New best individual ({self.best_individual.key}) found '
+                        f'with fitness {round(self.best_individual.fitness, 3)}')
+            logger.debug(f'         best individual has {len(self.best_individual.node_genes)} Nodes '
+                         f'and {len(self.best_individual.connection_genes)} Connections')
             return True
         return False
 
@@ -64,17 +56,12 @@ class EvolutionReport:
         return self
 
     def _generate_report(self, end_condition='normal'):
-        # self.report.add_data(name='generation_metrics', value=self.generation_metrics)
-        # self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
-        # self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
-        # self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
-        # self.report.add_data(name='end_condition', value=end_condition)
-
         self.report.add_data(name='generation_metrics', value=self.generation_metrics)
-        self.report.add_data(name='best_individual', value=self.get_best_individual())
-        # self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
-        self.report.add_data(name='best_individual_fitness', value=self.get_best_individual()['fitness'])
+        self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
+        self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
+        self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
         self.report.add_data(name='end_condition', value=end_condition)
+
         self.report.set_finish_time()
 
     def persist_report(self):
@@ -89,9 +76,9 @@ class EvolutionReport:
         return self.best_individual
 
 
-def calculate_number_of_parameters(genome: dict):
-    n_weight_parameters = 2 * len(genome['connections'])
-    n_bias_parameters = 2 * len(genome['nodes'])
+def calculate_number_of_parameters(genome):
+    n_weight_parameters = 2 * len(genome.connection_genes)
+    n_bias_parameters = 2 * len(genome.node_genes)
     return n_weight_parameters + n_bias_parameters
 
 
@@ -120,18 +107,11 @@ class GenerationReport:
         fitness_all = []
         all_n_parameters = []
         for key, genome in self.population.items():
-
-            fitness_all.append(genome['fitness'])
-
-            all_n_parameters.append(calculate_number_of_parameters(genome))
-            if genome['fitness'] > self.best_individual_fitness:
-                self.best_individual_key = genome['key']
-                self.best_individual_fitness = genome['fitness']
-            # fitness_all.append(genome.fitness)
-            # all_n_parameters.append(genome.calculate_number_of_parameters())
-            # if genome.fitness > self.best_individual_fitness:
-                # self.best_individual_fitness = genome.fitness
-                # self.best_individual_key = genome.key
+            fitness_all.append(genome.fitness)
+            all_n_parameters.append(genome.calculate_number_of_parameters())
+            if genome.fitness > self.best_individual_fitness:
+                self.best_individual_fitness = genome.fitness
+                self.best_individual_key = genome.key
 
         self.generation_data['best_individual_fitness'] = self.best_individual_fitness
         self.generation_data['best_individual_key'] = self.best_individual_key
