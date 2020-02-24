@@ -9,7 +9,7 @@ from experiments.slack_client import Notifier
 from neat.configuration import get_configuration
 from neat.evaluation.evaluation_engine_jupyneat import EvaluationStochasticEngineJupyneat
 from neat.genome import Genome
-from neat.reports import EvolutionReport
+from neat.reporting.reports_jupyneat import EvolutionReportJupyNeat
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.utils import timeit
 
@@ -18,10 +18,11 @@ JULIA_BASE_PATH = os.getenv("JULIA_BASE_PATH")
 
 class JupyNeatFSEvaluationEngine:
     @staticmethod
-    def create(report: EvolutionReport, notifier: Notifier):
+    def create(report: EvolutionReportJupyNeat, notifier: Notifier):
         return JupyNeatFSEvaluationEngine(report, notifier, EvaluationStochasticEngineJupyneat())
 
-    def __init__(self, report: EvolutionReport, notifier: Notifier, evaluation_engine: EvaluationStochasticEngine):
+    def __init__(self, report: EvolutionReportJupyNeat, notifier: Notifier,
+                 evaluation_engine: EvaluationStochasticEngine):
         self.report = report
         self.notifier = notifier
         self.evaluation_engine = evaluation_engine

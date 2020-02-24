@@ -10,7 +10,7 @@ from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.evolution_operators.crossover import Crossover
 from neat.evolution_operators.mutation import Mutation
 from neat.genome import Genome
-from neat.reports import EvolutionReport
+from neat.reporting.reports_pyneat import EvolutionReport
 from neat.species import SpeciationEngine
 from neat.stagnation import Stagnation
 from neat.utils import timeit
