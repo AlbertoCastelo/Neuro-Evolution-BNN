@@ -6,7 +6,6 @@ from neat.genome import Genome
 import os
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
-from neat.plotting.plot_network import plot_genome_network
 
 
 LOGS_PATH = f'{os.getcwd()}/'
@@ -15,14 +14,10 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 def main():
     ALGORITHM_VERSION = 'bayes-neat'
-    DATASET = 'mnist_binary'
-    CORRELATION_ID = 'test'
+    DATASET = 'toy-classification'
+    CORRELATION_ID = 'tests'
     # execution_id = 'f6d2d5e3-26a3-4069-9071-b74009323761' # 2 hours run
-    # execution_id = 'bf516f54-c29b-4f88-949c-102ab67930b3' # 10 hours run (learning architecture)
-    # execution_id = '59cbe09c-4ee7-4e7e-9b17-26c866113cfe' # test-run
-    # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
-    # execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2
-    execution_id = 'a91761a0-6201-4a1d-9293-5e713f305fbf' # fitness -0.86
+    execution_id = '0852002a-9194-4b25-8b1b-71949556290b'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,

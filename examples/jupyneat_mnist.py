@@ -3,7 +3,7 @@ from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
-from neat.reports import EvolutionReport
+from neat.reporting.reports_jupyneat import EvolutionReportJupyNeat
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
@@ -34,10 +34,10 @@ def main():
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     notifier = SlackNotifier.create(channel='batch-jobs')
 
-    report = EvolutionReport(report_repository=report_repository,
-                             algorithm_version=ALGORITHM_VERSION,
-                             dataset=DATASET,
-                             correlation_id=CORRELATION_ID)
+    report = EvolutionReportJupyNeat(report_repository=report_repository,
+                                     algorithm_version=ALGORITHM_VERSION,
+                                     dataset=DATASET,
+                                     correlation_id=CORRELATION_ID)
     print(report.report.execution_id)
 
     config.experiment = CORRELATION_ID
