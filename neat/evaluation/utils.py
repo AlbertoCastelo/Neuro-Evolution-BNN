@@ -2,6 +2,7 @@ from neat.configuration import ConfigError
 from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
+from neat.dataset.classification_titanic import TitanicDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 
 
@@ -21,7 +22,7 @@ def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_typ
     return x_batch, y_batch
 
 
-def get_dataset(dataset, testing=False):
+def get_dataset(dataset, train_percentage=0.4, testing=False):
     if testing:
         dataset_type = 'test'
     else:
@@ -33,6 +34,8 @@ def get_dataset(dataset, testing=False):
         dataset = RegressionExample2Dataset(dataset_type=dataset_type)
     elif dataset == 'classification_example_1':
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
+    elif dataset == 'titanic':
+        dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist':
         dataset = MNISTDataset(dataset_type=dataset_type)
     elif dataset == 'mnist_binary':

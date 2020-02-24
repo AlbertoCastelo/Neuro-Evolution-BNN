@@ -39,6 +39,7 @@ class EvaluationStochasticEngineJupyneat:
         '''
         population: is a Dict{Int, Genome}
         '''
+        logger.info(f'Population size is {len(population)}')
         # TODO: make n_samples increase with generation number
         n_samples = self.config.n_samples
         if self.parallel_evaluation:

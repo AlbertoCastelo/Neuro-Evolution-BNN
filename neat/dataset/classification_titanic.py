@@ -37,3 +37,18 @@ class TitanicDataset(NeatTestingDataset):
 
         self.x = self.x.float()
         self.y = self.y.long()
+
+        data_limit = self._get_data_limit()
+        if self.train:
+            self.x = self.x[:data_limit]
+            self.y = self.y[:data_limit]
+        else:
+            self.x = self.x[data_limit:]
+            self.y = self.y[data_limit:]
+
+    def _get_data_limit(self):
+        return int(round(len(self.x) * self.train_percentage))
+
+
+    def __len__(self):
+        return len(self.x)
