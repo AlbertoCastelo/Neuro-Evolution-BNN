@@ -18,6 +18,7 @@ def main():
     CORRELATION_ID = 'tests'
     execution_id = '438fc562-0ff0-457b-9c20-7c3bd7003b7c'   # fix architecture
     execution_id = '5e40afd0-2519-4d2e-813b-7023a730b1af'   # learning architecture 80 % of data
+    execution_id = 'bfee8549-4d76-426f-8215-f2de25ce794f'   # learning architecture 40 % of data
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
