@@ -38,7 +38,8 @@ def main():
         report = EvolutionReportJupyNeat(report_repository=report_repository,
                                          algorithm_version=ALGORITHM_VERSION,
                                          dataset=DATASET,
-                                         correlation_id=CORRELATION_ID)
+                                         correlation_id=CORRELATION_ID,
+                                         configuration=config)
         print(report.report.execution_id)
 
         config.experiment = CORRELATION_ID

@@ -10,19 +10,21 @@ from neat.utils import timeit
 class EvolutionReportJupyNeat:
 
     @staticmethod
-    def create(report_repository: ReportRepository, algorithm_version, dataset, correlation_id=None):
+    def create(report_repository: ReportRepository, algorithm_version, dataset, correlation_id, configuration):
         return EvolutionReportJupyNeat(report_repository=report_repository, algorithm_version=algorithm_version,
-                                       dataset=dataset, correlation_id=correlation_id)
+                                       dataset=dataset, correlation_id=correlation_id, configuration=configuration)
 
-    def __init__(self, report_repository: ReportRepository, algorithm_version, dataset, correlation_id=None):
+    def __init__(self, report_repository: ReportRepository, algorithm_version, dataset, correlation_id, configuration):
         self.report_repository = report_repository
         self.algorithm_version = algorithm_version
         self.dataset = dataset
         self.correlation_id = correlation_id
+        self.configuration = configuration
 
         self.report = BaseReport(correlation_id)
         self.report.add('algorithm_version', algorithm_version)
         self.report.add('dataset', dataset)
+        self.report.add('config', self.configuration.to_dict())
 
         self.generation_metrics = dict()
         self.best_individual = None

@@ -1,61 +1,67 @@
+import jsons
+import torch
 from torch.utils.data import DataLoader
 
-from neat.configuration import read_json_file_to_dict
+from experiments.reporting.report_repository import ReportRepository
+from neat.configuration import read_json_file_to_dict, BaseConfiguration
+from neat.evaluation.evaluate_simple import evaluate_genome_jupyneat
 from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
 from neat.genome import Genome
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+import os
 from neat.loss.vi_loss import get_loss
+from neat.neat_logger import get_neat_logger
 from neat.plotting.plot_network import plot_genome_network
 from tests.config_files.config_files import create_configuration
 
-config_file = '/classification-miso.json'
-config = create_configuration(filename=config_file)
+# config_file = '/classification-miso.json'
+# config = create_configuration(filename=config_file)
+
+
+LOGS_PATH = f'{os.getcwd()}/'
+logger = get_neat_logger(path=LOGS_PATH)
 
 
 def main():
-    execution_id = '895b11fc-590d-471e-af5a-015abc9e67e3'
-    genome_filename = f'./executions/11-02-2019, 19:12:46fcfd8573-5275-48ef-a92b-2ec41050c0de.json'
-    genome_dict = read_json_file_to_dict(filename=genome_filename)
-    genome = Genome.from_dict(genome_dict)
+    ALGORITHM_VERSION = 'bayes-neat'
+    DATASET = 'classification_example_1'
+    CORRELATION_ID = 'test'
+    execution_id = '34c9276e-6474-4a67-90e6-df1c1476eb2a'
 
-    is_cuda = False
+    report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
+    report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
+                                          dataset=DATASET,
+                                          correlation_id=CORRELATION_ID,
+                                          execution_id=execution_id)
+    genome = report.data['best_individual']
+    best_individual_fitness = report.data['best_individual_fitness']
+    print(f'Fitness of best individual: {best_individual_fitness}')
 
-    dataset = get_dataset(config.dataset, testing=False)
-    dataset.generate_data()
-    data_loader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=4)
+    config_dict = report.config
+    config = jsons.load(config_dict, BaseConfiguration)
 
     loss = get_loss(problem_type=config.problem_type)
+    dataset = get_dataset(config.dataset, testing=True)
+    dataset.generate_data()
 
-    x, y_true, y_pred, loss_value = evaluate_genome(genome=genome, data_loader=data_loader, loss=loss,
-                                                    beta_type=config.beta_type,
-                                                    batch_size=10000, n_samples=100, is_gpu=is_cuda, return_all=True)
+    x, y_true, y_pred, loss_value = evaluate_genome_jupyneat(genome=genome,
+                                                             problem_type=config.problem_type,
+                                                             n_input=config.n_input,
+                                                             n_output=config.n_output,
+                                                             activation_type=config.node_activation,
+                                                             dataset=dataset,
+                                                             loss=loss,
+                                                             beta_type=config.beta_type,
+                                                             batch_size=config.batch_size,
+                                                             n_samples=config.n_samples,
+                                                             is_gpu=config.is_gpu,
+                                                             return_all=True)
 
-    # predict
-    print('Evaluating results')
 
-    if is_cuda:
-        x = x.cpu()
-        y_true = y_true.cpu()
-        y_pred = y_pred.cpu()
-    x = dataset.input_scaler.inverse_transform(x)
-    # y_true =y_true.numpy()
-
-    # plot results
-
-    y_pred = np.argmax(y_pred.numpy(), 1)
-    df = pd.DataFrame(x, columns=['x1', 'x2'])
-    df['y'] = y_pred
-
-    x1_limit, x2_limit = dataset.get_separation_line()
-
-    plt.figure()
-    ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
-    ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
-    plt.show()
+    y_pred = torch.argmax(y_pred, dim=1)
 
     from sklearn.metrics import confusion_matrix, accuracy_score
     print(f'Loss: {loss_value}')
@@ -64,7 +70,6 @@ def main():
 
     print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
 
-    plot_genome_network(genome, view=True)
 
 if __name__ == '__main__':
     main()
