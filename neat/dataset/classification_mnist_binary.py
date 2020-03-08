@@ -40,7 +40,7 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
                 img_trans = self.transform(img)
                 yield img_trans
 
-        self.data = self.data.float()
+        # self.data = self.data.float()
         self.data = torch.cat(tuple(_data_generator(x_data=self.data)), 0)
         # self.data = self.transform(self.data.numpy())
         self.targets = self.targets.long()
@@ -50,12 +50,5 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         self.x = self.data
         self.y = self.targets
 
-        # if self.train:
-        #     self.x = self.train_data.float()
-        #     self.y = self.train_labels.short()
-        # else:
-        #     self.x = self.test_data.float()
-        #     self.y = self.test_labels.short()
-
-        # self.x = self.x[:1]
-        # self.y = self.y[:1]
+    def __getitem__(self, item):
+        return self.x[item], self.y[item]
