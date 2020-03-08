@@ -3,19 +3,20 @@ from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
-from neat.reporting.reports_jupyneat import EvolutionReport
+from neat.reporting.reports_pyneat import EvolutionReport
 from neat.utils import timeit
 from tests.config_files.config_files import create_configuration
 
+# DATASET = 'mnist'
+DATASET = 'mnist_downsampled'
 
-config_file = 'mnist'
-config = create_configuration(filename=f'/{config_file}.json')
+config = create_configuration(filename=f'/{DATASET}.json')
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.n_generations = 2
+config.n_generations = 1000
 config.pop_size = 150
 config.n_samples = 40
 
@@ -24,7 +25,7 @@ config.node_add_prob = 0.5
 
 
 ALGORITHM_VERSION = 'bayes-neat'
-DATASET = 'mnist'
+
 # CORRELATION_ID = 'parameters_grid'
 CORRELATION_ID = 'many-generations'
 

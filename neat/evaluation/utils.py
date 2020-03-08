@@ -2,6 +2,7 @@ from neat.configuration import ConfigError
 from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
+from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDataset
 from neat.dataset.classification_titanic import TitanicDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 
@@ -38,6 +39,8 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist':
         dataset = MNISTDataset(dataset_type=dataset_type)
+    elif dataset == 'mnist_downsampled':
+        dataset = MNISTDownsampledDataset(dataset_type=dataset_type)
     elif dataset == 'mnist_binary':
         dataset = MNISTBinaryDataset(dataset_type=dataset_type)
     else:
