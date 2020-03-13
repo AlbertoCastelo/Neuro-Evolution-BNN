@@ -15,15 +15,21 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 def main():
     ALGORITHM_VERSION = 'bayes-neat'
-    DATASET = 'mnist'
+
     CORRELATION_ID = 'test'
-    # execution_id = 'f6d2d5e3-26a3-4069-9071-b74009323761' # 2 hours run
-    execution_id = 'bf516f54-c29b-4f88-949c-102ab67930b3' # 10 hours run (learning architecture)
-    # execution_id = '59cbe09c-4ee7-4e7e-9b17-26c866113cfe' # test-run
-    # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
-    execution_id = 'a70103cb-e5f5-4c35-b3d6-5ab4e21e96ac'  # structure only has 1 output node
-    execution_id = '440c2b43-f514-4d9b-873b-47436ee96137'  # initial network creates connection for all output nodes
-    execution_id = 'c65d7ee2-135f-4527-adb4-bfc84e66f933'
+    # DATASET = 'mnist'
+    # # execution_id = 'f6d2d5e3-26a3-4069-9071-b74009323761' # 2 hours run
+    # execution_id = 'bf516f54-c29b-4f88-949c-102ab67930b3' # 10 hours run (learning architecture)
+    # # execution_id = '59cbe09c-4ee7-4e7e-9b17-26c866113cfe' # test-run
+    # # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
+    # execution_id = 'a70103cb-e5f5-4c35-b3d6-5ab4e21e96ac'  # structure only has 1 output node
+    # execution_id = '440c2b43-f514-4d9b-873b-47436ee96137'  # initial network creates connection for all output nodes
+    # execution_id = 'c65d7ee2-135f-4527-adb4-bfc84e66f933'
+
+    DATASET = 'mnist_downsampled'
+    execution_id = '58dc7890-969b-4643-b002-8757b4054260'
+    execution_id = '15a2cf07-01db-42e1-83f4-a4c5ca2a13c9'
+
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
                                           dataset=DATASET,
@@ -43,7 +49,7 @@ def main():
     print('Evaluating results')
     evaluate_with_parallel(genome, loss, config)
 
-    dataset = get_dataset(config.dataset_name, testing=True)
+    dataset = get_dataset(config.dataset, testing=True)
     dataset.generate_data()
     # TODO: remove data-loader. If we want to sample the dataset in each generation, the we can create a
     #  middlelayer between evaluation and dataset
@@ -70,7 +76,7 @@ def main():
 
 def evaluate_with_parallel(genome, loss, config):
 
-    process_initialization(dataset_name=config.dataset_name, testing=True)
+    process_initialization(dataset_name=config.dataset, testing=True)
     loss_value = _evaluate_genome_parallel(genome=genome, loss=loss, beta_type=config.beta_type,
                                            problem_type=config.problem_type,
                                            batch_size=config.batch_size, n_samples=config.n_samples)

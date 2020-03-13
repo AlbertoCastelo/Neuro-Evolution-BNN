@@ -29,7 +29,7 @@ def main():
     ALGORITHM_VERSION = 'bayes-neat'
     DATASET = 'classification_example_1'
     CORRELATION_ID = 'test'
-    execution_id = '34c9276e-6474-4a67-90e6-df1c1476eb2a'
+    execution_id = '180186eb-46c8-4bbd-9f8a-26a36cbe57e4'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
