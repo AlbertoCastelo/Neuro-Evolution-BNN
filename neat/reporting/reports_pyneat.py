@@ -32,6 +32,8 @@ class EvolutionReport:
 
         self.generation_metrics = dict()
         self.best_individual = None
+        self.metrics_best = {}
+        self.generic_text = None
 
     @timeit
     def report_new_generation(self, generation: int, population: dict, species: dict):
@@ -67,9 +69,13 @@ class EvolutionReport:
 
         from sklearn.metrics import confusion_matrix, accuracy_score
         # print(f'Loss: {loss_value}')
+        confusion_m = confusion_matrix(y_true, y_pred)
+        acc = accuracy_score(y_true, y_pred) * 100
+        self.metrics_best['confusion_matrix'] = confusion_m
+        self.metrics_best['accuracy'] = acc
         print('Confusion Matrix:')
-        print(confusion_matrix(y_true, y_pred))
-        print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
+        print(confusion_m)
+        print(f'Accuracy: {acc} %')
 
     def _update_best(self, generation_report, population):
         if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:

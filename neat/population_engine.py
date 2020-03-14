@@ -58,7 +58,8 @@ class EvolutionEngine:
         self.report.generate_final_report(end_condition=end_condition)\
                    .persist_report()
         self.report.persist_logs()
-        self.notifier.send(str(self.report.get_best_individual()))
+        # self.notifier.send(str(self.report.get_best_individual()))
+        self._send_final_message()
         logger.info('Finished evolutionary process')
 
     @timeit
@@ -77,6 +78,15 @@ class EvolutionEngine:
         self.report.report_new_generation(generation=generation,
                                           population=self.population,
                                           species=self.speciation_engine.species)
+
+    def _send_final_message(self):
+        self.notifier.send(f'-----------------------------------------------------------------\n'
+                           f'Dataset: {self.report.dataset}. \nCorrelation id: {self.report.correlation_id}.\n'
+                           f'Execution id: {self.report.report.execution_id}')
+        self.notifier.send(f'Best Fitness: {self.report.best_individual.fitness}')
+        if self.report.generic_text is not None:
+            self.notifier.send(str(self.report.generic_text))
+        self.notifier.send(str(self.report.metrics_best))
 
 
 class PopulationEngine:

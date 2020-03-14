@@ -5,8 +5,10 @@ from PIL import Image
 from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 
+from neat.configuration import get_configuration
 from neat.dataset.abstract import NeatTestingDataset
 
+n_output = get_configuration().n_output
 
 class MNISTBinaryDataset(NeatTestingDataset, MNIST):
     '''
@@ -28,9 +30,13 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
         MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
 
     def generate_data(self):
-        mask_1 = self.targets == 1
-        mask_0 = self.targets == 0
-        mask_or = mask_1 + mask_0
+        for output in range(get_configuration().n_output):
+            mask_i = self.targets == output
+            if output == 0:
+                mask_or = mask_i
+            else:
+                mask_or += mask_i
+
         self.data = self.data[mask_or]
         self.targets = self.targets[mask_or]
 
@@ -40,15 +46,34 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
                 img_trans = self.transform(img)
                 yield img_trans
 
-        # self.data = self.data.float()
         self.data = torch.cat(tuple(_data_generator(x_data=self.data)), 0)
-        # self.data = self.transform(self.data.numpy())
         self.targets = self.targets.long()
-
-        # print(f'data: {self.data.shape}')
 
         self.x = self.data
         self.y = self.targets
+    #
+    # def generate_data(self):
+    #     mask_1 = self.targets == 1
+    #     mask_0 = self.targets == 0
+    #     mask_or = mask_1 + mask_0
+    #     self.data = self.data[mask_or]
+    #     self.targets = self.targets[mask_or]
+    #
+    #     def _data_generator(x_data: torch.Tensor):
+    #         for i in range(len(x_data)):
+    #             img = Image.fromarray(x_data[i].numpy(), mode='L')
+    #             img_trans = self.transform(img)
+    #             yield img_trans
+    #
+    #     # self.data = self.data.float()
+    #     self.data = torch.cat(tuple(_data_generator(x_data=self.data)), 0)
+    #     # self.data = self.transform(self.data.numpy())
+    #     self.targets = self.targets.long()
+    #
+    #     # print(f'data: {self.data.shape}')
+    #
+    #     self.x = self.data
+    #     self.y = self.targets
 
     def __getitem__(self, item):
         return self.x[item], self.y[item]
