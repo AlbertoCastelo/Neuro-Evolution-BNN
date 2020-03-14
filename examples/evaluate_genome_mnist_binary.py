@@ -1,3 +1,5 @@
+import random
+import matplotlib.pyplot as plt
 import torch
 from experiments.reporting.report_repository import ReportRepository
 from neat.evaluation.evaluate_parallel import _evaluate_genome_parallel, process_initialization
@@ -21,11 +23,12 @@ def main():
     # execution_id = 'bf516f54-c29b-4f88-949c-102ab67930b3' # 10 hours run (learning architecture)
     # execution_id = '59cbe09c-4ee7-4e7e-9b17-26c866113cfe' # test-run
     # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
-    # execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2
+    execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2
     # execution_id = 'a91761a0-6201-4a1d-9293-5e713f305fbf'    # fitness -0.86
     # execution_id = 'eaa675cc-bb02-4a03-ad8f-fbe40b04762a'
     # execution_id = '4a0aba36-34b3-4d28-b536-ef01734505cc'
-    execution_id = 'edf899f5-d231-4567-a40e-59d9967013d4'
+    # execution_id = 'edf899f5-d231-4567-a40e-59d9967013d4'
+    # execution_id = '855fd0c8-5fd8-4b75-a39c-c678f690821f'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
@@ -38,6 +41,7 @@ def main():
 
     genome = Genome.from_dict(genome_dict)
     config = genome.genome_config
+    config.dataset = 'mnist_binary'
     print(f'Execution id: {execution_id}')
 
     loss = get_loss(problem_type=config.problem_type)
@@ -47,7 +51,13 @@ def main():
     evaluate_with_parallel(genome, loss, config)
 
     dataset = get_dataset(config.dataset, testing=True)
-    dataset.generate_data()
+
+    selection = random.choice(list(range(len(dataset))))
+    print(selection)
+    x, y = dataset.__getitem__(selection)
+    x = x.squeeze().numpy()
+    plt.imshow(x)
+    plt.show()
     # TODO: remove data-loader. If we want to sample the dataset in each generation, the we can create a
     #  middlelayer between evaluation and dataset
     x, y_true, y_pred, loss_value = evaluate_genome(genome=genome,

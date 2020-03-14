@@ -7,13 +7,13 @@
   "beta_type": "other",
 
   "fix_std": false,
-  "fix_architecture": true,
+  "fix_architecture": false,
   "log_network": false,
   "log_time": true,
 
   "feed_forward": true,
-  "is_initial_fully_connected": true,
-  "n_initial_hidden_neurons": 10,
+  "is_initial_fully_connected": false,
+  "n_initial_hidden_neurons": 0,
 
   "bias_mean_discrete": [-1.0, 0.0, 1.0],
   "bias_std_discrete": [0.1, 0.5, 1.0],

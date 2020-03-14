@@ -50,7 +50,6 @@ def main():
     evaluate_with_parallel(genome, loss, config)
 
     dataset = get_dataset(config.dataset, testing=True)
-    dataset.generate_data()
     # TODO: remove data-loader. If we want to sample the dataset in each generation, the we can create a
     #  middlelayer between evaluation and dataset
     x, y_true, y_pred, loss_value = evaluate_genome(genome=genome,

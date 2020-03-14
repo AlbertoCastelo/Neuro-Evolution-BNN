@@ -15,12 +15,12 @@ LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.n_generations = 200
-config.pop_size = 150
-config.n_samples = 50
-
-config.max_stagnation = 30
-config.node_add_prob = 0.5
+# config.n_generations = 200
+# config.pop_size = 150
+# config.n_samples = 50
+#
+# config.max_stagnation = 30
+# config.node_add_prob = 0.5
 
 
 ALGORITHM_VERSION = 'bayes-neat'
