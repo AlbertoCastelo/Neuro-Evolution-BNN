@@ -4,7 +4,7 @@ import torch
 
 from neat.representation_mapping.genome_to_network.complex_stochastic_network_jupyneat import transform_genome_to_layers, \
     ComplexStochasticNetworkJupyneat
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 STD = 0.00000001
 

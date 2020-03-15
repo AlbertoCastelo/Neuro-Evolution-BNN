@@ -4,7 +4,7 @@ import numpy as np
 from neat.representation_mapping.genome_to_network.stochastic_network import StochasticNetworkOld
 from deep_learning.standard.feed_forward import FeedForward
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 import matplotlib.pyplot as plt
 

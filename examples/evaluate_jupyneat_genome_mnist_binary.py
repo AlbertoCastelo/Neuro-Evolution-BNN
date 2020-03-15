@@ -1,14 +1,12 @@
 import torch
 from experiments.reporting.report_repository import ReportRepository
-from neat.configuration import get_configuration
 from neat.evaluation.evaluate_parallel import _evaluate_genome_parallel, process_initialization
 from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
 from neat.genome import Genome
 import os
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
-from neat.plotting.plot_network import plot_genome_network
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)

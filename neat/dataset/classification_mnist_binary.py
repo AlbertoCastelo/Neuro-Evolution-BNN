@@ -10,6 +10,7 @@ from neat.dataset.abstract import NeatTestingDataset
 
 n_output = get_configuration().n_output
 
+
 class MNISTBinaryDataset(NeatTestingDataset, MNIST):
     '''
     MNIST dataset considering only 2 classes: 1 and 2 digits.
@@ -51,7 +52,8 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
 
         self.x = self.data
         self.y = self.targets
-    #
+        print('GETTING DATASET')
+
     # def generate_data(self):
     #     mask_1 = self.targets == 1
     #     mask_0 = self.targets == 0

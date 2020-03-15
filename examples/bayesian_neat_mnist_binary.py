@@ -1,11 +1,12 @@
 import os
+
+from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
 from neat.utils import timeit
-from tests.config_files.config_files import create_configuration
 
 
 config_file = 'mnist_binary'
@@ -15,18 +16,17 @@ LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-# config.n_generations = 200
-# config.pop_size = 150
+config.pop_size = 20
 # config.n_samples = 50
 #
-# config.max_stagnation = 30
-# config.node_add_prob = 0.5
-
+config.n_generations = 300
+config.node_add_prob = 0.5
+config.n_output = 2
 
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'mnist_binary'
 # CORRELATION_ID = 'parameters_grid'
-CORRELATION_ID = 'tests'
+CORRELATION_ID = 'solve_binary'
 
 
 @timeit
@@ -35,11 +35,12 @@ def main():
     notifier = SlackNotifier.create(channel='batch-jobs')
     failed = 0
     total = 0
-    for pop_size in range(100, 201, 50):
+    for n_output in range(2, 11):
         # for n_samples in [20, 50, 100]:
-        for retry in range(2):
+        for retry in range(5):
             # config.n_samples = n_samples
-            config.pop_size = pop_size
+            notifier.send(f'New job using n_output: {n_output}')
+            config.n_output = n_output
             total += 1
             try:
                 report = EvolutionReport(report_repository=report_repository,

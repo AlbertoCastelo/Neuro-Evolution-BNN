@@ -1,0 +1,50 @@
+version: '3.4'
+
+x-app-service:
+  &app-service
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  volumes:
+    - ..:/workspace
+  depends_on:
+    - minio
+  environment:
+    - SLACK_API_TOKEN
+    - JULIA_BASE_PATH
+    - AWS_S3_HOST=http://minio:9000
+    - AWS_ACCESS_KEY_ID=minioKey
+    - AWS_SECRET_ACCESS_KEY=minioSecret
+    - AWS_REGION=eu-west-1
+  networks:
+    - default
+    - neat
+
+services:
+  pyneat:
+    <<: *app-service
+    container_name: pyneat
+    command: "sh /workspace/docker/scripts/run_jupyter_lab.sh"
+    user: root
+    ports:
+      - "8888:8888"
+
+  minio:
+    image: minio/minio
+    container_name: minio_neat
+    environment:
+      - MINIO_ACCESS_KEY=minioKey
+      - MINIO_SECRET_KEY=minioSecret
+    ports:
+      - "9000:9000"
+    command: server /data
+    volumes:
+      - minio-data:/data
+
+networks:
+  neat:
+    external: true
+
+volumes:
+  minio-data:
+    driver: local

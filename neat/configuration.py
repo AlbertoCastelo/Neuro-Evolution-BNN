@@ -168,3 +168,7 @@ def get_configuration(filename=None):
     if _Configuration._instance is None or filename is not None:
         _Configuration(filename=filename)
     return _Configuration._instance
+
+
+def set_configuration(config):
+    _Configuration._instance = config

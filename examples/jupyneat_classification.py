@@ -5,7 +5,7 @@ from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
 from neat.reporting.reports_jupyneat import EvolutionReportJupyNeat
 from neat.utils import timeit
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 
 config_file = 'classification-miso'

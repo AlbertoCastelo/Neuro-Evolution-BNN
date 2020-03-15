@@ -12,7 +12,7 @@ from neat.loss.vi_loss import get_loss, get_beta
 from neat.neat_logger import get_neat_logger
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.utils import timeit
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 config = create_configuration(filename='/mnist_binary.json')
 LOGS_PATH = f'{os.getcwd()}/'

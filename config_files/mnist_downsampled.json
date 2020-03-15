@@ -1,12 +1,12 @@
 {
   "parallel_evaluation": true,
-  "n_processes": 12,
+  "n_processes": 6,
   "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
-  "fix_std": false,
+  "fix_std": true,
   "fix_architecture": false,
   "log_network": true,
   "log_time": true,
@@ -15,20 +15,20 @@
   "is_initial_fully_connected": false,
   "n_initial_hidden_neurons": 0,
 
-  "dataset": "mnist_binary",
+  "dataset": "mnist_downsampled",
   "n_generations": 200,
   "node_activation": "tanh",
   "pop_size": 150,
 
   "problem_type": "classification",
-  "n_input": 784,
-  "n_output": 2,
+  "n_input": 256,
+  "n_output": 10,
   "n_samples": 100,
 
-  "bias_mean_discrete": [-1.0, 0.0, 1.0],
+  "bias_mean_discrete": [-1, 0.0, 1],
   "bias_std_discrete": [0.1, 0.5, 1.0],
 
-  "weight_mean_discrete": [-1.0, 0.0, 1.0],
+  "weight_mean_discrete": [-1, 0.0, 1],
   "weight_std_discrete": [0.1, 0.5, 1.0],
 
   "bias_mean_init_mean": 0.0,
@@ -73,7 +73,7 @@
 
   "species_fitness_function": "max",
   "species_elitism": 2,
-  "max_stagnation": 30,
+  "max_stagnation": 20,
 
   "elitism": 2,
   "survival_threshold": 0.2,
@@ -85,9 +85,9 @@
   "replace_rate": 0.1,
 
   "node_add_prob": 0.2,
-  "node_delete_prob": 0.1,
+  "node_delete_prob": 0.01,
   "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.25,
+  "connection_delete_prob": 0.01,
 
   "node_aggregation": "sum"
 }

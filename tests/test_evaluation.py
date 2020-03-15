@@ -3,10 +3,9 @@ from unittest import TestCase
 from torch.utils.data import DataLoader
 
 from neat.evaluation.evaluate_simple import evaluate_genome
-from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.evaluation.utils import get_dataset
 from neat.loss.vi_loss import get_loss
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 

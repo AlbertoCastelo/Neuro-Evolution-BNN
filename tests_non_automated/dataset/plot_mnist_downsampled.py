@@ -7,9 +7,9 @@ from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDatase
 
 
 def main():
-    dataset = MNISTDownsampledDataset(dataset_type='test')
+    # dataset = MNISTDownsampledDataset(dataset_type='train')
     # dataset = MNISTDataset(dataset_type='test')
-    # dataset = MNISTBinaryDataset(dataset_type='test')
+    dataset = MNISTBinaryDataset(dataset_type='test')
 
     dataset.generate_data()
     print(dataset)

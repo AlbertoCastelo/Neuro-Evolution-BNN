@@ -80,7 +80,7 @@ class EvaluationStochasticEngine:
     def _get_dataset(self):
         if self.dataset is None:
             self.dataset = get_dataset(self.config.dataset, testing=self.testing)
-            self.dataset.generate_data()
+            # self.dataset.generate_data()
         return self.dataset
 
     def _get_dataloader(self):

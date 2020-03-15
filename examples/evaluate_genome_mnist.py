@@ -29,6 +29,7 @@ def main():
     DATASET = 'mnist_downsampled'
     execution_id = '58dc7890-969b-4643-b002-8757b4054260'
     execution_id = '15a2cf07-01db-42e1-83f4-a4c5ca2a13c9'
+    execution_id = '177d1879-9ffb-4c95-9895-503256edf7aa'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from neat.evolution_operators.mutation import Mutation, exist_cycle, adds_multihop_jump
 from neat.genome import Genome
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 

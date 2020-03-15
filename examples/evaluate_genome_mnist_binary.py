@@ -2,6 +2,7 @@ import random
 import matplotlib.pyplot as plt
 import torch
 from experiments.reporting.report_repository import ReportRepository
+from neat.configuration import set_configuration
 from neat.evaluation.evaluate_parallel import _evaluate_genome_parallel, process_initialization
 from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
 from neat.genome import Genome
@@ -29,6 +30,8 @@ def main():
     # execution_id = '4a0aba36-34b3-4d28-b536-ef01734505cc'
     # execution_id = 'edf899f5-d231-4567-a40e-59d9967013d4'
     # execution_id = '855fd0c8-5fd8-4b75-a39c-c678f690821f'
+    # execution_id = '3c086424-bc94-438d-9ea2-d37a3021d8de'
+    # execution_id = 'c19dc3d5-735a-44a7-809d-71da51696237'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
@@ -42,6 +45,7 @@ def main():
     genome = Genome.from_dict(genome_dict)
     config = genome.genome_config
     config.dataset = 'mnist_binary'
+    set_configuration(config)
     print(f'Execution id: {execution_id}')
 
     loss = get_loss(problem_type=config.problem_type)

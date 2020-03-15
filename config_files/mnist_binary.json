@@ -1,12 +1,12 @@
 {
-  "parallel_evaluation": true,
-  "n_processes": 6,
-  "is_discrete": true,
+  "parallel_evaluation": false,
+  "n_processes": 9,
+  "is_discrete": false,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
-  "fix_std": true,
+  "fix_std": false,
   "fix_architecture": false,
   "log_network": true,
   "log_time": true,
@@ -15,26 +15,26 @@
   "is_initial_fully_connected": false,
   "n_initial_hidden_neurons": 0,
 
-  "dataset": "mnist_downsampled",
-  "n_generations": 1000,
+  "dataset": "mnist_binary",
+  "n_generations": 500,
   "node_activation": "tanh",
   "pop_size": 150,
 
   "problem_type": "classification",
-  "n_input": 256,
-  "n_output": 10,
+  "n_input": 784,
+  "n_output": 2,
   "n_samples": 100,
 
-  "bias_mean_discrete": [-1, 0.0, 1],
+  "bias_mean_discrete": [-1.0, 0.0, 1.0],
   "bias_std_discrete": [0.1, 0.5, 1.0],
 
-  "weight_mean_discrete": [-1, 0.0, 1],
+  "weight_mean_discrete": [-1.0, 0.0, 1.0],
   "weight_std_discrete": [0.1, 0.5, 1.0],
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
-  "bias_mean_max_value": 30.0,
-  "bias_mean_min_value": -30.0,
+  "bias_mean_max_value": 1.0,
+  "bias_mean_min_value": -1.0,
   "bias_mean_prior": 0.0,
 
   "bias_std_init_mean": 0.001,
@@ -61,8 +61,8 @@
 
   "weight_mean_init_mean": 0,
   "weight_mean_init_std": 1,
-  "weight_mean_max_value": 10,
-  "weight_mean_min_value": -10,
+  "weight_mean_max_value": 2,
+  "weight_mean_min_value": -2,
   "weight_mean_prior": 0.0,
 
   "weight_std_init_mean": 0.001,
@@ -73,7 +73,7 @@
 
   "species_fitness_function": "max",
   "species_elitism": 2,
-  "max_stagnation": 20,
+  "max_stagnation": 30,
 
   "elitism": 2,
   "survival_threshold": 0.2,
@@ -84,7 +84,7 @@
   "mutate_rate": 0.8,
   "replace_rate": 0.1,
 
-  "node_add_prob": 0.2,
+  "node_add_prob": 0.5,
   "node_delete_prob": 0.1,
   "connection_add_prob": 0.5,
   "connection_delete_prob": 0.25,

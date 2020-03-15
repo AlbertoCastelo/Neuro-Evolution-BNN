@@ -1,21 +1,13 @@
 import jsons
 import torch
-from torch.utils.data import DataLoader
 
 from experiments.reporting.report_repository import ReportRepository
-from neat.configuration import read_json_file_to_dict, BaseConfiguration
+from neat.configuration import BaseConfiguration
 from neat.evaluation.evaluate_simple import evaluate_genome_jupyneat
-from neat.evaluation.evaluation_engine import evaluate_genome, get_dataset
-from neat.genome import Genome
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+from neat.evaluation.evaluation_engine import get_dataset
 import os
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
-from neat.plotting.plot_network import plot_genome_network
-from tests.config_files.config_files import create_configuration
 
 # config_file = '/classification-miso.json'
 # config = create_configuration(filename=config_file)

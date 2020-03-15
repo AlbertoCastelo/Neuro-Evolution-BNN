@@ -2,7 +2,7 @@ import torch
 
 from neat.dataset.regression_example import RegressionExample1Dataset
 
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 import matplotlib.pyplot as plt
 from deep_learning.standard.train_eval import EvaluateStandardDL
 

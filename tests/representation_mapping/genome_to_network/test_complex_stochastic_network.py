@@ -6,7 +6,7 @@ from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import transform_genome_to_layers, \
     ComplexStochasticNetwork
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 STD = 0.00000001
 

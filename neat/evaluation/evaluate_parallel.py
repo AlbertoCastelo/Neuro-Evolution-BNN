@@ -16,7 +16,7 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network_ju
 def process_initialization(dataset_name, testing):
     global dataset
     dataset = get_dataset(dataset_name, testing=testing)
-    dataset.generate_data()
+    # dataset.generate_data()
 
 
 def evaluate_genome_task(x):

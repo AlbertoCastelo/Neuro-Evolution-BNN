@@ -7,7 +7,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 from deep_learning.standard.feed_forward import FeedForward
 
 config = create_configuration(filename='/classification-miso.json')

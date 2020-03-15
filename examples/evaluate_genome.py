@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from neat.loss.vi_loss import get_loss
 from neat.plotting.plot_network import plot_genome_network
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 
 config_file = '/classification-miso.json'
 config = create_configuration(filename=config_file)

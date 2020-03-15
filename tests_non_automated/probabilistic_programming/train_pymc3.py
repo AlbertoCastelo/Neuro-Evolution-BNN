@@ -2,7 +2,7 @@ import theano
 
 from neat.evaluation.evaluation_engine import get_dataset
 from tests_non_automated.probabilistic_programming.create_network import construct_nn
-from tests.config_files.config_files import create_configuration
+from config_files import create_configuration
 import pymc3 as pm
 
 
