@@ -6,7 +6,7 @@ x-app-service:
     context: ..
     dockerfile: docker/Dockerfile
   volumes:
-    - ..:/workspace
+    - ..:/home/jovyan
   depends_on:
     - minio
   environment:
@@ -24,7 +24,7 @@ services:
   pyneat:
     <<: *app-service
     container_name: pyneat
-    command: "sh /workspace/docker/scripts/run_jupyter_lab.sh"
+    command: "sh /home/jovyan/docker/scripts/run_jupyter_lab.sh"
     user: root
     ports:
       - "8888:8888"
