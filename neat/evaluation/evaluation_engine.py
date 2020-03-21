@@ -75,7 +75,9 @@ class EvaluationStochasticEngine:
 
     def close(self):
         if self.parallel_evaluation:
+            print('closing pool')
             self.pool.close()
+            self.pool.join()
 
     def _get_dataset(self):
         if self.dataset is None:

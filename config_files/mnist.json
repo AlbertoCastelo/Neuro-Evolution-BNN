@@ -7,13 +7,13 @@
   "beta_type": "other",
 
   "fix_std": true,
-  "fix_architecture": false,
+  "fix_architecture": true,
   "log_network": true,
   "log_time": true,
 
   "feed_forward": true,
-  "is_initial_fully_connected": false,
-  "n_initial_hidden_neurons": 0,
+  "is_initial_fully_connected": true,
+  "n_initial_hidden_neurons": 6,
 
   "dataset": "mnist",
   "n_generations": 1000,
@@ -25,10 +25,10 @@
   "n_output": 10,
   "n_samples": 100,
 
-  "bias_mean_discrete": [-0.2, 0.0, 0.2],
+  "bias_mean_discrete": [-1.0, 0.0, 1.0],
   "bias_std_discrete": [0.05, 0.1, 0.5],
 
-  "weight_mean_discrete": [-0.2, 0.0, 0.2],
+  "weight_mean_discrete": [-1.0, 0.0, 1.0],
   "weight_std_discrete":[0.05, 0.1, 0.5],
 
   "bias_mean_init_mean": 0.0,

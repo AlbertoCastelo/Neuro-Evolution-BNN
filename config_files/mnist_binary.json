@@ -1,12 +1,12 @@
 {
-  "parallel_evaluation": false,
-  "n_processes": 9,
-  "is_discrete": false,
+  "parallel_evaluation": true,
+  "n_processes": 10,
+  "is_discrete": true,
   "is_gpu": false,
   "batch_size": 100000000,
   "beta_type": "other",
 
-  "fix_std": false,
+  "fix_std": true,
   "fix_architecture": false,
   "log_network": true,
   "log_time": true,

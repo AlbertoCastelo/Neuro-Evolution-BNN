@@ -1,11 +1,12 @@
 import os
+
+from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
 from neat.reporting.reports_jupyneat import EvolutionReportJupyNeat
 from neat.utils import timeit
-from config_files import create_configuration
 
 
 config_file = 'classification-miso'

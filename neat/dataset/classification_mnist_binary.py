@@ -52,7 +52,6 @@ class MNISTBinaryDataset(NeatTestingDataset, MNIST):
 
         self.x = self.data
         self.y = self.targets
-        print('GETTING DATASET')
 
     # def generate_data(self):
     #     mask_1 = self.targets == 1

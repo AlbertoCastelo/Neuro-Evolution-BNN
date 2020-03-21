@@ -19,9 +19,12 @@ logger = get_neat_logger(path=LOGS_PATH)
 config.pop_size = 20
 # config.n_samples = 50
 #
-config.n_generations = 300
+config.n_generations = 2
 config.node_add_prob = 0.5
 config.n_output = 2
+
+node_add_probs = [0.3, 0.5, 0.7]
+connection_add_probs = [0.3, 0.5, 0.7]
 
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = 'mnist_binary'
@@ -35,14 +38,21 @@ def main():
     notifier = SlackNotifier.create(channel='batch-jobs')
     failed = 0
     total = 0
-    for n_output in range(2, 11):
-        # for n_samples in [20, 50, 100]:
-        for retry in range(5):
-            # config.n_samples = n_samples
-            notifier.send(f'New job using n_output: {n_output}')
-            config.n_output = n_output
-            total += 1
-            try:
+    # for n_output in range(2, 11):
+    for node_add_prob in node_add_probs:
+        for connection_add_prob in connection_add_probs:
+            # for n_samples in [20, 50, 100]:
+            for retry in range(2):
+                config.node_add_prob = node_add_prob
+                config.connection_add_prob = connection_add_prob
+                notifier.send(f'New job using: node_add_prob={node_add_prob} || '
+                              f'connection_add_prob={connection_add_prob}')
+
+                # config.n_samples = n_samples
+                # notifier.send(f'New job using n_output: {n_output}')
+                # config.n_output = n_output
+                total += 1
+                # try:
                 report = EvolutionReport(report_repository=report_repository,
                                          algorithm_version=ALGORITHM_VERSION,
                                          dataset=DATASET,
@@ -50,11 +60,11 @@ def main():
                 print(report.report.execution_id)
                 evolution_engine = EvolutionEngine(report=report, notifier=notifier)
                 evolution_engine.run()
-            except Exception as e:
-                print(e)
-                notifier.send(e)
-                logger.error(e)
-                failed += 1
+                # except Exception as e:
+                #     print(e)
+                #     notifier.send(e)
+                #     logger.error(e)
+                #     failed += 1
     print(f'It failed {failed} times out of {total}')
 
     # return evolution_engine

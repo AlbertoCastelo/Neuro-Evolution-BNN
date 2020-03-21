@@ -33,7 +33,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
         dataset = RegressionExample1Dataset(dataset_type=dataset_type)
     elif dataset == 'regression_example_2':
         dataset = RegressionExample2Dataset(dataset_type=dataset_type)
-    elif dataset == 'classification_example_1':
+    elif dataset == 'classification-miso':
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
     elif dataset == 'titanic':
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type)

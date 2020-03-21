@@ -1,22 +1,25 @@
 import os
+
+from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.evaluation_engine import JupyNeatFSEvaluationEngine
 from neat.neat_logger import get_neat_logger
 from neat.reporting.reports_jupyneat import EvolutionReportJupyNeat
 from neat.utils import timeit
-from config_files import create_configuration
 
 
-config_file = 'mnist'
-config = create_configuration(filename=f'/{config_file}.json')
+# config_file = 'mnist'
+DATASET = 'mnist_downsampled'
+
+config = create_configuration(filename=f'/{DATASET}.json')
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.n_generations = 20
-config.pop_size = 5
+config.pop_size = 150
 config.n_samples = 20
 
 config.max_stagnation = 30
@@ -24,7 +27,7 @@ config.node_add_prob = 0.5
 
 
 ALGORITHM_VERSION = 'bayes-neat'
-DATASET = 'mnist'
+# DATASET = 'mnist'
 
 CORRELATION_ID = 'test'
 
@@ -37,7 +40,8 @@ def main():
     report = EvolutionReportJupyNeat(report_repository=report_repository,
                                      algorithm_version=ALGORITHM_VERSION,
                                      dataset=DATASET,
-                                     correlation_id=CORRELATION_ID)
+                                     correlation_id=CORRELATION_ID,
+                                     configuration=config)
     print(report.report.execution_id)
 
     config.experiment = CORRELATION_ID

@@ -24,7 +24,7 @@ def main():
     # execution_id = 'bf516f54-c29b-4f88-949c-102ab67930b3' # 10 hours run (learning architecture)
     # execution_id = '59cbe09c-4ee7-4e7e-9b17-26c866113cfe' # test-run
     # execution_id = 'c5551a6c-177b-4c2c-8ecd-a75e79ae0ec2'
-    execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2
+    execution_id = '1f30c172-9056-4012-9651-0765527bd550'  # fitness -0.2 # its on another docker container not on the one used by docker-compose
     # execution_id = 'a91761a0-6201-4a1d-9293-5e713f305fbf'    # fitness -0.86
     # execution_id = 'eaa675cc-bb02-4a03-ad8f-fbe40b04762a'
     # execution_id = '4a0aba36-34b3-4d28-b536-ef01734505cc'
@@ -32,7 +32,8 @@ def main():
     # execution_id = '855fd0c8-5fd8-4b75-a39c-c678f690821f'
     # execution_id = '3c086424-bc94-438d-9ea2-d37a3021d8de'
     # execution_id = 'c19dc3d5-735a-44a7-809d-71da51696237'
-
+    CORRELATION_ID = 'test'
+    execution_id = '2014fc1f-50e0-42b8-800e-69102967c77f' # -0.22
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
                                           dataset=DATASET,
