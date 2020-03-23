@@ -259,7 +259,7 @@ class LayerBuilder:
         for output_index, output_key in enumerate(layer_node_keys):
             key_index_mapping_output[output_key] = output_index
         weight_mean = torch.zeros([n_output, n_input])
-        weight_log_var = torch.zeros([n_output, n_input])
+        weight_log_var = -33.0 * torch.ones([n_output, n_input])
         for connection_key in layer_connections:
             input_node_key, output_node_key = connection_key
             weight_mean[key_index_mapping_output[output_node_key], key_index_mapping_input[input_node_key]] = \
