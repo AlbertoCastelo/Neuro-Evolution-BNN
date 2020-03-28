@@ -4,6 +4,7 @@
   "fix_std": false,
   "fix_architecture": false,
   "n_initial_hidden_neurons": 0,
+  "initial_nodes_sample": 50,
 
   "feed_forward": true,
   "batch_size": 10000,

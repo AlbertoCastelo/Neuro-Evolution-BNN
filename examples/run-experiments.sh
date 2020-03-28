@@ -1,4 +1,6 @@
 #!/bin/bash
+clear
+
 export AWS_S3_HOST=http://localhost:9000
 export AWS_ACCESS_KEY_ID=minioKey
 export AWS_SECRET_ACCESS_KEY=minioSecret
@@ -8,20 +10,23 @@ export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 
 #DATASET=classification-miso
-DATASET=mnist_binary
 DATASET=mnist_downsampled
 
-
 N_GENERATIONS_BASE=100
-POP_SIZE=150
+POP_SIZE=50
 PARALLEL_EVALUATION=1
-n_processes=5
+n_processes=12
 IS_DISCRETE=0
+n_samples=1
+
 node_delete_prob=0.0
 connection_delete_prob=0.0
-node_add_prob=0.4
-connection_add_prob=0.6
+node_add_prob=0.5
+connection_add_prob=0.8
+n_input=256
 n_output=10
+n_initial_hidden_neurons=0
+initial_nodes_sample=10
 
 mutate_power=0.5
 mutate_rate=0.8
@@ -30,7 +35,31 @@ compatibility_threshold=2.5
 fix_std=false
 bias_std_max_value=0.00000001
 weight_std_max_value=0.00000001
-N_GENERATIONS=300
+N_GENERATIONS=1000
+
+##### MNIST DOWNSAMPLED
+#DATASET=mnist_downsampled
+#N_GENERATIONS_BASE=100
+#POP_SIZE=20
+#PARALLEL_EVALUATION=1
+#n_processes=10
+#IS_DISCRETE=1
+#node_delete_prob=0.0
+#connection_delete_prob=0.0
+#node_add_prob=0.5
+#connection_add_prob=0.8
+#n_output=10
+#n_initial_hidden_neurons=0
+#initial_nodes_sample=50
+#
+#mutate_power=0.5
+#mutate_rate=0.8
+#compatibility_threshold=2.5
+#
+#fix_std=false
+#bias_std_max_value=0.00000001
+#weight_std_max_value=0.00000001
+#N_GENERATIONS=300
 
 #for n_output in 4 6 8 10
 #do
@@ -59,7 +88,11 @@ N_GENERATIONS=300
                               'connection_add_prob': $connection_add_prob,
                               'mutate_power': $mutate_power,
                               'compatibility_threshold': $compatibility_threshold,
-                              'n_output': $n_output
+                              'n_initial_hidden_neurons': $n_initial_hidden_neurons,
+                              'initial_nodes_sample': $initial_nodes_sample,
+                              'n_input': $n_input,
+                              'n_output': $n_output,
+                              'n_samples': $n_samples
         }"
   done
 #done

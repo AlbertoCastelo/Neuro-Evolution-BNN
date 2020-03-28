@@ -133,6 +133,7 @@ class GenerationReport:
                     f'N-Parameters Best: {best_n_parameters}')
         logger.info(f'                         Mean fitness: {round(np.mean(fitness_all), 3)}. '
                     f'Mean N-Parameters: {round(np.mean(all_n_parameters), 3)}')
+        logger.info(f'                         N-Species: {len(self.species)}')
 
     def _prepare_species_report(self):
         self.generation_data['n_species'] = len(self.species)

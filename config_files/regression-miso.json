@@ -12,6 +12,7 @@
 
   "feed_forward": true,
   "n_initial_hidden_neurons": 0,
+  "initial_nodes_sample": 50,
 
   "bias_mean_discrete": [-1.0, 0.0, 1.0],
   "bias_std_discrete": [0.1, 0.5, 1.0],

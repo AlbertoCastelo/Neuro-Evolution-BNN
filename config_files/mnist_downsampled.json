@@ -14,6 +14,7 @@
   "feed_forward": true,
   "is_initial_fully_connected": false,
   "n_initial_hidden_neurons": 0,
+  "initial_nodes_sample": 50,
 
   "dataset": "mnist_downsampled",
   "n_generations": 200,
