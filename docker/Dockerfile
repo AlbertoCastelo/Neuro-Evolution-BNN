@@ -124,6 +124,8 @@ USER $NB_UID
 #RUN jupyter notebook --generate-config
 
 #RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/mykey.key -out /root/mycert.pem -subj "/C=ES/ST=Madrid/L=Madrid/O=Nextail/OU=NextailCerts/CN=etc/emailAddress=infraops@nextail.com"
+RUN apt-get update -y && \
+    apt-get install graphviz -y
 
 #RUN echo "c.NotebookApp.allow_password_change = False" >> /home/jovyan/.jupyter/jupyter_notebook_config
 RUN echo "c.NotebookApp.token = ''" >> /home/jovyan/.jupyter/jupyter_notebook_config.py && \

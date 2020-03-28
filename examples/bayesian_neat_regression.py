@@ -58,6 +58,6 @@ def main():
 main()
 # evolution_engine = main()
 #
-# best_individual = evolution_engine.report.get_best_individual()
+best_individual = evolution_engine.report.get_best_individual()
 # # report to slack
 # notifier.send(message=f'{str(best_individual)}')

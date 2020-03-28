@@ -14,7 +14,7 @@ def main():
     DATASET = 'mnist_downsampled'
 
     config = create_configuration(filename=f'/{DATASET}.json')
-    config.n_output = 4
+    config.n_output = 10
 
     dataset.generate_data()
     print(dataset)

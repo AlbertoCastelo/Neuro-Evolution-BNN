@@ -1,5 +1,6 @@
 from neat.configuration import ConfigError
 from neat.dataset.classification_example import ClassificationExample1Dataset
+from neat.dataset.classification_example_3 import ClassificationExample2Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
 from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDataset
@@ -35,6 +36,8 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
         dataset = RegressionExample2Dataset(dataset_type=dataset_type)
     elif dataset == 'classification-miso':
         dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
+    elif dataset == 'classification-miso-3':
+        dataset = ClassificationExample2Dataset(dataset_type=dataset_type)
     elif dataset == 'titanic':
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist':

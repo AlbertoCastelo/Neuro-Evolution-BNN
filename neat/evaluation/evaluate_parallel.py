@@ -11,6 +11,7 @@ from neat.loss.vi_loss import get_beta, get_loss
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.representation_mapping.genome_to_network.complex_stochastic_network_jupyneat import \
     ComplexStochasticNetworkJupyneat
+from neat.utils import timeit
 
 
 def process_initialization(dataset_name, testing):
@@ -27,6 +28,7 @@ def evaluate_genome_task_jupyneat(x):
     return - _evaluate_genome_parallel_jupyneat(*x)
 
 
+@timeit
 def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
                               batch_size=10000, n_samples=10, is_gpu=False):
     '''

@@ -31,6 +31,8 @@ def main():
     execution_id = '15a2cf07-01db-42e1-83f4-a4c5ca2a13c9'
     execution_id = '177d1879-9ffb-4c95-9895-503256edf7aa'
     execution_id = 'f9ba67cf-be7b-44f4-b271-7264c901b642'
+    execution_id = '19ca821b-9d34-415d-9b5e-fff24adee132'
+    execution_id = 'cb3a361c-922a-4fd1-9368-1fc341cc9d1f'
 
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
     report = report_repository.get_report(algorithm_version=ALGORITHM_VERSION,
@@ -72,7 +74,7 @@ def main():
 
     print(f'Accuracy: {accuracy_score(y_true, y_pred) * 100} %')
 
-    # plot_genome_network(genome, view=True)
+    plot_genome_network(genome, view=True)
 
 
 def evaluate_with_parallel(genome, loss, config):
