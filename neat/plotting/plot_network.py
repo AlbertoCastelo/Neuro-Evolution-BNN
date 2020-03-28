@@ -4,12 +4,12 @@ from neat.genome import Genome
 
 
 def plot_genome_network(genome: Genome, filename='./network.png', view=True):
-    plot_network(nodes=list(genome.node_genes.keys()),
-                 edges=list(genome.connection_genes.keys()),
-                 input_nodes=genome.get_input_nodes_keys(),
-                 output_nodes=genome.get_output_nodes_keys(),
-                 filename=filename,
-                 view=view)
+    return plot_network(nodes=list(genome.node_genes.keys()),
+                        edges=list(genome.connection_genes.keys()),
+                        input_nodes=genome.get_input_nodes_keys(),
+                        output_nodes=genome.get_output_nodes_keys(),
+                        filename=filename,
+                        view=view)
 
 
 def plot_network(nodes, edges, input_nodes, output_nodes, view=False,
@@ -55,3 +55,4 @@ def plot_network(nodes, edges, input_nodes, output_nodes, view=False,
         # width = str(0.1 + abs(cg.weight / 5.0))
         graph.edge(a, b, _attributes={'style': style, 'color': color, 'penwidth': width})
     graph.render(filename, view=view)
+    return graph
