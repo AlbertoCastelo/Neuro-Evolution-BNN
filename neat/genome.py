@@ -2,7 +2,7 @@ import copy
 import random
 import uuid
 from itertools import count
-
+import numpy as np
 import jsons
 
 from neat.configuration import get_configuration, write_json_file_from_dict, read_json_file_to_dict, BaseConfiguration
@@ -198,23 +198,35 @@ class Genome:
             connections = self._compute_full_connections()
         else:
             # initialize network with only a few connections between input-output nodes
-            connections = self._compute_random_connections(n_initial_connections=self.n_output)
+            connections = self._compute_random_connections(repetitions=min(50, len(self.input_nodes_keys)))
 
         for input_node, output_node in connections:
-            key = (input_node, output_node)
+            key = (int(input_node), int(output_node))
             connection = ConnectionGene(key=key)
             connection.random_initialization()
             self.connection_genes[key] = connection
 
-    def _compute_random_connections(self, n_initial_connections):
+    def _compute_random_connections(self, repetitions):
+
+        # each output node should contain at least 1 connection to input
         connections = []
-        for i in range(n_initial_connections):
-            output_node = i
-            input_node = random.choice(self.input_nodes_keys)
-            connection = (input_node, output_node)
-            if connection not in connections:
-                connections.append(connection)
-                i += 1
+        hidden_nodes = self._get_hidden_nodes()
+        if hidden_nodes:
+            for h in hidden_nodes:
+                input_nodes_keys = np.random.choice(self.input_nodes_keys, size=repetitions)
+                for input_id in input_nodes_keys:
+                    connections.append((input_id, h))
+            for h in hidden_nodes:
+                for output_id in self.output_nodes_keys:
+                    connections.append((h, output_id))
+        else:
+
+            for output_id in self.output_nodes_keys:
+                input_nodes_keys = np.random.choice(self.input_nodes_keys, size=repetitions)
+                for input_id in input_nodes_keys:
+                    connection = (input_id, output_id)
+                    if connection not in connections:
+                        connections.append(connection)
         return connections
 
     def _compute_full_connections(self):
