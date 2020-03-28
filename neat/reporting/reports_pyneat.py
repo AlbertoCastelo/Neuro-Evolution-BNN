@@ -158,6 +158,19 @@ class GenerationReport:
         self.generation_data['mean_fitness'] = round(np.mean(fitness_all), 3)
         self.generation_data['std_fitness'] = round(np.std(fitness_all), 3)
 
+        # species data
+        n_species = len(self.species)
+        representative_fitnesses_by_specie = \
+            [round(specie.representative.fitness, 3) for specie in self.species.values()]
+        best_fitnesses_by_specie = \
+            [round(specie.fitness, 3) if specie.fitness else None for specie in self.species.values()]
+
+        n_genomes_by_specie = [len(specie.members) for specie in self.species.values()]
+        self.generation_data['n_species'] = n_species
+        self.generation_data['representative_fitnesses_by_specie'] = representative_fitnesses_by_specie
+        self.generation_data['best_fitnesses_by_specie'] = best_fitnesses_by_specie
+        self.generation_data['n_genomes_by_specie'] = n_genomes_by_specie
+
         # best_n_parameters = self.population.get(self.best_individual_key).calculate_number_of_parameters()
         best_n_parameters = calculate_number_of_parameters(self.population.get(self.best_individual_key))
 
@@ -165,6 +178,9 @@ class GenerationReport:
                     f'N-Parameters Best: {best_n_parameters}')
         logger.info(f'                         Mean fitness: {round(np.mean(fitness_all), 3)}. '
                     f'Mean N-Parameters: {round(np.mean(all_n_parameters), 3)}')
+        logger.info(f'                         N-Species: {n_species}.')
+        logger.info(f'                                N-Genomes by Specie: {n_genomes_by_specie}')
+        logger.info(f'                                Best Fitness by Specie: {best_fitnesses_by_specie}')
 
     def _prepare_species_report(self):
         self.generation_data['n_species'] = len(self.species)

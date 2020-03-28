@@ -67,6 +67,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.bias_replace_rate = 0.1
 
         self.n_initial_hidden_neurons = 5
+        self.initial_nodes_sample = 50
 
         # TODO: THIS IS REDUNDANT AND INNECESARY BECAUSE IT DOES NOT CHANGE
         self.response_init_mean = 1.0

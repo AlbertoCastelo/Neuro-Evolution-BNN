@@ -86,6 +86,7 @@ class Genome:
         self.genome_config = get_configuration() if genome_config is None else genome_config
         self.n_input = self.genome_config.n_input
         self.n_output = self.genome_config.n_output
+        self.initial_nodes_sample = self.genome_config.initial_nodes_sample
 
         self.output_nodes_keys = self.get_output_nodes_keys()
         self.input_nodes_keys = self.get_input_nodes_keys()
@@ -198,7 +199,7 @@ class Genome:
             connections = self._compute_full_connections()
         else:
             # initialize network with only a few connections between input-output nodes
-            connections = self._compute_random_connections(repetitions=min(50, len(self.input_nodes_keys)))
+            connections = self._compute_random_connections(repetitions=min(self.initial_nodes_sample, len(self.input_nodes_keys)))
 
         for input_node, output_node in connections:
             key = (int(input_node), int(output_node))
