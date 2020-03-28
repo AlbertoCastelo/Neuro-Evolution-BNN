@@ -1,0 +1,23 @@
+**/__pycache__/
+
+.ipython/
+.jupyter/
+.local/
+
+# git files
+.gitignore
+
+# pycharm files
+*/.pytest_cache
+*/.idea
+
+# pytest cache & test results
+.pytest_cache
+test_results
+
+# local dev directories
+tmp/
+#python_engine/python_engine.egg-info
+
+# avoid saving pipenv files
+Pipfile
