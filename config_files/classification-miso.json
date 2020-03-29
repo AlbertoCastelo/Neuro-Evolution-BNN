@@ -6,6 +6,7 @@
   "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
+  "beta": 0.001,
 
   "fix_std": false,
   "fix_architecture": false,

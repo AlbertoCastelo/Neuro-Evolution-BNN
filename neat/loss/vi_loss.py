@@ -50,6 +50,6 @@ def get_beta(beta_type, m, batch_idx, epoch, n_epochs):
     elif beta_type == 'Standard':
         beta = 1 / m
     else:
-        beta = 0
+        beta = get_configuration().beta
 
     return beta

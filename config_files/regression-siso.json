@@ -10,6 +10,7 @@
   "feed_forward": true,
   "batch_size": 10000,
   "beta_type": "other",
+  "beta": 0.001,
 
   "bias_mean_discrete": [-1.0, 0.0, 1.0],
   "bias_std_discrete": [0.1, 0.5, 1.0],

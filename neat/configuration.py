@@ -99,6 +99,7 @@ class DefaultConfiguration(BaseConfiguration):
 
         # loss weighting factor
         self.beta_type = 'other'
+        self.beta = 0.001
 
         self.n_samples = 100
 
