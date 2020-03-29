@@ -36,6 +36,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.batch_size = 10000
         self.parallel_evaluation = True
         self.n_processes = None
+        self.train_percentage = 0.9
 
         # evolution parameters
         self.pop_size = 150

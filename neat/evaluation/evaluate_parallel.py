@@ -29,7 +29,7 @@ def evaluate_genome_task_jupyneat(x):
 
 
 @timeit
-def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
+def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type, is_testing,
                               batch_size=10000, n_samples=10, is_gpu=False):
     '''
     Calculates: KL-Div(q(w)||p(w|D))
@@ -48,7 +48,10 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type,
     network.eval()
 
     # calculate Data log-likelihood (p(y*|x*,D))
-    x_batch, y_batch = dataset.x, dataset.y
+    if is_testing:
+        x_batch, y_batch = dataset.x_test, dataset.y_test
+    else:
+        x_batch, y_batch = dataset.x_train, dataset.y_train
     x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
                                            y_batch=y_batch,
                                            problem_type=problem_type,

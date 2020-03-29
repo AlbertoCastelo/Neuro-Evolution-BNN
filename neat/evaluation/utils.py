@@ -43,10 +43,11 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
     elif dataset == 'mnist':
         dataset = MNISTDataset(dataset_type=dataset_type)
     elif dataset == 'mnist_downsampled':
-        dataset = MNISTDownsampledDataset(dataset_type=dataset_type)
+        dataset = MNISTDownsampledDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist_binary':
         dataset = MNISTBinaryDataset(dataset_type=dataset_type)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()
+    print(f'Training: {len(dataset.x_train)}. Testing: {len(dataset.x_test)}')
     return dataset

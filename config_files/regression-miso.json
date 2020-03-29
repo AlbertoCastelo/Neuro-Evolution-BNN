@@ -1,6 +1,7 @@
 {"parallel_evaluation": true,
   "is_discrete": true,
   "is_gpu": false,
+  "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
 

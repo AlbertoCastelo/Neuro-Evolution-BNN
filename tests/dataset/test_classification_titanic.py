@@ -9,11 +9,13 @@ from neat.dataset.classification_titanic import TitanicDataset
 class TestTitanicDataset(TestCase):
 
     def test_generate_data(self):
-        dataset = TitanicDataset()
+        dataset = TitanicDataset(train_percentage=0.6)
         dataset.generate_data()
 
         x = dataset.x
         y = dataset.y
+        print(len(dataset))
+        print(y.sum())
 
         self.assertEqual(type(x), torch.Tensor)
         self.assertEqual(type(y), torch.Tensor)

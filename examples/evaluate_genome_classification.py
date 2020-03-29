@@ -36,7 +36,7 @@ def main():
 
     ##### EVALUATE ######
     print('Evaluating results')
-    evaluate_with_parallel(genome, loss, config)
+    evaluate_with_parallel(genome, loss, config, is_testing=False)
 
     dataset = get_dataset(config.dataset, testing=True)
     # TODO: remove data-loader. If we want to sample the dataset in each generation, the we can create a
@@ -62,12 +62,14 @@ def main():
     # plot_genome_network(genome, view=True)
 
 
-def evaluate_with_parallel(genome, loss, config):
+def evaluate_with_parallel(genome, loss, config, is_testing):
 
     process_initialization(dataset_name=config.dataset, testing=True)
     loss_value = _evaluate_genome_parallel(genome=genome, loss=loss, beta_type=config.beta_type,
                                            problem_type=config.problem_type,
-                                           batch_size=config.batch_size, n_samples=config.n_samples)
+                                           batch_size=config.batch_size,
+                                           n_samples=config.n_samples,
+                                           is_testing=is_testing)
     print(f'Parallel loss: {loss_value}')
 
 

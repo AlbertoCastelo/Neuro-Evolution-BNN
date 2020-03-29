@@ -1,13 +1,13 @@
 import torch
 
+from config_files.configuration_utils import create_configuration
 from neat.dataset.regression_example import RegressionExample1Dataset
 
-from config_files import create_configuration
 import matplotlib.pyplot as plt
 from deep_learning.standard.train_eval import EvaluateStandardDL
+from neat.evaluation.utils import get_dataset
 
 config_file = '/regression-siso.json'
-dataset = RegressionExample1Dataset()
 network_filename = f'network-regression_1.pt'
 
 is_cuda = True
@@ -16,6 +16,8 @@ if is_cuda:
     torch.cuda.set_device(0)
 
 config = create_configuration(filename=config_file)
+dataset = get_dataset(dataset=config.dataset, testing=True)
+
 
 lr = 0.01
 weight_decay = 0.0005

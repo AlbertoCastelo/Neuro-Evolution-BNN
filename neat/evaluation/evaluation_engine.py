@@ -8,6 +8,7 @@ from neat.evaluation.evaluate_simple import evaluate_genome
 from neat.evaluation.utils import get_dataset
 from neat.loss.vi_loss import get_loss, get_beta
 from neat.utils import timeit
+IS_TESTING = False
 
 
 class EvaluationStochasticEngine:
@@ -47,6 +48,7 @@ class EvaluationStochasticEngine:
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
                 x = (genome, get_loss(problem_type=self.config.problem_type),
                      self.config.beta_type, self.config.problem_type,
+                     IS_TESTING,
                      self.batch_size, n_samples, self.is_gpu)
                 tasks.append(x)
 
@@ -66,6 +68,7 @@ class EvaluationStochasticEngine:
                                                    problem_type=self.config.problem_type,
                                                    dataset=self.dataset,
                                                    loss=self.loss,
+                                                   is_testing=IS_TESTING,
                                                    beta_type=self.config.beta_type,
                                                    batch_size=self.batch_size,
                                                    n_samples=n_samples,

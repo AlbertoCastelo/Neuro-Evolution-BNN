@@ -1,6 +1,7 @@
 {
   "parallel_evaluation": false,
   "is_discrete": true,
+  "train_percentage": 0.9,
   "fix_std": false,
   "fix_architecture": false,
   "n_initial_hidden_neurons": 0,

@@ -1,11 +1,12 @@
 import os
+
+from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
 from neat.utils import timeit
-from config_files import create_configuration
 
 
 config_file = 'titanic'

@@ -18,9 +18,9 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.n_generations = 200
-config.n_output = 2
+config.n_output = 10
 config.dataset = DATASET
-
+config.train_percentage = 0.5
 
 ALGORITHM_VERSION = 'bayes-neat'
 

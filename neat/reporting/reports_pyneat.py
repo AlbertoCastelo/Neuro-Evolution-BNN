@@ -54,7 +54,7 @@ class EvolutionReport:
     def show_metrics_best(self):
         # only for classification!!
         config = get_configuration()
-        dataset = get_dataset(config.dataset, testing=False)
+        dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=False)
         loss = get_loss(problem_type=config.problem_type)
         x, y_true, y_pred, loss_value = evaluate_genome(genome=self.best_individual,
                                                         dataset=dataset,
@@ -64,6 +64,7 @@ class EvolutionReport:
                                                         batch_size=config.batch_size,
                                                         n_samples=config.n_samples,
                                                         is_gpu=config.is_gpu,
+                                                        is_testing=False,
                                                         return_all=True)
         y_pred = torch.argmax(y_pred, dim=1)
 

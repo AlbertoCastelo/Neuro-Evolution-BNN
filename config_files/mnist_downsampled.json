@@ -1,8 +1,9 @@
 {
-  "parallel_evaluation": false,
+  "parallel_evaluation": true,
   "n_processes": 10,
   "is_discrete": true,
   "is_gpu": false,
+  "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
 
@@ -62,8 +63,8 @@
 
   "weight_mean_init_mean": 0,
   "weight_mean_init_std": 1,
-  "weight_mean_max_value": 2,
-  "weight_mean_min_value": -2,
+  "weight_mean_max_value": 1.0,
+  "weight_mean_min_value": -1.0,
   "weight_mean_prior": 0.0,
 
   "weight_std_init_mean": 0.001,

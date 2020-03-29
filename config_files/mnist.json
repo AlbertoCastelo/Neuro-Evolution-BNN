@@ -3,6 +3,7 @@
   "n_processes": 6,
   "is_discrete": true,
   "is_gpu": false,
+  "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
 

@@ -8,15 +8,15 @@ from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDatase
 
 
 def main():
-    dataset = MNISTDownsampledDataset(dataset_type='train')
+    dataset = MNISTDownsampledDataset(train_percentage=0.4, dataset_type='train')
     # dataset = MNISTDataset(dataset_type='test')
     # dataset = MNISTBinaryDataset(dataset_type='test')
     DATASET = 'mnist_downsampled'
-
     config = create_configuration(filename=f'/{DATASET}.json')
     config.n_output = 10
-
     dataset.generate_data()
+
+    print(len(dataset))
     print(dataset)
     selection = random.choice(list(range(len(dataset))))
     print(selection)

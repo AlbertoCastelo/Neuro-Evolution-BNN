@@ -3,6 +3,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from neat.configuration import get_configuration
+from neat.evaluation.utils import _prepare_batch_data
 from neat.loss.vi_loss import _get_loss_by_problem
 from deep_learning.standard.feed_forward import FeedForward
 
@@ -21,8 +22,8 @@ class EvaluateStandardDL:
         self.n_hidden_layers = n_hidden_layers
 
     def run(self):
-        self.dataset.generate_data()
-        self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
+        # self.dataset.generate_data()
+        # self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
 
         self.network = FeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
                                    n_neurons_per_layer=self.n_neurons_per_layer,
@@ -36,9 +37,29 @@ class EvaluateStandardDL:
             self.network.cuda()
             self.criterion.cuda()
 
+        x_batch, y_batch = self.dataset.x_train, self.dataset.y_train
+        x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                               y_batch=y_batch,
+                                               problem_type=self.config.problem_type,
+                                               is_gpu=self.config.is_gpu,
+                                               n_input=self.config.n_input,
+                                               n_output=self.config.n_output,
+                                               n_samples=1)
+
         # train
         for epoch in range(self.n_epochs):
-            loss_epoch = self.train_one()
+            # with torch.no_grad():
+            loss_epoch = 0
+            if self.is_cuda:
+                x_batch.cuda()
+                y_batch.cuda()
+            output = self.network(x_batch)
+            loss = self.criterion(output, y_batch)
+            loss_epoch += loss.data.item()
+
+            self.optimizer.zero_grad()
+            loss.backward()  # Backward Propagation
+            self.optimizer.step()  # Optimizer update
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
 
@@ -76,17 +97,24 @@ class EvaluateStandardDL:
         chunks_x = []
         chunks_y_pred = []
         chunks_y_true = []
-        for x_batch, y_batch in self.data_loader:
+        x_batch, y_batch = self.dataset.x_test, self.dataset.y_test
+        x_batch, y_batch = _prepare_batch_data(x_batch=x_batch,
+                                               y_batch=y_batch,
+                                               problem_type=self.config.problem_type,
+                                               is_gpu=self.config.is_gpu,
+                                               n_input=self.config.n_input,
+                                               n_output=self.config.n_output,
+                                               n_samples=1)
 
-            if self.is_cuda:
-                x_batch.cuda()
-                y_batch.cuda()
-            with torch.no_grad():
-                y_pred = self.network(x_batch)
+        if self.is_cuda:
+            x_batch.cuda()
+            y_batch.cuda()
+        with torch.no_grad():
+            y_pred = self.network(x_batch)
 
-                chunks_x.append(x_batch)
-                chunks_y_pred.append(y_pred)
-                chunks_y_true.append(y_batch)
+            chunks_x.append(x_batch)
+            chunks_y_pred.append(y_pred)
+            chunks_y_true.append(y_batch)
 
         x = torch.cat(chunks_x, dim=0)
         y_pred = torch.cat(chunks_y_pred, dim=0)
