@@ -15,19 +15,13 @@ from neat.dataset.abstract import NeatTestingDataset
 class MNISTDownsampledDataset(NeatTestingDataset, MNIST):
     DOWNSAMPLED_SIZE = (16, 16)
 
-    def __init__(self, dataset_type='train'):
-        self.x = None
-        self.y = None
-        self.train = False
-        if dataset_type == 'train':
-            self.train = True
+    def __init__(self, train_percentage, dataset_type='train'):
 
-        # TODO: REMOVE THIS SET
-        self.train = False
         self.transform = transforms.Compose([transforms.ToTensor(),
                                              transforms.Normalize((0.1307,), (0.3081,))])
         path = ''.join([os.path.dirname(os.path.realpath(__file__)), '/data/mnist'])
-        MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
+        MNIST.__init__(self, root=path, train=False, download=True, transform=self.transform)
+        NeatTestingDataset.__init__(self, train_percentage=train_percentage, dataset_type=dataset_type)
 
     def generate_data(self):
         for output in range(get_configuration().n_output):
@@ -54,5 +48,15 @@ class MNISTDownsampledDataset(NeatTestingDataset, MNIST):
         self.x = self.data
         self.y = self.targets
 
+        data_limit = self._get_data_limit()
+        self.x_train = self.x[:data_limit]
+        self.y_train = self.y[:data_limit]
+
+        self.x_test = self.x[data_limit:]
+        self.y_test = self.y[data_limit:]
+
     def __getitem__(self, item):
         return self.x[item], self.y[item]
+
+    def __len__(self):
+        return len(self.x)
