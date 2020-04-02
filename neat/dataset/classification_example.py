@@ -64,6 +64,13 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).long()
 
+        data_limit = self._get_data_limit()
+        self.x_train = self.x[:data_limit]
+        self.y_train = self.y[:data_limit]
+
+        self.x_test = self.x[data_limit:]
+        self.y_test = self.y[data_limit:]
+
     def get_separation_line(self):
         x1 = np.linspace(self.X1_MIN, self.X1_MAX, 200)
         x2 = self._get_x2_limit(x1)

@@ -17,7 +17,7 @@ class ClassificationExample2Dataset(NeatTestingDataset):
     X2_MIN = -1.0
     X2_MAX = 1.0
 
-    def __init__(self, dataset_type='train', is_debug=False):
+    def __init__(self, train_percentage, dataset_type='train', is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
         self.dataset_type = dataset_type
@@ -30,6 +30,7 @@ class ClassificationExample2Dataset(NeatTestingDataset):
         self.y_original = None
         self.x = None
         self.y = None
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type)
 
     def generate_data(self):
         self.input_scaler = StandardScaler()
@@ -64,6 +65,13 @@ class ClassificationExample2Dataset(NeatTestingDataset):
 
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).long()
+
+        data_limit = self._get_data_limit()
+        self.x_train = self.x[:data_limit]
+        self.y_train = self.y[:data_limit]
+
+        self.x_test = self.x[data_limit:]
+        self.y_test = self.y[data_limit:]
 
     def get_separation_line(self):
         x1 = np.linspace(self.X1_MIN, self.X1_MAX, 200)

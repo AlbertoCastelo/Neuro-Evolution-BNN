@@ -6,7 +6,7 @@
   "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
-  "beta": 0.001,
+  "beta": 0.00,
 
   "fix_std": false,
   "fix_architecture": false,
@@ -43,6 +43,7 @@
   "compatibility_threshold": 3.0,
   "compatibility_weight_coefficient": 0.5,
   "compatibility_disjoint_coefficient": 1.0,
+  "n_species": 5,
 
   "dataset": "titanic",
   "n_generations": 200,

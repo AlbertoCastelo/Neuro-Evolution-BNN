@@ -107,6 +107,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.compatibility_threshold = 3.0
         self.compatibility_weight_coefficient = 0.5
         self.compatibility_disjoint_coefficient = 1.0
+        self.n_species = 10
 
         # stagnation
         self.species_fitness_function = 'max'

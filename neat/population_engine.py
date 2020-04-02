@@ -11,7 +11,7 @@ from neat.evolution_operators.crossover import Crossover
 from neat.evolution_operators.mutation import Mutation
 from neat.genome import Genome
 from neat.reporting.reports_pyneat import EvolutionReport
-from neat.species import SpeciationEngine
+from neat.species import SpeciationEngine, FixSpeciationEngine
 from neat.stagnation import Stagnation
 from neat.utils import timeit
 
@@ -23,7 +23,8 @@ class EvolutionEngine:
         self.notifier = notifier
 
         self.population_engine = PopulationEngine(stagnation_engine=Stagnation())
-        self.speciation_engine = SpeciationEngine()
+        # self.speciation_engine = SpeciationEngine()
+        self.speciation_engine = FixSpeciationEngine()
         self.evaluation_engine = EvaluationStochasticEngine()
         self.evolution_configuration = get_configuration()
 
