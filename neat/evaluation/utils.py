@@ -1,10 +1,12 @@
 from neat.configuration import ConfigError
+from neat.dataset.classification_cancer import HistoPathologicCancer
 from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.classification_example_3 import ClassificationExample2Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
 from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDataset
 from neat.dataset.classification_titanic import TitanicDataset
+from neat.dataset.classification_xray_binary import XRayBinary
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
 
 
@@ -31,21 +33,26 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
         dataset_type = 'train'
 
     if dataset == 'regression_example_1':
-        dataset = RegressionExample1Dataset(dataset_type=dataset_type)
+        dataset = RegressionExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'regression_example_2':
-        dataset = RegressionExample2Dataset(dataset_type=dataset_type)
+        dataset = RegressionExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'classification-miso':
-        dataset = ClassificationExample1Dataset(dataset_type=dataset_type)
+        dataset = ClassificationExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'classification-miso-3':
-        dataset = ClassificationExample2Dataset(dataset_type=dataset_type)
+        dataset = ClassificationExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'titanic':
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist':
-        dataset = MNISTDataset(dataset_type=dataset_type)
+        dataset = MNISTDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist_downsampled':
         dataset = MNISTDownsampledDataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'mnist_binary':
-        dataset = MNISTBinaryDataset(dataset_type=dataset_type)
+        dataset = MNISTBinaryDataset(train_percentage=train_percentage, dataset_type=dataset_type)
+    elif dataset == 'xray_binary':
+        dataset = XRayBinary(train_percentage=train_percentage, dataset_type=dataset_type)
+    elif dataset == 'cancer':
+        dataset = HistoPathologicCancer(train_percentage=train_percentage, dataset_type=dataset_type)
+
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()

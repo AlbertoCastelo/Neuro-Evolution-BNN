@@ -16,25 +16,42 @@ S3_BASE_PATH_LOGS = 'logs'
 
 class ReportPathFactory:
     @staticmethod
-    def create(algorithm_version, dataset, execution_id, correlation_id):
-        return ReportPathFactory(algorithm_version, dataset, execution_id, correlation_id)
+    def create(algorithm_version, dataset=None, correlation_id=None, execution_id=None):
+        return ReportPathFactory(algorithm_version, dataset, correlation_id, execution_id)
 
-    def __init__(self, algorithm_version, dataset, execution_id, correlation_id):
+    def __init__(self, algorithm_version, dataset=None, correlation_id=None, execution_id=None):
         self.algorithm_version = algorithm_version
         self.execution_id = execution_id
         self.correlation_id = correlation_id
         self.dataset = dataset
 
+    def get_algorithm_version_path(self):
+        return f'version={self.algorithm_version}'
+
+    def get_dataset_path(self):
+        return f'{self.get_algorithm_version_path()}/dataset={self.dataset}'
+
+    def get_correlation_id_path(self):
+        path = f'{self.get_dataset_path()}/correlation_id={self.correlation_id}'
+        return path
+
+    def get_execution_id_path(self):
+        return f'{self.get_correlation_id_path()}/execution_id={self.execution_id}'
+
     def get_table_path(self, table):
-        data_path = f'{S3_BASE_PATH_TABLES}/version={self.algorithm_version}/dataset={self.dataset}/' \
-                    f'correlation_id={self.correlation_id}/' \
-                    f'execution_id={self.execution_id}/table={table}'
-        return data_path
+        return f'{S3_BASE_PATH_TABLES}/{self.get_execution_id_path()}/table={table}'
+
+    def get_reports_path(self):
+        if self.algorithm_version and self.dataset and self.correlation_id:
+            return f'{S3_BASE_PATH_REPORTS}/{self.get_correlation_id_path()}'
+        elif self.algorithm_version and self.dataset:
+            return f'{S3_BASE_PATH_REPORTS}/{self.get_dataset_path()}'
+        elif self.algorithm_version:
+            return f'{S3_BASE_PATH_REPORTS}/{self.get_algorithm_version_path()}'
+        raise ValueError()
 
     def get_report_path(self):
-        data_path = f'{S3_BASE_PATH_REPORTS}/version={self.algorithm_version}/dataset={self.dataset}/' \
-                    f'correlation_id={self.correlation_id}/' \
-                    f'execution_id={self.execution_id}'
+        data_path = f'{S3_BASE_PATH_REPORTS}/{self.get_execution_id_path()}'
         return data_path
 
     def get_logs_path(self):
@@ -59,6 +76,14 @@ class ReportRepository:
         self.project = project
         self.bucket = None
         self.object_repository = object_repository
+
+    def get_executions(self, algorithm_version, dataset, correlation_id):
+        path = ReportPathFactory.create(algorithm_version=algorithm_version,
+                                        dataset=dataset,
+                                        correlation_id=correlation_id)\
+            .get_reports_path()
+        for execution in self.object_repository.tree(path):
+            yield execution.split('/')[0].split('=')[1]
 
     def set_table(self, algorithm_version, dataset, execution_id, correlation_id, table_name, table_value):
         path = ReportPathFactory.create(algorithm_version=algorithm_version,
