@@ -4,6 +4,7 @@ from multiprocessing import Manager, Queue
 import torch
 
 from experiments.multiprocessing_utils import Worker
+from neat.evaluation.evaluate_simple import _process_output_data
 from neat.evaluation.utils import get_dataset, _prepare_batch_data
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
@@ -14,10 +15,9 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network_ju
 from neat.utils import timeit
 
 
-def process_initialization(dataset_name, testing):
+def process_initialization(dataset_name, train_percentage, testing):
     global dataset
-    dataset = get_dataset(dataset_name, testing=testing)
-    # dataset.generate_data()
+    dataset = get_dataset(dataset_name, train_percentage=train_percentage, testing=testing)
 
 
 def evaluate_genome_task(x):
@@ -60,12 +60,11 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type, is_
                                            n_output=genome.n_output,
                                            n_samples=n_samples)
 
-    if is_gpu:
-        x_batch, y_batch = x_batch.cuda(), y_batch.cuda()
-
     with torch.no_grad():
         # forward pass
         output, _ = network(x_batch)
+        output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
+                                                  n_output=genome.n_output, problem_type=problem_type, is_pass=True)
         beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
         kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
 

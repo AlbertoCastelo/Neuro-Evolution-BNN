@@ -27,7 +27,7 @@ class EvaluationStochasticEngine:
             self.n_processes = self._get_n_processes()
             self.pool = Pool(processes=self.n_processes,
                              initializer=process_initialization,
-                             initargs=(self.config.dataset, True))
+                             initargs=(self.config.dataset, self.config.train_percentage, testing))
 
     def _get_n_processes(self):
         if self.config.n_processes is not None:
