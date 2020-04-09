@@ -5,7 +5,7 @@ from experiments.file_utils import write_json_file_from_dict
 from experiments.logger import logger
 from experiments.reporting.report import BaseReport
 from experiments.reporting.report_repository import ReportRepository
-from neat.configuration import get_configuration
+from neat.configuration import get_configuration, ConfigError
 from neat.evaluation.evaluate_simple import evaluate_genome
 from neat.evaluation.utils import get_dataset
 from neat.genome import Genome
@@ -54,6 +54,16 @@ class EvolutionReport:
     def show_metrics_best(self):
         # only for classification!!
         config = get_configuration()
+        if config.problem_type == 'regression':
+            # loss = nn.MSELoss()
+            pass
+        elif config.problem_type == 'classification':
+            self._show_classification_metrics(config)
+        else:
+            raise ConfigError(f'Problem Type is incorrect: {config.problem_type}')
+
+
+    def _show_classification_metrics(self, config):
         dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=False)
         loss = get_loss(problem_type=config.problem_type)
         x, y_true, y_pred, loss_value = evaluate_genome(genome=self.best_individual,
@@ -67,7 +77,6 @@ class EvolutionReport:
                                                         is_testing=False,
                                                         return_all=True)
         y_pred = torch.argmax(y_pred, dim=1)
-
         from sklearn.metrics import confusion_matrix, accuracy_score
         # print(f'Loss: {loss_value}')
         confusion_m = confusion_matrix(y_true, y_pred)

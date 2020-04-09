@@ -1,4 +1,4 @@
-import copy
+import numpy as np
 import itertools
 import random
 
@@ -21,6 +21,7 @@ class Mutation:
         self.mutate_power = self.config.mutate_power
         self.replace_rate = self.config.replace_rate
 
+        self.architecture_mutation_power = self.config.architecture_mutation_power
         self.node_add_prob = self.config.node_add_prob
         self.node_delete_prob = self.config.node_delete_prob
         self.connection_add_prob = self.config.connection_add_prob
@@ -71,34 +72,36 @@ class Mutation:
     def mutate_add_node(self, genome: Genome):
         # TODO: careful! this can add multihop-jumps to the network
 
+        possible_connections_to_split = list(genome.connection_genes.keys())
         # Choose a random connection to split
-        connection_to_split_key = random.choice(list(genome.connection_genes.keys()))
+        k = min(len(possible_connections_to_split), self.architecture_mutation_power)
+        connection_to_split_keys = random.sample(possible_connections_to_split, k)
+        for connection_to_split_key in connection_to_split_keys:
+            new_node_key = genome.get_new_node_key()
+            new_node = NodeGene(key=new_node_key).random_initialization()
+            genome.node_genes[new_node_key] = new_node
 
-        new_node_key = genome.get_new_node_key()
-        new_node = NodeGene(key=new_node_key).random_initialization()
-        genome.node_genes[new_node_key] = new_node
+            connection_to_split = genome.connection_genes[connection_to_split_key]
+            i, o = connection_to_split_key
 
-        connection_to_split = genome.connection_genes[connection_to_split_key]
-        i, o = connection_to_split_key
+            # add connection between input and the new node
+            new_connection_key_i = (i, new_node_key)
+            new_connection_i = ConnectionGene(key=new_connection_key_i)
+            new_connection_i.set_mean(mean=1.0), new_connection_i.set_std(std=0.0000001)
+            genome.connection_genes[new_connection_key_i] = new_connection_i
 
-        # add connection between input and the new node
-        new_connection_key_i = (i, new_node_key)
-        new_connection_i = ConnectionGene(key=new_connection_key_i)
-        new_connection_i.set_mean(mean=1.0), new_connection_i.set_std(std=0.0000001)
-        genome.connection_genes[new_connection_key_i] = new_connection_i
+            # add connection between new node and output
+            new_connection_key_o = (new_node_key, o)
+            new_connection_o = ConnectionGene(key=new_connection_key_o).random_initialization()
+            new_connection_o.set_mean(mean=connection_to_split.get_mean())
+            new_connection_o.set_std(std=connection_to_split.get_std())
+            genome.connection_genes[new_connection_key_o] = new_connection_o
 
-        # add connection between new node and output
-        new_connection_key_o = (new_node_key, o)
-        new_connection_o = ConnectionGene(key=new_connection_key_o).random_initialization()
-        new_connection_o.set_mean(mean=connection_to_split.get_mean())
-        new_connection_o.set_std(std=connection_to_split.get_std())
-        genome.connection_genes[new_connection_key_o] = new_connection_o
-
-        # delete connection
-        # Careful: neat-python disable the connection instead of deleting
-        # conn_to_split.enabled = False
-        del genome.connection_genes[connection_to_split_key]
-        logger.network(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
+            # delete connection
+            # Careful: neat-python disable the connection instead of deleting
+            # conn_to_split.enabled = False
+            del genome.connection_genes[connection_to_split_key]
+            logger.network(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
         return genome
 
     def mutate_delete_node(self, genome: Genome):
@@ -126,20 +129,21 @@ class Mutation:
 
     def mutate_add_connection(self, genome: Genome):
         possible_outputs = list(genome.node_genes.keys())
-        out_node_key = random.choice(possible_outputs)
+        k = min(len(possible_outputs), self.architecture_mutation_power)
+        out_node_keys = random.sample(possible_outputs, k)
+        for out_node_key in out_node_keys:
+            possible_inputs = self._calculate_possible_inputs_when_adding_connection(genome,
+                                                                                     out_node_key=out_node_key,
+                                                                                     config=self.config)
+            if len(possible_inputs) == 0:
+                continue
+            in_node = random.choice(possible_inputs)
 
-        possible_inputs = self._calculate_possible_inputs_when_adding_connection(genome,
-                                                                                 out_node_key=out_node_key,
-                                                                                 config=self.config)
-        if len(possible_inputs) == 0:
-            return genome
-        in_node = random.choice(possible_inputs)
+            new_connection_key = (in_node, out_node_key)
 
-        new_connection_key = (in_node, out_node_key)
-
-        new_connection = ConnectionGene(key=new_connection_key).random_initialization()
-        genome.connection_genes[new_connection_key] = new_connection
-        logger.network(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
+            new_connection = ConnectionGene(key=new_connection_key).random_initialization()
+            genome.connection_genes[new_connection_key] = new_connection
+            logger.network(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
         return genome
 
     def mutate_delete_connection(self, genome: Genome):

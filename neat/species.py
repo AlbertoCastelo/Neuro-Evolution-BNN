@@ -163,44 +163,10 @@ class FixSpeciationEngine:
         # Partition population into species based on genetic similarity.
         new_representatives, new_members = \
             self._assign_genome_to_specie(distances, new_members, new_representatives, population, unspeciated_genomes)
-        # while unspeciated_genomes:
-        #     gid = unspeciated_genomes.pop()
-        #     g = population[gid]
-        #
-        #     # Find the species with the most similar representative.
-        #     candidates = []
-        #     for sid, rid in new_representatives.items():
-        #         rep = population[rid]
-        #         d = distances.get_distance(genome_0=rep, genome_1=g)
-        #         if d < self.compatibility_threshold:
-        #             candidates.append((d, sid))
-        #
-        #     if candidates:
-        #         ignored_sdist, sid = min(candidates, key=lambda x: x[0])
-        #         new_members[sid].append(gid)
-        #     else:
-        #         # No species is similar enough, create a new species, using
-        #         # this genome as its representative.
-        #         sid = next(self.indexer)
-        #         new_representatives[sid] = gid
-        #         new_members[sid] = [gid]
+
 
         # Update species collection based on new speciation.
         self.species = self._members_to_species(self.species, new_members, new_representatives, population)
-        # self.genome_to_species = {}
-        # for sid, rid in new_representatives.items():
-        #     s = self.species.get(sid)
-        #     if s is None:
-        #         logger.debug(f'New specie')
-        #         s = Specie(sid, generation)
-        #         self.species[sid] = s
-        #
-        #     members = new_members[sid]
-        #     for gid in members:
-        #         self.genome_to_species[gid] = sid
-        #
-        #     member_dict = dict((gid, population[gid]) for gid in members)
-        #     s.update(population[rid], member_dict)
 
         self.gdmean = distances.get_mean_distance()
         self.gdstdev = distances.get_std_distance()
@@ -242,7 +208,8 @@ class FixSpeciationEngine:
                     total_distance_by_genome[i, j] = d
                     total_distance_by_genome[j, i] = d
         index_top_farthest_genomes = total_distance_by_genome.sum(1).argsort()[-self.n_species:][::-1]
-
+        print(index_top_farthest_genomes)
+        print(len(unspeciated_genomes))
         # create new species
         for index_genome in index_top_farthest_genomes:
             genome_key = unspeciated_genomes[index_genome]

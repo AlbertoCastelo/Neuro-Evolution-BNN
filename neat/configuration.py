@@ -120,6 +120,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.min_species_size = 2
 
         # mutation
+        self.architecture_mutation_power = 2
         self.single_structural_mutation = False
         self.mutate_power = 0.5
         self.mutate_rate = 0.8
