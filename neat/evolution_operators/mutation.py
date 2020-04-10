@@ -29,7 +29,7 @@ class Mutation:
 
     @timeit
     def mutate(self, genome: Genome):
-        if not self.fix_architecture:
+        if not self.config.fix_architecture:
             genome = self._mutate_architecture(genome)
 
         # Mutate connection genes.

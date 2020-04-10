@@ -1,5 +1,6 @@
 import math
 import random
+import time
 from itertools import count
 import numpy as np
 
@@ -32,6 +33,8 @@ class EvolutionEngine:
 
         self.population = None
 
+        self.start_time = time.perf_counter()
+
     @timeit
     def run(self):
         logger.info('Started evolutionary process')
@@ -50,6 +53,11 @@ class EvolutionEngine:
 
         for generation in range(1, self.n_generations + 1):
             self._run_generation(generation)
+
+            elapsed = time.perf_counter() - self.start_time
+            if elapsed > 3600:
+                raise Exception
+
         self.evaluation_engine.close()
         # except Exception as e:
         #     end_condition = 'exception'
@@ -79,6 +87,11 @@ class EvolutionEngine:
         self.report.report_new_generation(generation=generation,
                                           population=self.population,
                                           species=self.speciation_engine.species)
+
+        # schedule parameters
+        if generation == self.evolution_configuration.generation_fix_architecture:
+            logger.info('Fixing Architecture')
+            self.evolution_configuration.fix_architecture = True
 
     def _send_final_message(self):
         self.notifier.send(f'-----------------------------------------------------------------\n'

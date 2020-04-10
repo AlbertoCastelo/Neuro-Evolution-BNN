@@ -47,6 +47,7 @@
 
   "dataset": "classification-miso",
   "n_generations": 200,
+  "generation_fix_architecture": 150,
   "n_input": 2,
   "n_output": 2,
   "n_samples": 100,
@@ -90,6 +91,7 @@
   "mutate_rate": 0.8,
   "replace_rate": 0.1,
 
+  "architecture_mutation_power": 1,
   "node_add_prob": 0.2,
   "node_delete_prob": 0.1,
   "connection_add_prob": 0.5,

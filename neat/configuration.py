@@ -41,6 +41,7 @@ class DefaultConfiguration(BaseConfiguration):
         # evolution parameters
         self.pop_size = 150
         self.n_generations = 200
+        self.generation_fix_architecture = 150
 
         # execution
         self.is_gpu = False
