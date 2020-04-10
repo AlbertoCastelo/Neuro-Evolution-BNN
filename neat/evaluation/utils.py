@@ -32,9 +32,9 @@ def get_dataset(dataset, train_percentage=0.4, testing=False):
     else:
         dataset_type = 'train'
 
-    if dataset == 'regression_example_1':
+    if dataset == 'regression-siso':
         dataset = RegressionExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
-    elif dataset == 'regression_example_2':
+    elif dataset == 'regression-miso':
         dataset = RegressionExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type)
     elif dataset == 'classification-miso':
         dataset = ClassificationExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type)

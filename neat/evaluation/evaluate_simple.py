@@ -68,7 +68,9 @@ def evaluate_genome(genome: Genome, dataset, loss, beta_type, problem_type, is_t
 
 
 @timeit
-def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_testing, n_samples=1000):
+def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_testing, n_samples=1000,
+                                      use_sigmoid=False):
+
     '''
     Calculate Predictive Distribution for a genome and dataset
     '''
@@ -95,6 +97,7 @@ def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_
     with torch.no_grad():
         # forward pass
         output, _ = network(x_batch)
+
         _, output_distribution, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
                                                                n_output=genome.n_output, problem_type=problem_type,
                                                                is_pass=True)
@@ -119,8 +122,15 @@ def _process_output_data(output, y_true, n_samples, n_output, problem_type, is_p
         multinomial, multinomial_dist = calculate_multinomial_3(output, n_samples, n_output)
         return multinomial, multinomial_dist, y_true
     elif problem_type == 'regression':
-        raise ValueError('Problem Type not supported yet')
+        output, output_dist = calculate_regression_distribution(output, n_samples, n_output)
+        return output, output_dist, y_true
+        # raise ValueError('Problem Type not supported yet')
     raise ValueError('Problem Type is wrong')
+
+
+def calculate_regression_distribution(output, n_samples, n_output):
+    logits = _reshape_output(output, n_samples, n_output)
+    return logits.mean(1), logits
 
 
 def convert_to_multinomial(y_pred, n_samples, n_output):
