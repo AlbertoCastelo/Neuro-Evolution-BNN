@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 import torch
 
+from config_files.configuration_utils import create_configuration
 from deep_learning.probabilistic.train_eval import EvaluateProbabilisticDL
 from neat.dataset.classification_example import ClassificationExample1Dataset
 import seaborn as sns
-from config_files import create_configuration
 import matplotlib.pyplot as plt
 
 config_file = '/classification-miso.json'
 network_filename = f'network-probabilistic-classification.pt'
-dataset = ClassificationExample1Dataset()
+dataset = ClassificationExample1Dataset(train_percentage=0.5)
 
 config = create_configuration(filename=config_file)
 is_cuda = True

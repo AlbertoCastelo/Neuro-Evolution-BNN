@@ -9,8 +9,6 @@ from neat.genome import Genome
 import os
 from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
-from neat.plotting.plot_network import plot_genome_network
-
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)

@@ -9,8 +9,8 @@ from neat.reporting.reports_pyneat import EvolutionReport
 from neat.utils import timeit
 
 
-# config_file = 'classification-miso'
-config_file = 'classification-miso-3'
+config_file = 'classification-miso'
+# config_file = 'classification-miso-3'
 
 config = create_configuration(filename=f'/{config_file}.json')
 
@@ -19,7 +19,7 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
 config.pop_size = 150
-config.parallel_evaluation = False
+config.parallel_evaluation = True
 config.n_generations = 100
 config.n_samples = 20
 
