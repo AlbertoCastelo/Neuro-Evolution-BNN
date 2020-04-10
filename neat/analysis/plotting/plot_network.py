@@ -1,5 +1,6 @@
 import graphviz
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 from neat.genome import Genome
 
 
@@ -56,3 +57,8 @@ def plot_network(nodes, edges, input_nodes, output_nodes, view=False,
         graph.edge(a, b, _attributes={'style': style, 'color': color, 'penwidth': width})
     graph.render(filename, view=view)
     return graph
+
+
+def plot_number_of_parameters(data):
+    sns.boxplot(data=data, y='n_parameters', x='correlation_id')
+    plt.show()
