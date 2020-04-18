@@ -62,3 +62,6 @@ class TestNetwork2Genome(TestCase):
         stochastic_network = ComplexStochasticNetwork(genome=genome)
 
         parameters = network.state_dict()
+
+        self.assertTrue(torch.allclose(parameters['layer_0.weight'], stochastic_network.layer_0.qw_mean, atol=1e-02))
+        self.assertTrue(torch.allclose(parameters['layer_1.weight'], stochastic_network.layer_1.qw_mean, atol=1e-02))

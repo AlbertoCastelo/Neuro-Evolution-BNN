@@ -193,6 +193,7 @@ class LayerBuilder:
         # layer_node_keys = _filter_nodes_without_input_connection(node_keys=self.layer_node_keys,
         #                                                          connections=self.connections)
         layer_node_keys = self.nodes_per_layer[self.layer_counter]
+
         layer_node_keys.sort()
         n_output = len(layer_node_keys)
 
@@ -212,6 +213,8 @@ class LayerBuilder:
         # sorted input keys
         logger.debug(f'Layer: {self.layer_counter}')
         original_input_keys = self.nodes_per_layer[self.layer_counter+1]
+
+        # TODO: why do i need this sort?
         original_input_keys.sort()
         external_input_keys = self._get_external_input_keys(input_node_keys, original_input_keys)
         input_node_keys = original_input_keys + external_input_keys

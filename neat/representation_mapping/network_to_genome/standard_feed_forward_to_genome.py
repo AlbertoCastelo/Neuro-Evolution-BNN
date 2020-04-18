@@ -20,7 +20,9 @@ def get_genome_from_standard_network(network: nn.Module, key=1, std=0.00001) -> 
         for bias, key in zip(biases, nodes_index):
             genome.add_node(key=key, mean=bias, std=std)
             # node_key_index += 1
-    nodes_per_layer[i+1] = list(range(-1, -genome.n_input - 1, -1))
+    # nodes_per_layer[i+1] = list(range(-1, -genome.n_input - 1, -1))
+    nodes_per_layer[i+1] = list(range(-genome.n_input, 0))
+
     # process connections
     for i in range(n_layers):
         weights = parameters[f'layer_{i}.weight'].numpy()
