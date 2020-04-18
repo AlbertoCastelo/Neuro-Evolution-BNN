@@ -32,14 +32,19 @@ class Mutation:
         if not self.config.fix_architecture:
             genome = self._mutate_architecture(genome)
 
+        self._mutate_weights_and_biases(genome)
+        return genome
+
+    @timeit
+    def _mutate_weights_and_biases(self, genome):
         # Mutate connection genes.
         for key in genome.connection_genes.keys():
             genome.connection_genes[key].mutate()
         # Mutate node genes (bias, response, etc.).
         for key in genome.node_genes.keys():
             genome.node_genes[key].mutate()
-        return genome
 
+    @timeit
     def _mutate_architecture(self, genome: Genome):
         if self.single_structural_mutation:
             div = max(1, (self.node_add_prob + self.node_delete_prob +
@@ -69,6 +74,7 @@ class Mutation:
                 genome = self.mutate_delete_connection(genome)
         return genome
 
+    @timeit
     def mutate_add_node(self, genome: Genome):
         # TODO: careful! this can add multihop-jumps to the network
 
@@ -104,6 +110,7 @@ class Mutation:
             logger.network(f'Genome {genome.key}. Mutation: Add a Node: {new_node_key} between {i}->{o}')
         return genome
 
+    @timeit
     def mutate_delete_node(self, genome: Genome):
         # Do nothing if there are no non-output nodes.
         available_nodes = self._get_available_nodes_to_be_deleted(genome)
@@ -127,6 +134,7 @@ class Mutation:
         logger.network(f'Genome {genome.key}. Mutation: Delete a Node: {del_key}')
         return genome
 
+    @timeit
     def mutate_add_connection(self, genome: Genome):
         possible_outputs = list(genome.node_genes.keys())
         k = min(len(possible_outputs), self.architecture_mutation_power)
@@ -146,8 +154,10 @@ class Mutation:
             logger.network(f'Genome {genome.key}. Mutation: Add a Connection: {new_connection_key}')
         return genome
 
+    @timeit
     def mutate_delete_connection(self, genome: Genome):
-        possible_connections_to_delete = self._calculate_possible_connections_to_delete(genome=genome)
+        possible_connections_to_delete = self._calculate_possible_connections_to_delete(
+            genome=genome, connection_add_prob=self.config.connection_add_prob)
         if len(possible_connections_to_delete) > 1:
             key = random.choice(possible_connections_to_delete)
             del genome.connection_genes[key]
@@ -155,20 +165,22 @@ class Mutation:
         return genome
 
     @staticmethod
-    def _calculate_possible_connections_to_delete(genome):
+    @timeit
+    def _calculate_possible_connections_to_delete(genome, connection_add_prob=0.1):
         '''
-        Assumes the network does not have cycles nor multi-hop jumps.
+        Assumes the network does not have cycles.
         '''
         possible_connections_to_delete_set = set(genome.connection_genes.keys())
-        possible_connections_to_delete_set = \
-            Mutation._remove_connection_that_introduces_multihop_jumps(
-                genome=genome,
-                possible_connection_set=possible_connections_to_delete_set)
+        # possible_connections_to_delete_set = \
+        #     Mutation._remove_connection_that_introduces_multihop_jumps(
+        #         genome=genome,
+        #         possible_connection_set=possible_connections_to_delete_set)
 
-        possible_connections_to_delete_set = \
-            Mutation._remove_connection_that_introduces_cycles(
-                genome=genome,
-                possible_connection_set=possible_connections_to_delete_set)
+        if connection_add_prob > 0:
+            possible_connections_to_delete_set = \
+                Mutation._remove_connection_that_introduces_cycles(
+                    genome=genome,
+                    possible_connection_set=possible_connections_to_delete_set)
 
         return list(possible_connections_to_delete_set)
 
@@ -210,6 +222,7 @@ class Mutation:
         return possible_input_keys_set
 
     @staticmethod
+    @timeit
     def _remove_connection_that_introduces_cycles(genome: Genome, possible_connection_set: set) -> set:
         connections_to_remove = []
         for connection in possible_connection_set:
@@ -217,10 +230,12 @@ class Mutation:
 
             if exist_cycle(connections=connections):
                 connections_to_remove.append(connection)
+        logger.debug(f'connections that introduce cycles: {connections_to_remove}')
         possible_connection_set -= set(connections_to_remove)
         return possible_connection_set
 
     @staticmethod
+    @timeit
     def _remove_connection_that_introduces_multihop_jumps(genome: Genome, possible_connection_set: set) -> set:
         output_node_keys = genome.get_output_nodes_keys()
         input_node_keys = genome.get_input_nodes_keys()

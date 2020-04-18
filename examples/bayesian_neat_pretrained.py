@@ -46,19 +46,20 @@ def main():
     total = 0
     for retry in range(1):
         logger.info(f'Pretraining Network')
-        standard_runner = StandardDLRunner(config=config, n_epochs=2000)
+        standard_runner = StandardDLRunner(config=config, n_epochs=100)
         standard_runner.run()
         # TODO: save pretrained results to Report
 
         config.initial_genome_filename = save_genome(network=standard_runner.evaluator.network,
                                                      dataset=config.dataset)
 
-        config.beta = 0.1
+        config.beta = 0.000005
         config.architecture_mutation_power = 5
-        config.node_add_prob = 0.05
-        config.node_delete_prob = 0.2
-        config.connection_add_prob = 0.2
+        config.node_add_prob = 0.0
+        config.node_delete_prob = 0.0
+        config.connection_add_prob = 0.0
         config.connection_delete_prob = 1.0
+        config.mutate_power = 0.1
         print('Another Try')
         total += 1
 
