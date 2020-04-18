@@ -1,14 +1,12 @@
 from torch import nn
 
-from neat.gene import NodeGene
 from neat.genome import Genome
 
 
-def get_genome_from_standard_network(network: nn.Module, std):
+def get_genome_from_standard_network(network: nn.Module, key=1, std=0.00001) -> Genome:
     parameters = network.state_dict()
-    genome = Genome(key=1)
-    genome._initialize_output_nodes()
-
+    genome = Genome(key=key)
+    # genome._initialize_output_nodes()
 
     n_layers = len(parameters) // 2
     nodes_per_layer = {}
