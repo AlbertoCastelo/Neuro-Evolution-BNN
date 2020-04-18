@@ -74,9 +74,12 @@ class Genome:
         return genome
 
     @staticmethod
-    def create_from_file(filename):
+    def create_from_file(filename, key=None):
         genome_dict = read_json_file_to_dict(filename)
-        return Genome.from_dict(genome_dict)
+        genome = Genome.from_dict(genome_dict)
+        if key:
+            genome.key = key
+        return genome
 
     def __init__(self, key, id=None, genome_config=None):
         self.describe_with_parameters = False

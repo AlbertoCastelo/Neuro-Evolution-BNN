@@ -123,8 +123,12 @@ class PopulationEngine:
         population = {}
         for i in range(self.pop_size):
             key = next(self.genome_indexer)
-            genome = Genome(key=key)
-            genome.create_random_genome()
+            if self.config.initial_genome_filename is None:
+                genome = Genome(key=key)
+                genome.create_random_genome()
+            else:
+                filename = self.config.initial_genome_filename
+                genome = Genome.create_from_file(filename=filename, key=key)
 
             population[key] = genome
             self.ancestors[key] = tuple()

@@ -1,6 +1,6 @@
 import torch
+import os
 from torch.optim import Adam
-from torch.utils.data import DataLoader
 
 from neat.configuration import get_configuration
 from neat.evaluation.utils import _prepare_batch_data
@@ -63,12 +63,12 @@ class EvaluateStandardDL:
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
 
-    def save_network(self, filename):
+    def save_network(self, name):
         # save weights
-        torch.save(self.network.state_dict(), f'./../models/{filename}')
+        filename = ''.join([os.path.dirname(os.path.realpath(__file__)), f'examples/models/{name}'])
+        torch.save(self.network.state_dict(), filename)
 
     def train_one(self):
-
         self.network.train()
         loss_epoch = 0
         for x_batch, y_batch in self.data_loader:
