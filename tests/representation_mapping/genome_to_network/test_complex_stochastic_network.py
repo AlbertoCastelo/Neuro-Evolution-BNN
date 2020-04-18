@@ -1,13 +1,15 @@
 from unittest import TestCase
-
+import os
 import torch
 
+from config_files.configuration_utils import create_configuration
 from neat.gene import NodeGene, ConnectionGene
 from neat.genome import Genome
+from neat.neat_logger import get_neat_logger
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import transform_genome_to_layers, \
     ComplexStochasticNetwork
-from config_files import create_configuration
-
+LOGS_PATH = f'{os.getcwd()}/'
+logger = get_neat_logger(path=LOGS_PATH)
 STD = 0.00000001
 
 

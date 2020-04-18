@@ -1,12 +1,15 @@
 from unittest import TestCase
 
 import torch
-
+import os
 from config_files.configuration_utils import create_configuration
 from neat.genome import Genome
+from neat.neat_logger import get_neat_logger
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from neat.representation_mapping.network_to_genome.standard_feed_forward_to_genome import \
     get_genome_from_standard_network
 from deep_learning.standard.feed_forward import FeedForward
+logger = get_neat_logger(path=f'{os.getcwd()}/')
 
 
 class TestNetwork2Genome(TestCase):
@@ -45,3 +48,17 @@ class TestNetwork2Genome(TestCase):
         self.assertEqual(parameters['layer_1.weight'][1, 1], genome.connection_genes[(-2, 3)].get_mean())
         self.assertEqual(parameters['layer_1.weight'][2, 0], genome.connection_genes[(-1, 4)].get_mean())
         self.assertEqual(parameters['layer_1.weight'][2, 1], genome.connection_genes[(-2, 4)].get_mean())
+
+    def test_standard_network_to_genome_to_stochastic_network(self):
+        config = create_configuration(filename='/classification-miso.json')
+        n_neurons_per_layer = 3
+        network = FeedForward(n_input=config.n_input, n_output=config.n_output,
+                              n_neurons_per_layer=n_neurons_per_layer,
+                              n_hidden_layers=1)
+
+        std = 0.1
+        genome = get_genome_from_standard_network(network, std=std)
+
+        stochastic_network = ComplexStochasticNetwork(genome=genome)
+
+        parameters = network.state_dict()
