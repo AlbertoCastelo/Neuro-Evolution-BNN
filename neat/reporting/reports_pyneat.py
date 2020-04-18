@@ -64,7 +64,8 @@ class EvolutionReport:
 
 
     def _show_classification_metrics(self, config):
-        dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=False)
+        dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=False,
+                              random_state=config.dataset_random_state)
         loss = get_loss(problem_type=config.problem_type)
         x, y_true, y_pred, loss_value = evaluate_genome(genome=self.best_individual,
                                                         dataset=dataset,

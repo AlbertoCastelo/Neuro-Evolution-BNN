@@ -15,8 +15,8 @@ STD_1CHANNEL = (0.2563, )
 class HistoPathologicCancer(NeatTestingDataset):
     """Histo-Pathologic Cancer Dataset with binary labeling: Finding/No-Finding"""
 
-    def __init__(self, train_percentage, dataset_type, path=None, img_size=64, transform=None, n_channels=1,
-                 is_debug=True):
+    def __init__(self, train_percentage, dataset_type, random_state=42, path=None, img_size=64,
+                 transform=None, n_channels=1, is_debug=True):
         self.path = path if path is not None \
             else '/home/alberto/Desktop/datasets/histopathologic-cancer-detection/'
         self.img_size = img_size
@@ -41,7 +41,8 @@ class HistoPathologicCancer(NeatTestingDataset):
         if is_debug:
             self.df_data = self.df_data[:20000]
 
-        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type)
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type,
+                         random_state=random_state)
 
     def generate_data(self):
         def _data_generator(self):
@@ -58,12 +59,7 @@ class HistoPathologicCancer(NeatTestingDataset):
         self.x = self.data
         self.y = self.targets
 
-        data_limit = self._get_data_limit()
-        self.x_train = self.x[:data_limit]
-        self.y_train = self.y[:data_limit]
-
-        self.x_test = self.x[data_limit:]
-        self.y_test = self.y[data_limit:]
+        self._generate_train_test_sets()
 
     def __len__(self):
         return len(self.df_data)

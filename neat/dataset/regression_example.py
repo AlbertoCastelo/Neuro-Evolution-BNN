@@ -13,7 +13,7 @@ class RegressionExample1Dataset(NeatTestingDataset):
     TRAIN_SIZE = 5000
     TEST_SIZE = 5000
 
-    def __init__(self, train_percentage, dataset_type='train', is_debug=False):
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, is_debug=False):
         self.is_debug = is_debug
         self.dataset_type = dataset_type
         self.input_scaler = StandardScaler()
@@ -22,7 +22,7 @@ class RegressionExample1Dataset(NeatTestingDataset):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
-        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type)
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state)
 
     def generate_data(self):
         range_ = [0.0, 0.7]
@@ -55,12 +55,7 @@ class RegressionExample1Dataset(NeatTestingDataset):
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).float()
 
-        data_limit = self._get_data_limit()
-        self.x_train = self.x[:data_limit]
-        self.y_train = self.y[:data_limit]
-
-        self.x_test = self.x[data_limit:]
-        self.y_test = self.y[data_limit:]
+        self._generate_train_test_sets()
 
     def _get_x_y(self, x, noise):
         dataset_size = x.shape[0]

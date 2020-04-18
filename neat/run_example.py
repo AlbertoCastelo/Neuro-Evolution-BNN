@@ -1,5 +1,6 @@
-import json
 import sys
+import random
+
 sys.path.append('./')
 
 from config_files.configuration_utils import create_configuration
@@ -10,7 +11,6 @@ import os
 
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
-
 import fire
 
 node_add_probs = [0.3, 0.5, 0.7]
@@ -22,6 +22,7 @@ class ExecutionRunner:
         print(config_parameters)
         config = create_configuration(filename=f'/{dataset_name}.json')
         config = self._modify_config(config, config_parameters)
+        config.dataset_random_state = random.sample(list(range(100)), k=1)[0]
         LOGS_PATH = f'{os.getcwd()}/'
         logger = get_neat_logger(path=LOGS_PATH)
 
@@ -39,8 +40,8 @@ class ExecutionRunner:
             evolution_engine.run()
         except Exception as e:
             print(e)
-            notifier.send(e)
-            logger.error(e)
+            notifier.send(str(e))
+            logger.error(str(e))
 
     def _modify_config(self, config, config_parameters):
         for name, value in config_parameters.items():

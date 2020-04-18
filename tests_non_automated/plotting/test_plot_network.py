@@ -1,4 +1,4 @@
-from neat.plotting.plot_network import plot_network
+from neat.analysis.plotting.plot_network import plot_network
 
 
 def main():

@@ -1,12 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import numpy as np
 
 def plot_loss_distribution(data):
     loss_data = pd.melt(data, id_vars=['correlation_id', 'execution_id', 'is_bayesian', 'train_percentage'],
                         value_vars=['loss_training', 'loss_testing'], var_name='type', value_name='loss')
-
+    median_loss_data = loss_data.groupby(['correlation_id', 'execution_id', 'is_bayesian', 'train_percentage', 'type'])\
+        .agg({'loss': [np.mean, np.median]})
+    print()
+    print()
+    print()
     correlation_ids = loss_data['correlation_id'].unique().tolist()
     _, axes = plt.subplots(len(correlation_ids), 1, figsize=(15, 8))
     for i, correlation_id in enumerate(correlation_ids):

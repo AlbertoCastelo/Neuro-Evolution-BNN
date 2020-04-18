@@ -5,7 +5,7 @@ from config_files.configuration_utils import create_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
 import seaborn as sns
 import matplotlib.pyplot as plt
-from deep_learning.standard.train_eval import EvaluateStandardDL
+from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 
 # DATASET = 'mnist'
 from neat.evaluation.utils import get_dataset
@@ -14,7 +14,7 @@ from neat.neat_logger import get_neat_logger
 DATASET = 'mnist_downsampled'
 
 config = create_configuration(filename=f'/{DATASET}.json')
-config.n_output = 4
+config.n_output = 10
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
@@ -25,7 +25,7 @@ is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 200
+n_epochs = 1000
 batch_size = 50000
 
 evaluator = EvaluateStandardDL(dataset=dataset,
@@ -33,8 +33,8 @@ evaluator = EvaluateStandardDL(dataset=dataset,
                                lr=lr,
                                weight_decay=weight_decay,
                                n_epochs=n_epochs,
-                               n_neurons_per_layer=10,
-                               n_hidden_layers=1,
+                               n_neurons_per_layer=6,
+                               n_hidden_layers=2,
                                is_cuda=is_cuda)
 evaluator.run()
 

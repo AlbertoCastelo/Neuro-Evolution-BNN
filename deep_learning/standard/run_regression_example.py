@@ -4,7 +4,7 @@ from config_files.configuration_utils import create_configuration
 from neat.dataset.regression_example import RegressionExample1Dataset
 
 import matplotlib.pyplot as plt
-from deep_learning.standard.train_eval import EvaluateStandardDL
+from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from neat.evaluation.utils import get_dataset
 
 config_file = '/regression-siso.json'

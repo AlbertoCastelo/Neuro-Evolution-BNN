@@ -5,14 +5,14 @@ from config_files.configuration_utils import create_configuration
 from neat.dataset.classification_example import ClassificationExample1Dataset
 import seaborn as sns
 import matplotlib.pyplot as plt
-from deep_learning.standard.train_eval import EvaluateStandardDL
+from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from neat.evaluation.utils import get_dataset
 from neat.neat_logger import get_neat_logger
 
 DATASET = 'titanic'
 
 config = create_configuration(filename=f'/{DATASET}.json')
-config.n_output = 4
+config.n_output = 2
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
@@ -23,7 +23,7 @@ is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 200
+n_epochs = 2000
 
 
 batch_size = 50000

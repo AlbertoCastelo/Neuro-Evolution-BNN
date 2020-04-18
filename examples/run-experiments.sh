@@ -10,17 +10,17 @@ export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 ###################################################################
 # Regression-Siso
-DATASET=regression-siso
-n_input=1
-n_output=1
-POP_SIZE=50
-PARALLEL_EVALUATION=1
-n_processes=15
-IS_DISCRETE=0
-initial_nodes_sample=1
-n_species=5
-architecture_mutation_power=1
-train_percentage=0.5
+#DATASET=regression-siso
+#n_input=1
+#n_output=1
+#POP_SIZE=50
+#PARALLEL_EVALUATION=1
+#n_processes=15
+#IS_DISCRETE=0
+#initial_nodes_sample=1
+#n_species=5
+#architecture_mutation_power=1
+#train_percentage=0.5
 ###################################################################
 #DATASET=classification-miso
 #n_input=2
@@ -68,17 +68,17 @@ train_percentage=0.5
 #train_percentage=0.5
 ###################################################################
 # MNIST DOWNSAMPLED
-#DATASET=mnist_downsampled
-#n_input=256
-#n_output=4
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=12
-#IS_DISCRETE=0
-#initial_nodes_sample=20
-#n_species=5
-#architecture_mutation_power=2
-#train_percentage=0.5
+DATASET=mnist_downsampled
+n_input=256
+n_output=4
+POP_SIZE=50
+PARALLEL_EVALUATION=1
+n_processes=12
+IS_DISCRETE=0
+initial_nodes_sample=5
+n_species=5
+architecture_mutation_power=2
+train_percentage=0.5
 
 
 # REGRESSION MISO
@@ -162,6 +162,7 @@ N_GENERATIONS=300
 #  N_GENERATIONS=$((n_output * 100))
 #  echo $N_GENERATIONS
 
+N_REPETITIONS=10
 function run_bneat {
 #  echo $1 $2 $3
   correlation_id=$1
@@ -169,9 +170,10 @@ function run_bneat {
   n_samples=$3
 #  echo $correlation_id, $fix_std, $n_samples
 #  for train_percentage in 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
-#  do
+  for train_percentage in 0.1 0.3 0.5 0.7 0.9
+  do
 #  for repetition in 1 2 3 4 5
-  for repetition in 1 2 3 4 5
+  for repetition in $(seq 1 $N_REPETITIONS)
   do
     pipenv run python neat/run_example.py run \
         --dataset_name=$DATASET \
@@ -199,7 +201,7 @@ function run_bneat {
                               'architecture_mutation_power': $architecture_mutation_power
         }"
   done
-#  done
+  done
 }
 
 # test
@@ -209,13 +211,13 @@ function run_bneat {
 #run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Neat
-correlation_id='neat_6_'$DATASET
+correlation_id='neat_10_'$DATASET
 fix_std=1
 n_samples=1
 run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Bayesian-Neat
-correlation_id='bayesian_neat_6_'$DATASET
+correlation_id='bayesian_neat_10_'$DATASET
 fix_std=0
 n_samples=50
 run_bneat $correlation_id $fix_std $n_samples
