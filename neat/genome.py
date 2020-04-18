@@ -143,14 +143,14 @@ class Genome:
 
     def add_node(self, key, mean=None, std=None):
         node = NodeGene(key=key)
-        node.bias_mean = mean
-        node.bias_std = std
+        node.set_mean(mean)
+        node.set_std(std)
         self.node_genes[key] = node
 
     def add_connection(self, key, mean=None, std=None):
         connection = ConnectionGene(key=key)
-        connection.weight_mean = mean
-        connection.weight_std = std
+        connection.set_mean(mean)
+        connection.set_std(std)
         self.connection_genes[key] = connection
 
     def get_genome_sample(self):
