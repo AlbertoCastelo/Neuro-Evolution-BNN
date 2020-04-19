@@ -27,7 +27,7 @@ def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_typ
     return x_batch, y_batch
 
 
-def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42):
+def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, noise=0.1):
     if testing:
         dataset_type = 'test'
     else:
@@ -35,36 +35,37 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42):
 
     if dataset == 'regression-siso':
         dataset = RegressionExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                            random_state=random_state)
+                                            random_state=random_state, noise=noise)
     elif dataset == 'regression-miso':
         dataset = RegressionExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                            random_state=random_state)
+                                            random_state=random_state, noise=noise)
     elif dataset == 'classification-miso':
         dataset = ClassificationExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                                random_state=random_state)
+                                                random_state=random_state, noise=noise)
     elif dataset == 'classification-miso-3':
         dataset = ClassificationExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                                random_state=random_state)
+                                                random_state=random_state, noise=noise)
     elif dataset == 'titanic':
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                 random_state=random_state)
+                                 random_state=random_state, noise=noise)
     elif dataset == 'mnist':
         dataset = MNISTDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                               random_state=random_state)
+                               random_state=random_state, noise=noise)
     elif dataset == 'mnist_downsampled':
         dataset = MNISTDownsampledDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                          random_state=random_state)
+                                          random_state=random_state, noise=noise)
     elif dataset == 'mnist_binary':
         dataset = MNISTBinaryDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                     random_state=random_state)
+                                     random_state=random_state, noise=noise)
     elif dataset == 'xray_binary':
-        dataset = XRayBinary(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state)
+        dataset = XRayBinary(train_percentage=train_percentage, dataset_type=dataset_type,
+                             random_state=random_state, noise=noise)
     elif dataset == 'cancer':
         dataset = HistoPathologicCancer(train_percentage=train_percentage, dataset_type=dataset_type,
-                                        random_state=random_state)
+                                        random_state=random_state, noise=noise)
     elif dataset == 'iris':
         dataset = IrisDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                              random_state=random_state)
+                              random_state=random_state, noise=noise)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()
