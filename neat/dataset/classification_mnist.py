@@ -24,7 +24,7 @@ class MNISTDataset(NeatTestingDataset, MNIST):
                                              transforms.Normalize((0.1307,), (0.3081,))])
         path = ''.join([os.path.dirname(os.path.realpath(__file__)), '/data/mnist'])
         MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
-        NeatTestingDataset.__init__(train_percentage=train_percentage, dataset_type=dataset_type,
+        NeatTestingDataset.__init__(self, train_percentage=train_percentage, dataset_type=dataset_type,
                                     random_state=random_state)
 
     def generate_data(self):

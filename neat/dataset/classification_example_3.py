@@ -17,7 +17,7 @@ class ClassificationExample2Dataset(NeatTestingDataset):
     X2_MIN = -1.0
     X2_MAX = 1.0
 
-    def __init__(self, train_percentage, dataset_type='train', random_state=42, is_debug=False):
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
         self.dataset_type = dataset_type
@@ -31,7 +31,7 @@ class ClassificationExample2Dataset(NeatTestingDataset):
         self.x = None
         self.y = None
         super().__init__(train_percentage=train_percentage, dataset_type=dataset_type,
-                         random_state=random_state)
+                         random_state=random_state, noise=noise)
 
     def generate_data(self):
         self.input_scaler = StandardScaler()

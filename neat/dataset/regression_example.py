@@ -13,7 +13,7 @@ class RegressionExample1Dataset(NeatTestingDataset):
     TRAIN_SIZE = 5000
     TEST_SIZE = 5000
 
-    def __init__(self, train_percentage, dataset_type='train', random_state=42, is_debug=False):
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, is_debug=False):
         self.is_debug = is_debug
         self.dataset_type = dataset_type
         self.input_scaler = StandardScaler()
@@ -22,7 +22,8 @@ class RegressionExample1Dataset(NeatTestingDataset):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
 
-        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state)
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state,
+                         noise=noise)
 
     def generate_data(self):
         range_ = [0.0, 0.7]

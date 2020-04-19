@@ -17,7 +17,7 @@ IS_DEBUG = False
 class XRayBinary(NeatTestingDataset):
     """X-Ray Dataset with binary labeling: Finding/No-Finding"""
 
-    def __init__(self, train_percentage, dataset_type, random_state=42, img_size=64, is_train=False,
+    def __init__(self, train_percentage, dataset_type, random_state=42, noise=0.0, img_size=64, is_train=False,
                  transform=None, n_channels=1, is_debug=IS_DEBUG):
         self.path = PATH
         self.img_size = img_size
@@ -56,7 +56,8 @@ class XRayBinary(NeatTestingDataset):
         self.img_label = np.array(
             [self.x_ray_df.loc[filename, ['target']].values[0] for filename in self.img_filenames])
 
-        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state)
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state,
+                         noise=noise)
 
     def generate_data(self):
         def _data_generator(self):
