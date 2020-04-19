@@ -6,9 +6,6 @@ from config_files.configuration_utils import create_configuration
 from deep_learning.standard.runner import StandardDLRunner
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
-from neat.evaluation.evaluate_simple import evaluate_genome
-from neat.evaluation.utils import get_dataset
-from neat.loss.vi_loss import get_loss
 from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
@@ -38,6 +35,10 @@ ALGORITHM_VERSION = 'bayes-neat'
 DATASET = config_file
 CORRELATION_ID = 'tests'
 
+
+# config.parallel_evaluation = True
+config.fix_std = False
+
 @timeit
 def main():
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
@@ -51,10 +52,15 @@ def main():
         # TODO: save pretrained results to Report
 
         config.initial_genome_filename = save_genome(network=standard_runner.evaluator.network,
-                                                     dataset=config.dataset)
+                                                     dataset=config.dataset,
+                                                     std=0.2)
 
-        config.beta = 0.000005
-        config.architecture_mutation_power = 5
+        # config.beta = 0.000005
+        config.beta = 0.0005
+        # config.beta = 0.005
+        # config.beta = 0.000
+
+        config.architecture_mutation_power = 1
         config.node_add_prob = 0.0
         config.node_delete_prob = 0.0
         config.connection_add_prob = 0.0
@@ -100,9 +106,9 @@ def main():
     print(f'It failed {failed} times out of {total}')
 
 
-def save_genome(network, dataset):
+def save_genome(network, dataset, std):
     filename = ''.join([os.path.dirname(os.path.realpath(__file__)), f'/genomes/genome-{dataset}.json'])
-    genome = get_genome_from_standard_network(network=network)
+    genome = get_genome_from_standard_network(network=network, std=std)
     genome.save_genome(filename)
     return filename
 

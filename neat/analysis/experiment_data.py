@@ -90,7 +90,7 @@ class ExperimentData:
 
             if config.problem_type == 'classification':
                 chunk['accuracy'] = accuracy_score(y_true, y_pred) * 100
-                chunk['f1'] = f1_score(y_true, y_pred)
+                chunk['f1'] = f1_score(y_true, y_pred, average='weighted')
             else:
                 chunk['mse'] = mean_squared_error(y_true, y_pred)
                 chunk['mae'] = mean_absolute_error(y_true, y_pred)

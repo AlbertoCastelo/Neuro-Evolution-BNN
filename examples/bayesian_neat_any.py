@@ -18,8 +18,9 @@ logger = get_neat_logger(path=LOGS_PATH)
 # TODO: better mechanism for override
 config.pop_size = 50
 config.n_process = 10
-config.parallel_evaluation = False
+config.parallel_evaluation = True
 config.n_generations = 300
+config.noise = 1.0
 # config.n_samples = 50
 # config.fix_std = False
 

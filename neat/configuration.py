@@ -19,6 +19,7 @@ class DefaultConfiguration(BaseConfiguration):
     def __init__(self):
         # problem definition
         self.dataset = 'regression_example_1'
+        self.noise = 0.0
         self.dataset_random_state = 42
         self.problem_type = 'regression'
 

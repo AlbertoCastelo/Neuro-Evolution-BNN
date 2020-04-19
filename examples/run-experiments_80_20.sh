@@ -55,17 +55,32 @@ export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 #correlation_id="free_std"
 ###################################################################
 # TITANIC
-DATASET=titanic
-n_input=6
-n_output=2
+#DATASET=titanic
+#n_input=6
+#n_output=2
+#POP_SIZE=50
+#PARALLEL_EVALUATION=1
+#n_processes=15
+#IS_DISCRETE=0
+#initial_nodes_sample=6
+#n_species=5
+#architecture_mutation_power=1
+#train_percentage=0.75
+
+###################################################################
+# IRIS
+DATASET=iris
+n_input=4
+n_output=3
 POP_SIZE=50
 PARALLEL_EVALUATION=1
 n_processes=15
 IS_DISCRETE=0
-initial_nodes_sample=6
+initial_nodes_sample=4
 n_species=5
 architecture_mutation_power=1
 train_percentage=0.75
+
 ###################################################################
 ## MNIST DOWNSAMPLED
 #DATASET=mnist_downsampled
@@ -208,13 +223,13 @@ function run_bneat {
 #run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Neat
-correlation_id='neat_10_'$DATASET
+correlation_id='neat_3_'$DATASET
 fix_std=1
 n_samples=1
 run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Bayesian-Neat
-correlation_id='bayesian_neat_10_'$DATASET
+correlation_id='bayesian_neat_3_'$DATASET
 fix_std=0
 n_samples=50
 run_bneat $correlation_id $fix_std $n_samples

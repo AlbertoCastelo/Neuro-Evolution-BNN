@@ -17,7 +17,8 @@ LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 network_filename = f'network-{DATASET}.pt'
-dataset = get_dataset(dataset=config.dataset, train_percentage=0.8)
+dataset = get_dataset(dataset=config.dataset, train_percentage=config.train_percentage,
+                      random_state=config.dataset_random_state, noise=config.noise)
 
 is_cuda = False
 

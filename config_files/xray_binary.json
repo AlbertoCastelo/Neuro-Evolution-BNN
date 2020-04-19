@@ -19,6 +19,7 @@
   "initial_nodes_sample": 50,
 
   "dataset": "xray_binary",
+  "dataset_random_state": 35,
   "n_generations": 200,
   "generation_fix_architecture": 150,
   "node_activation": "tanh",

@@ -6,7 +6,7 @@
   "train_percentage": 0.9,
   "batch_size": 100000000,
   "beta_type": "other",
-  "beta": 0.00,
+  "beta": 0.000001,
 
   "fix_std": true,
   "fix_architecture": false,
@@ -15,19 +15,21 @@
 
   "feed_forward": true,
   "is_initial_fully_connected": false,
+  "initial_genome_filename": null,
   "n_initial_hidden_neurons": 0,
   "initial_nodes_sample": 50,
 
-  "dataset": "mnist_downsampled",
+  "dataset": "iris",
   "dataset_random_state": 35,
+  "noise": 0.0,
   "n_generations": 200,
   "generation_fix_architecture": 150,
   "node_activation": "tanh",
   "pop_size": 150,
 
   "problem_type": "classification",
-  "n_input": 256,
-  "n_output": 10,
+  "n_input": 4,
+  "n_output": 3,
   "n_samples": 100,
 
   "bias_mean_discrete": [-1, 0.0, 1],
