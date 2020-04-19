@@ -15,6 +15,7 @@
 
   "feed_forward": true,
   "is_initial_fully_connected": false,
+  "initial_genome_filename": null,
   "n_initial_hidden_neurons": 0,
   "initial_nodes_sample": 50,
 

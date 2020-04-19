@@ -7,6 +7,7 @@
   "fix_std": false,
   "fix_architecture": false,
   "is_initial_fully_connected": false,
+  "initial_genome_filename": null,
   "n_initial_hidden_neurons": 0,
   "initial_nodes_sample": 50,
   "batch_size": 100000000,
