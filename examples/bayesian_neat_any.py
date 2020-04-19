@@ -10,6 +10,7 @@ from neat.utils import timeit
 
 
 config_file = 'iris'
+# config_file = 'titanic'
 config = create_configuration(filename=f'/{config_file}.json')
 
 LOGS_PATH = f'{os.getcwd()}/'
