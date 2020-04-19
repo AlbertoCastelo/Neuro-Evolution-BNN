@@ -1,13 +1,15 @@
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 import torch
+import numpy as np
 
 
 class NeatTestingDataset(Dataset):
-    def __init__(self, train_percentage, dataset_type, random_state):
+    def __init__(self, train_percentage, dataset_type, random_state, noise):
         self.train_percentage = train_percentage
         self.dataset_type = dataset_type
         self.random_state = random_state
+        self.noise = noise
 
         self.train = False
         self.x = None
@@ -36,3 +38,14 @@ class NeatTestingDataset(Dataset):
 
     def generate_data(self):
         raise NotImplementedError
+
+    def _add_noise(self, x):
+        if self.noise > 0:
+            means = np.mean(x, 0)
+            stds = np.std(x, 0)
+            x_noisy = ((x - means)/stds +
+                       np.random.normal(0, self.noise, size=x.shape)
+                       + means) * stds
+            return x_noisy
+        return x
+
