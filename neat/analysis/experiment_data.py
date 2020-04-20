@@ -67,6 +67,7 @@ class ExperimentData:
             y_pred = torch.argmax(y_pred, dim=1)
 
             train_percentage = config.train_percentage
+            noise = config.noise
             duration = report.duration
             n_parameters = genome.calculate_number_of_parameters()
             n_nodes = genome.n_bias_parameters // 2
@@ -76,6 +77,7 @@ class ExperimentData:
             chunk = pd.DataFrame({'correlation_id': correlation_id,
                                   'execution_id': execution_id,
                                   'train_percentage': train_percentage,
+                                  'noise': noise,
                                   'is_bayesian': False if config.fix_std else True,
                                   'beta': config.beta,
                                   'loss_training': -best_individual_fitness,
