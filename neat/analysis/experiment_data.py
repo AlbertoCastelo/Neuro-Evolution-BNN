@@ -17,12 +17,13 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 class ExperimentData:
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat'):
+                 algorithm_version='bayes-neat', drop_worst=0.2):
         self.correlation_ids = correlation_ids
         self.dataset_name = dataset_name
         self.n_samples = n_samples
         self.project = project
         self.algorithm_version = algorithm_version
+        self.drop_worst = drop_worst
 
         self.reports = None
         self.best_genomes = {}
@@ -99,7 +100,10 @@ class ExperimentData:
 
             data_chunks.append(chunk)
 
-        self.experiment_data = pd.concat(data_chunks, sort=False)
+        experiment_data = pd.concat(data_chunks, sort=False)
+
+        self.experiment_data = self._drop_worse_executions_per_correlation(experiment_data, self.drop_worst)
+
         return self
 
     def generate_evolution_data(self):
@@ -174,6 +178,21 @@ class ExperimentData:
 
         return reports
 
+    @staticmethod
+    def _drop_worse_executions_per_correlation(experiment_data, drop_worst):
+        experiment_data.sort_values('loss_training', ascending=True, inplace=True)
+        executions_per_experiment = experiment_data.groupby('correlation_id')['execution_id'].nunique().reset_index()\
+            .rename(columns={'execution_id': 'n_executions'})
+        executions_per_experiment['n_executions'] = round(executions_per_experiment['n_executions'] * drop_worst, 0)
+        # experiment_data = experiment_data.merge(executions_per_experiment, on='correlation_id')
+        chunks = []
+        for correlation_id, experiment_data_per_correlation_id in experiment_data.groupby('correlation_id'):
+            n_executions = int(executions_per_experiment.loc[executions_per_experiment['correlation_id'] == correlation_id,
+                'n_executions'].values[0])
+            experiment_data_per_correlation_id.sort_values('loss_training', ascending=True, inplace=True)
+
+            chunks.append(experiment_data_per_correlation_id.head(n_executions))
+        return pd.concat(chunks, sort=False, ignore_index=True)
 
 
 def get_mean_std(genome: Genome):
