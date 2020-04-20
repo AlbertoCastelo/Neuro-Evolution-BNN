@@ -15,7 +15,8 @@ class TestExperimentData(TestCase):
         expected_experiment_data = pd.DataFrame({'correlation_id': [1, 1, 2],
                                                  'execution_id': [2, 1, 4],
                                                  'loss_training': [0.1, 0.8, 0.5]})
-        drop_worst = 0.5
-        experiment_data_filtered = ExperimentData._drop_worse_executions_per_correlation(experiment_data, drop_worst)
+        keep_top = 0.5
+        experiment_data_filtered = ExperimentData._drop_worse_executions_per_correlation(experiment_data, keep_top,
+                                                                                         filtering_group=['correlation_id'])
 
         assert_frame_equal(expected_experiment_data, experiment_data_filtered)
