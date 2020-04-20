@@ -216,8 +216,10 @@ class FixSpeciationEngine:
             sid = next(self.indexer)
             new_representatives[sid] = genome_key
             new_members[sid] = [genome_key]
+
+        for index_genome in index_top_farthest_genomes:
+            genome_key = unspeciated_genomes[index_genome]
             unspeciated_genomes.remove(genome_key)
-            # np.delete(total_distance_by_genome, index_genome, axis=1)
 
         new_representatives, new_members = \
             self._assign_genome_to_specie(distances, new_members, new_representatives, population, unspeciated_genomes)
