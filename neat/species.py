@@ -210,15 +210,17 @@ class FixSpeciationEngine:
         index_top_farthest_genomes = total_distance_by_genome.sum(1).argsort()[-self.n_species:][::-1]
         print(index_top_farthest_genomes)
         print(len(unspeciated_genomes))
+
         # create new species
+        genomes_keys_to_delete = []
         for index_genome in index_top_farthest_genomes:
             genome_key = unspeciated_genomes[index_genome]
             sid = next(self.indexer)
             new_representatives[sid] = genome_key
             new_members[sid] = [genome_key]
+            genomes_keys_to_delete.append(genome_key)
 
-        for index_genome in index_top_farthest_genomes:
-            genome_key = unspeciated_genomes[index_genome]
+        for genome_key in genomes_keys_to_delete:
             unspeciated_genomes.remove(genome_key)
 
         new_representatives, new_members = \
