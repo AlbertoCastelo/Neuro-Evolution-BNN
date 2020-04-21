@@ -65,7 +65,7 @@ class EvaluateStandardDL:
 
     def save_network(self, name):
         # save weights
-        filename = ''.join([os.path.dirname(os.path.realpath(__file__)), f'examples/models/{name}'])
+        filename = ''.join([os.path.dirname(os.path.realpath(__file__)), f'/../models/{name}'])
         torch.save(self.network.state_dict(), filename)
 
     def train_one(self):
