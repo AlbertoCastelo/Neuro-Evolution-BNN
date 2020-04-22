@@ -1,6 +1,12 @@
 from unittest import TestCase
+
+from neat.neat_logger import get_neat_logger
 from neat.representation_mapping.genome_to_network.graph_utils import calculate_nodes_per_layer, \
     calculate_max_graph_depth_per_node
+import os
+
+LOGS_PATH = f'{os.getcwd()}/'
+logger = get_neat_logger(path=LOGS_PATH)
 
 
 class TestCalculateNodesPerLayer(TestCase):

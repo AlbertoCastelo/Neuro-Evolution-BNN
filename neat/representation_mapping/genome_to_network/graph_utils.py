@@ -1,6 +1,7 @@
 import copy
 
 from experiments.logger import logger
+from neat.utils import timeit
 
 
 def calculate_nodes_per_layer(links: list or tuple, output_node_keys: list, input_node_keys: list):
@@ -109,6 +110,7 @@ def _is_next_layer_input(layer_node_keys):
     return is_negative
 
 
+@timeit
 def exist_cycle(connections: list) -> bool:
     # change data structure
     con = _get_connections_per_node(connections)
@@ -132,6 +134,7 @@ def exist_cycle(connections: list) -> bool:
     return False
 
 
+@timeit
 def _get_connections_per_node(connections: list, inverse_order=False):
     '''
     :param connections: eg. ((-1, 1), (1, 2), (2, 3), (2, 4))

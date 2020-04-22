@@ -27,7 +27,7 @@ def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_typ
     return x_batch, y_batch
 
 
-def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, noise=0.1):
+def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, noise=0.0):
     if testing:
         dataset_type = 'test'
     else:

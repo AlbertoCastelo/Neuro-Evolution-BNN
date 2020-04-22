@@ -61,7 +61,6 @@ class EvaluationStochasticEngine:
 
         else:
             self.dataset = self._get_dataset()
-            # self.data_loader = self._get_dataloader()
             self.loss = self._get_loss()
             for genome in population.values():
                 logger.debug(f'Genome {genome.key}: {genome.get_graph()}')
@@ -89,7 +88,6 @@ class EvaluationStochasticEngine:
                                        train_percentage=self.config.train_percentage,
                                        random_state=self.config.dataset_random_state,
                                        noise=self.config.noise)
-            # self.dataset.generate_data()
         return self.dataset
 
     def _get_dataloader(self):

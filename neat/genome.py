@@ -293,3 +293,50 @@ class Genome:
 
             general_data = ''.join([general_data, '\n', bias_str, '\n', weight_str])
         return general_data
+
+    def __eq__(self, other):
+        # check node keys
+        nodes_self_but_other = set(self.node_genes.keys()) - set(other.node_genes.keys())
+        nodes_other_but_self = set(other.node_genes.keys()) - set(self.node_genes.keys())
+        if nodes_self_but_other != set():
+            print(f'Nodes in self but not in other: {nodes_self_but_other}')
+            return False
+        if nodes_other_but_self != set():
+            print(f'Nodes in other but not in self: {nodes_other_but_self}')
+            return False
+
+        # check connection keys
+        connections_self_but_other = set(self.connection_genes.keys()) - set(other.connection_genes.keys())
+        connections_other_but_self = set(other.connection_genes.keys()) - set(self.connection_genes.keys())
+        if connections_self_but_other != set():
+            print(f'Connections in self but not in other: {connections_self_but_other}')
+            return False
+        if connections_other_but_self != set():
+            print(f'Connections in other but not in self: {connections_other_but_self}')
+            return False
+
+        # check Bias values
+        for node_key, node_self in self.node_genes.items():
+            node_other = other.node_genes[node_key]
+
+            mean_difference = round(node_self.get_mean() - node_other.get_mean(), 4)
+            std_difference = round(node_self.get_std() - node_other.get_std(), 4)
+            if mean_difference != 0.0:
+                print(f'Mean difference in Node')
+
+            if std_difference != 0.0:
+                print(f'Std difference in Node')
+
+        # check Weight values
+        for connection_key, connection_self in self.connection_genes.items():
+            connection_other = other.connection_genes[connection_key]
+
+            mean_difference = round(connection_self.get_mean() - connection_other.get_mean(), 4)
+            std_difference = round(connection_self.get_std() - connection_other.get_std(), 4)
+            if mean_difference != 0.0:
+                print(f'Mean difference in Connection')
+
+            if std_difference != 0.0:
+                print(f'Std difference in Connection')
+
+        return True

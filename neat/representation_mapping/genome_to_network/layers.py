@@ -23,13 +23,14 @@ class StochasticLinearParameters:
 class StochasticLinear(nn.Module):
 
     def __init__(self, in_features, out_features, is_cuda=False, parameters: StochasticLinearParameters = None,
-                 n_samples=10, q_logvar_init=-5):
+                 n_samples=10, q_logvar_init=-5, is_trainable=False):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
         # float: Gussian distribution
         # q_logvar_init: float, the approximate posterior is currently always a factorized gaussian
         super(StochasticLinear, self).__init__()
 
+        self.is_trainable = is_trainable
         self.in_features = in_features
         self.out_features = out_features
         self.is_cuda = is_cuda
@@ -69,6 +70,15 @@ class StochasticLinear(nn.Module):
 
             if parameters.log_alpha is not None:
                 self.log_alpha = parameters.log_alpha
+
+            if self.is_trainable:
+                self.qw_mean = Parameter(self.qw_mean)
+                self.qw_logvar = Parameter(self.qw_logvar)
+
+                self.qb_mean = Parameter(self.qb_mean)
+                self.qb_logvar = Parameter(self.qb_logvar)
+                self.log_alpha = Parameter(self.log_alpha)
+
 
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters
@@ -221,12 +231,13 @@ class StochasticLinear(nn.Module):
 class ComplexStochasticLinear(nn.Module):
 
     def __init__(self, in_features, out_features, is_cuda=False, parameters: StochasticLinearParameters = None,
-                 n_samples=10, q_logvar_init=-5):
+                 n_samples=10, q_logvar_init=-5, is_trainable=False):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
         # float: Gussian distribution
         # q_logvar_init: float, the approximate posterior is currently always a factorized gaussian
         super(ComplexStochasticLinear, self).__init__()
+        self.is_trainable = is_trainable
 
         self.in_features = in_features
         self.out_features = out_features
@@ -267,6 +278,15 @@ class ComplexStochasticLinear(nn.Module):
 
             if parameters.log_alpha is not None:
                 self.log_alpha = parameters.log_alpha
+
+            if self.is_trainable:
+                self.qw_mean = Parameter(self.qw_mean)
+                self.qw_logvar = Parameter(self.qw_logvar)
+
+                self.qb_mean = Parameter(self.qb_mean)
+                self.qb_logvar = Parameter(self.qb_logvar)
+                self.log_alpha = Parameter(self.log_alpha)
+
 
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters

@@ -17,13 +17,13 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 class ExperimentData:
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat', drop_worst=0.2):
+                 algorithm_version='bayes-neat', keep_top=0.8):
         self.correlation_ids = correlation_ids
         self.dataset_name = dataset_name
         self.n_samples = n_samples
         self.project = project
         self.algorithm_version = algorithm_version
-        self.keep_top = drop_worst
+        self.keep_top = keep_top
 
         self.reports = None
         self.best_genomes = {}
@@ -195,6 +195,7 @@ class ExperimentData:
             #                        executions_per_experiment['correlation_id'] == correlation_id,
             #                        'n_executions'].values[0])
             n_executions = int(experiment_data_per_correlation_id['n_executions'].values[0])
+            print(n_executions)
             experiment_data_per_correlation_id.sort_values('loss_training', ascending=True, inplace=True)
 
             chunks.append(experiment_data_per_correlation_id.head(n_executions))

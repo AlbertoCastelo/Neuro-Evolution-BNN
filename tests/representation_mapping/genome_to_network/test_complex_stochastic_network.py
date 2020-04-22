@@ -328,12 +328,17 @@ def generate_genome_given_graph(graph, connection_weights):
     genome = Genome(key='foo')
 
     unique_node_keys = []
+    input_nodes = []
     for connection in graph:
         for node_key in connection:
             if node_key not in unique_node_keys:
                 unique_node_keys.append(node_key)
 
-    unique_node_keys = list(set(unique_node_keys + genome.get_output_nodes_keys()))
+            if node_key < 0:
+                input_nodes.append(node_key)
+    input_nodes = set(input_nodes)
+
+    unique_node_keys = list(set(unique_node_keys + genome.get_output_nodes_keys()) - input_nodes)
     nodes = {}
     for node_key in unique_node_keys:
         node = NodeGene(key=node_key).random_initialization()

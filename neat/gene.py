@@ -59,6 +59,14 @@ class Gene:
         log_var = calculate_log_var_given_variance(var)
         self._set_log_var(log_var)
 
+    def set_log_var(self, log_var):
+        self._set_log_var(log_var)
+        var = calculate_variance_given_log_var(log_var)
+        self._set_variance(var)
+        std = calculate_std_given_variance(var)
+        std = self._clip(value=std, parameter_type='std')
+        self._set_std(std)
+
     def set_mean(self, mean):
         mean = self._clip(value=mean, parameter_type='mean')
         setattr(self, self.mean_name, mean)

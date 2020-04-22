@@ -12,9 +12,9 @@ from neat.utils import timeit
 
 
 class ComplexStochasticNetwork(nn.Module):
-    def __init__(self, genome: Genome):
+    def __init__(self, genome: Genome, is_trainable=False):
         super(ComplexStochasticNetwork, self).__init__()
-
+        self.is_trainable = is_trainable
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
@@ -54,9 +54,11 @@ class ComplexStochasticNetwork(nn.Module):
                                                            qb_mean=layer.bias_mean,
                                                            qb_logvar=layer.bias_log_var)
 
+
             layer = ComplexStochasticLinear(in_features=layer.n_input,
                                             out_features=layer.n_output,
-                                            parameters=parameters)
+                                            parameters=parameters,
+                                            is_trainable=self.is_trainable)
 
             setattr(self, f'layer_{layer_key}', layer)
             setattr(self, f'activation_{layer_key}', self.activation)
@@ -74,7 +76,6 @@ def transform_genome_to_layers(genome: Genome) -> dict:
     layer_indices = list(nodes_per_layer.keys())
     layer_indices.sort()
     for layer_index in layer_indices[:-1]:
-        # print(layer_index)
         original_nodes_in_layer = nodes_per_layer[layer_index]
         layer = LayerBuilder(nodes=nodes,
                              connections=connections,
