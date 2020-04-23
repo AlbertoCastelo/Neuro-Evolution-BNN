@@ -1,6 +1,5 @@
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
-from neat.representation_mapping.genome_to_network.graph_utils import calculate_nodes_per_layer
 
 
 def convert_stochastic_network_to_genome(network: ComplexStochasticNetwork, original_genome: Genome = None) -> Genome:
@@ -8,13 +7,6 @@ def convert_stochastic_network_to_genome(network: ComplexStochasticNetwork, orig
         raise ValueError('Not implemented')
 
     genome = original_genome.copy()
-
-    nodes = genome.node_genes
-    connections = genome.connection_genes
-
-    nodes_per_layer = calculate_nodes_per_layer(links=list(connections.keys()),
-                                                input_node_keys=genome.get_input_nodes_keys(),
-                                                output_node_keys=genome.get_output_nodes_keys())
 
     layers = network.layers
     for layer_index, layer in layers.items():

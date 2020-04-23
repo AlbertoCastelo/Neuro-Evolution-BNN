@@ -41,7 +41,6 @@ class TestNetwork2Genome(TestCase):
         self.assertEqual(parameters['layer_1.bias'][1], genome.node_genes[3].get_mean())
         self.assertEqual(parameters['layer_1.bias'][2], genome.node_genes[4].get_mean())
 
-
         self.assertEqual(parameters['layer_1.weight'][0, 0], genome.connection_genes[(-1, 2)].get_mean())
         self.assertEqual(parameters['layer_1.weight'][0, 1], genome.connection_genes[(-2, 2)].get_mean())
         self.assertEqual(parameters['layer_1.weight'][1, 0], genome.connection_genes[(-1, 3)].get_mean())

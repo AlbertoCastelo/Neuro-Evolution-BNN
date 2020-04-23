@@ -5,8 +5,7 @@ from experiments.logger import logger
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.graph_utils import calculate_nodes_per_layer
 from neat.representation_mapping.genome_to_network.layers import StochasticLinearParameters, \
-    ComplexStochasticLinear
-from neat.representation_mapping.genome_to_network.stochastic_network import _filter_nodes_without_input_connection
+    ComplexStochasticLinear, StochasticLinearMasks
 from neat.representation_mapping.genome_to_network.utils import get_activation
 from neat.utils import timeit
 
@@ -25,8 +24,9 @@ class ComplexStochasticNetwork(nn.Module):
         self.config = genome.genome_config
         self.activation = get_activation(activation=self.config.node_activation)
         self.layers = transform_genome_to_layers(genome=genome)
+        self.layers_masks = generate_layer_masks(self.layers, genome)
         self.n_layers = len(self.layers)
-        self._set_network_layers(layers=self.layers)
+        self._set_network_layers(layers=self.layers, layers_masks=self.layers_masks)
         self._cache = {}
 
     def forward(self, x):
@@ -36,7 +36,6 @@ class ComplexStochasticNetwork(nn.Module):
         for i in range(start_index, -1, -1):
             # cache needed values
             for index_to_cache in self.layers[i].indices_of_nodes_to_cache:
-                # self._cache[(i, index_to_cache)] = x[:, index_to_cache]
                 self._cache[(i, index_to_cache)] = x.index_select(1, torch.LongTensor((index_to_cache,)))
             # append needed values
             chunks = [x]
@@ -48,10 +47,10 @@ class ComplexStochasticNetwork(nn.Module):
                 x = getattr(self, f'activation_{i}')(x)
         return x, kl_qw_pw
 
-    def _set_network_layers(self, layers: dict):
+    def _set_network_layers(self, layers: dict, layers_masks: dict):
         for layer_key in layers:
             layer = layers[layer_key]
-
+            layer_masks = layers_masks[layer_key]
             parameters = StochasticLinearParameters.create(qw_mean=layer.weight_mean,
                                                            qw_logvar=layer.weight_log_var,
                                                            qb_mean=layer.bias_mean,
@@ -61,6 +60,7 @@ class ComplexStochasticNetwork(nn.Module):
             layer = ComplexStochasticLinear(in_features=layer.n_input,
                                             out_features=layer.n_output,
                                             parameters=parameters,
+                                            masks=layer_masks,
                                             is_trainable=self.is_trainable)
 
             setattr(self, f'layer_{layer_key}', layer)
@@ -68,10 +68,10 @@ class ComplexStochasticNetwork(nn.Module):
 
     def clear_non_existing_weights(self, clear_grad=True):
         # clear gradients and values of non-existing connections on the genome
+        # THIS HAS A PROBLEM: IN-PLACE OPERATIONS DON'T WORK WELL WITH AUTOGRAD
         for layer_index in range(self.n_layers):
             stochastic_linear_layer = getattr(self, f'layer_{layer_index}')
             layer = self.layers[layer_index]
-
             for connection_input_index, input_node_key in enumerate(layer.input_keys):
                 for connection_output_index, output_node_key in enumerate(layer.output_keys):
                     connection_key = (input_node_key, output_node_key)
@@ -147,6 +147,24 @@ def transform_genome_to_layers(genome: Genome) -> dict:
         logger.debug(f'Indices needed from cache: {layer.indices_of_needed_nodes}')
 
     return layers
+
+
+def generate_layer_masks(layers: dict, genome: Genome):
+    masks_per_layer = {}
+    for layer_index, layer in layers.items():
+        tensor_sizes = len(layer.output_keys), len(layer.input_keys)
+        mask_mean = torch.ones(tensor_sizes)
+        mask_logvar = torch.zeros(tensor_sizes)
+        for connection_input_index, input_node_key in enumerate(layer.input_keys):
+            for connection_output_index, output_node_key in enumerate(layer.output_keys):
+                connection_key = (input_node_key, output_node_key)
+                if connection_key not in genome.connection_genes.keys():
+
+                    mask_mean[connection_output_index, connection_input_index] = 0.0
+                    mask_logvar[connection_output_index, connection_input_index] = DEFAULT_LOGVAR
+
+        masks_per_layer[layer_index] = StochasticLinearMasks(mask_mean=mask_mean, mask_logvar=mask_logvar)
+    return masks_per_layer
 
 
 def _get_node_index_to_cache(node_key, layers):
