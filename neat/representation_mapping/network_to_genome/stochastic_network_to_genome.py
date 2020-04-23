@@ -24,18 +24,15 @@ def convert_stochastic_network_to_genome(network: ComplexStochasticNetwork, orig
 
         for connection_input_index, input_node_key in enumerate(layer.input_keys):
             for connection_output_index, output_node_key in enumerate(layer.output_keys):
+                connection_key = (input_node_key, output_node_key)
                 mean = layer.weight_mean[connection_output_index, connection_input_index]
                 log_var = layer.weight_log_var[connection_output_index, connection_input_index]
-                genome.connection_genes[(input_node_key, output_node_key)].set_mean(mean)
-                genome.connection_genes[(input_node_key, output_node_key)].set_log_var(log_var)
-
-    # n_layers = len(nodes_per_layer)
-    # for layer, node_keys in nodes_per_layer.items():
-    #     if layer == n_layers - 1:
-    #         continue
-
-
-
+                if connection_key in genome.connection_genes.keys():
+                    genome.connection_genes[connection_key].set_mean(mean)
+                    genome.connection_genes[connection_key].set_log_var(log_var)
+                else:
+                    assert mean == 0.0
+                    assert log_var <= -10.0
 
     return genome
 
