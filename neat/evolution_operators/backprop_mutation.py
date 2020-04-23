@@ -42,13 +42,15 @@ class BackPropMutation:
         self.network.train()
         for epoch in range(self.n_epochs):
             loss_epoch = 0.0
+
             output, _ = self.network(x_batch)
             loss = self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
-            # loss = self.loss(output, y_batch)
             loss_epoch += loss.data.item()
 
             self.optimizer.zero_grad()
             loss.backward()  # Backward Propagation
+            # self.network.clear_non_existing_weights()  # zero_grad for those unexistent parameters
             self.optimizer.step()  # Optimizer update
+            self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')

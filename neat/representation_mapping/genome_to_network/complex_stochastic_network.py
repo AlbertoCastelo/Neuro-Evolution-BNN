@@ -10,11 +10,14 @@ from neat.representation_mapping.genome_to_network.stochastic_network import _fi
 from neat.representation_mapping.genome_to_network.utils import get_activation
 from neat.utils import timeit
 
+DEFAULT_LOGVAR = -33.0
+
 
 class ComplexStochasticNetwork(nn.Module):
     def __init__(self, genome: Genome, is_trainable=False):
         super(ComplexStochasticNetwork, self).__init__()
         self.is_trainable = is_trainable
+        self.genome = genome
         self.n_output = genome.n_output
         self.n_input = genome.n_input
         self.nodes = genome.node_genes
@@ -62,6 +65,26 @@ class ComplexStochasticNetwork(nn.Module):
 
             setattr(self, f'layer_{layer_key}', layer)
             setattr(self, f'activation_{layer_key}', self.activation)
+
+    def clear_non_existing_weights(self, clear_grad=True):
+        # clear gradients and values of non-existing connections on the genome
+        for layer_index in range(self.n_layers):
+            stochastic_linear_layer = getattr(self, f'layer_{layer_index}')
+            layer = self.layers[layer_index]
+
+            for connection_input_index, input_node_key in enumerate(layer.input_keys):
+                for connection_output_index, output_node_key in enumerate(layer.output_keys):
+                    connection_key = (input_node_key, output_node_key)
+                    if connection_key not in self.genome.connection_genes.keys():
+                        if clear_grad:
+                            # clear gradients
+                            stochastic_linear_layer.qw_mean.grad[connection_output_index, connection_input_index] = 0.0
+                            stochastic_linear_layer.qw_logvar.grad[connection_output_index, connection_input_index] = 0.0
+
+                        # # clear values
+                        stochastic_linear_layer.qw_mean[connection_output_index, connection_input_index] = 0.0
+                        stochastic_linear_layer.qw_logvar[connection_output_index, connection_input_index] = \
+                            DEFAULT_LOGVAR
 
 
 @timeit
@@ -264,7 +287,7 @@ class LayerBuilder:
         for output_index, output_key in enumerate(layer_node_keys):
             key_index_mapping_output[output_key] = output_index
         weight_mean = torch.zeros([n_output, n_input])
-        weight_log_var = -33.0 * torch.ones([n_output, n_input])
+        weight_log_var = DEFAULT_LOGVAR * torch.ones([n_output, n_input])
         for connection_key in layer_connections:
             input_node_key, output_node_key = connection_key
             weight_mean[key_index_mapping_output[output_node_key], key_index_mapping_input[input_node_key]] = \
