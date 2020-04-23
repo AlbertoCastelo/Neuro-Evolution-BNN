@@ -20,6 +20,14 @@ class StochasticLinearParameters:
         self.log_alpha = log_alpha
 
 
+class StochasticLinearMasks:
+    def __init__(self, mask_mean, mask_logvar):
+        self.mask_mean = mask_mean
+        self.mask_logvar = mask_logvar
+
+        assert self.mask_mean.shape == self.mask_logvar.shape
+
+
 class StochasticLinear(nn.Module):
 
     def __init__(self, in_features, out_features, is_cuda=False, parameters: StochasticLinearParameters = None,
@@ -231,7 +239,7 @@ class StochasticLinear(nn.Module):
 class ComplexStochasticLinear(nn.Module):
 
     def __init__(self, in_features, out_features, is_cuda=False, parameters: StochasticLinearParameters = None,
-                 n_samples=10, q_logvar_init=-5, is_trainable=False):
+                 masks: StochasticLinearMasks = None, n_samples=10, q_logvar_init=-5, is_trainable=False):
         # p_logvar_init, p_pi can be either
         # (list/tuples): prior model is a mixture of Gaussians components=len(p_pi)=len(p_logvar_init)
         # float: Gussian distribution
@@ -265,11 +273,6 @@ class ComplexStochasticLinear(nn.Module):
             # initialize all paramaters
             self.reset_parameters()
         else:
-            # this parameters are known
-            # print(f'qw_mean: {parameters.qw_mean.shape}')
-            # print(f'qw_logvar: {parameters.qw_logvar.shape}')
-            # print(f'qb_mean: {parameters.qb_mean.shape}')
-            # print(f'qb_logvar: {parameters.qb_logvar.shape}')
             self.qw_mean = parameters.qw_mean
             self.qw_logvar = parameters.qw_logvar
 
@@ -287,6 +290,9 @@ class ComplexStochasticLinear(nn.Module):
                 self.qb_logvar = Parameter(self.qb_logvar)
                 self.log_alpha = Parameter(self.log_alpha)
 
+        # prepare masks: needed to simulate non-existing connections (resets connections values to 0.0)
+        self.mask_mean = masks.mask_mean
+        self.mask_logvar = masks.mask_logvar
 
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters
@@ -299,56 +305,56 @@ class ComplexStochasticLinear(nn.Module):
         # assumes 1 sigma for all weights per layer.
         self.log_alpha.data.uniform_(-stdv, stdv)
 
-    def forward_2(self, x):
-        # EQUATION
-        # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
-        #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
-        batch_size = x.shape[0]
-
-        print(f'x: {x.shape}')
-        qw_var = torch.exp(1.0 + self.qw_logvar)
-        qb_var = torch.exp(1.0 + self.qb_logvar)
-
-        w_sample_size = (self.out_features * self.n_samples, self.in_features)
-        qw_mean = self.qw_mean.repeat(self.n_samples, 1)
-        qw_var = qw_var.repeat(self.n_samples, 1)
-        # assert (qw_mean.shape == w_sample_size)
-
-        w_sample = qw_mean + qw_var * torch.randn(w_sample_size)
-        print(f'w-samples: {w_sample.shape}')
-        b_sample_size = (self.out_features * self.n_samples, 1)
-        b_mean = self.qb_mean.view(-1, 1).repeat(self.n_samples, 1)
-        qb_var = qb_var.view(-1, 1).repeat(self.n_samples, 1)
-
-        b_sample = b_mean + qb_var * torch.randn(b_sample_size)
-        print(f'b-samples: {b_sample.shape}')
-        y = F.linear(input=x, weight=w_sample, )
-        print(f'y: {y.shape}')
-        log_q_theta = self._log_q_theta(w_sample=w_sample, b_sample=b_sample,
-                                        qw_mean=self.qw_mean, qw_std=qw_var,
-                                        qb_mean=self.qb_mean, qb_std=qb_var)
-
-        log_p_theta = self._log_p_theta(w_sample=w_sample, b_sample=b_sample)
-
-        # kl_qw_pw = log_p_theta - log_q_theta
-        kl_qw_pw = 0
-        return y, kl_qw_pw
+    # def forward_2(self, x):
+    #     # EQUATION
+    #     # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
+    #     #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
+    #     batch_size = x.shape[0]
+    #
+    #     print(f'x: {x.shape}')
+    #     qw_var = torch.exp(1.0 + self.qw_logvar)
+    #     qb_var = torch.exp(1.0 + self.qb_logvar)
+    #
+    #     w_sample_size = (self.out_features * self.n_samples, self.in_features)
+    #     qw_mean = self.qw_mean.repeat(self.n_samples, 1)
+    #     qw_var = qw_var.repeat(self.n_samples, 1)
+    #     # assert (qw_mean.shape == w_sample_size)
+    #
+    #     w_sample = qw_mean + qw_var * torch.randn(w_sample_size)
+    #     print(f'w-samples: {w_sample.shape}')
+    #     b_sample_size = (self.out_features * self.n_samples, 1)
+    #     b_mean = self.qb_mean.view(-1, 1).repeat(self.n_samples, 1)
+    #     qb_var = qb_var.view(-1, 1).repeat(self.n_samples, 1)
+    #
+    #     b_sample = b_mean + qb_var * torch.randn(b_sample_size)
+    #     print(f'b-samples: {b_sample.shape}')
+    #     y = F.linear(input=x, weight=w_sample, )
+    #     print(f'y: {y.shape}')
+    #     log_q_theta = self._log_q_theta(w_sample=w_sample, b_sample=b_sample,
+    #                                     qw_mean=self.qw_mean, qw_std=qw_var,
+    #                                     qb_mean=self.qb_mean, qb_std=qb_var)
+    #
+    #     log_p_theta = self._log_p_theta(w_sample=w_sample, b_sample=b_sample)
+    #
+    #     # kl_qw_pw = log_p_theta - log_q_theta
+    #     kl_qw_pw = 0
+    #     return y, kl_qw_pw
 
     def forward(self, x):
-        # print()
-        # print(f'qw_mean: {self.qw_mean}')
-        # print(f'qw_logvar: {self.qw_logvar}')
-        # print(f'qb_mean: {self.qb_mean}')
-        # print(f'qb_logvar: {self.qb_logvar}')
         # EQUATION
         # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
         #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
+
+        # needed if we apply mask. Otherwise can be removed.
+        qw_logvar = self.qw_logvar * self.mask_mean + self.mask_logvar
+        qw_mean = self.qw_mean * self.mask_mean
+
         batch_size = x.shape[0]
 
-        qw_var = torch.exp(1.0 + self.qw_logvar)
+        qw_var = torch.exp(1.0 + qw_logvar)
         qb_var = torch.exp(1.0 + self.qb_logvar)
 
-        x_w_mu = F.linear(input=x, weight=self.qw_mean)
+        x_w_mu = F.linear(input=x, weight=qw_mean)
         x_w_var = F.linear(input=x, weight=qw_var)
 
         b_mu = self.qb_mean.repeat(batch_size, 1)
@@ -361,10 +367,6 @@ class ComplexStochasticLinear(nn.Module):
             w_samples = w_samples.cuda()
             b_samples = b_samples.cuda()
 
-        # print()
-        # print(mu_b.shape)
-        # print(log_var_b.shape)
-        # print(b_samples.shape)
         output = 1e-8 + x_w_mu + x_w_var * w_samples + \
                  b_mu + b_var * b_samples
 
