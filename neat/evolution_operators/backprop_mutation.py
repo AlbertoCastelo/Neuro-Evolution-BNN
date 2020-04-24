@@ -1,6 +1,7 @@
 from torch.optim import Adam
 
 from neat.evaluation.utils import _prepare_batch_data
+from neat.evolution_operators.mutation import Mutation
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss
@@ -11,7 +12,7 @@ from neat.representation_mapping.network_to_genome.stochastic_network_to_genome 
 BACKPROP_MUTATION = 'backprop_mutation'
 
 
-class BackPropMutation:
+class BackPropMutation(Mutation):
     def __init__(self, dataset, n_samples, problem_type, beta, n_epochs, weight_decay=0.0005, lr=0.01):
         self.dataset = dataset
         self.lr = lr
@@ -24,7 +25,9 @@ class BackPropMutation:
         self.network = None
 
     def mutate(self, genome: Genome):
-        self._mutate(genome)
+        if self.network is None:
+            self._mutate(genome)
+        return convert_stochastic_network_to_genome(network=self.network, original_genome=genome)
 
     def _mutate(self, genome: Genome):
         kl_qw_pw = compute_kl_qw_pw(genome=genome)
@@ -59,8 +62,3 @@ class BackPropMutation:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
 
         self.final_loss = float(loss.data)
-
-    def mutated_genome(self, genome: Genome):
-        if self.network is None:
-            self.mutate(genome)
-        return convert_stochastic_network_to_genome(network=self.network, original_genome=genome)
