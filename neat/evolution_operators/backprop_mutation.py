@@ -1,4 +1,3 @@
-from torch.autograd import Variable
 from torch.optim import Adam
 
 from neat.evaluation.utils import _prepare_batch_data
@@ -45,6 +44,7 @@ class BackPropMutation:
             loss_epoch = 0.0
 
             output, _ = self.network(x_batch)
+
             loss = self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
             loss_epoch += loss.data.item()
 
@@ -55,6 +55,8 @@ class BackPropMutation:
             # self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
+
+        self.final_loss = float(loss.data)
 
     def mutated_genome(self, genome: Genome):
         if self.network is None:

@@ -60,6 +60,7 @@ class Gene:
         self._set_log_var(log_var)
 
     def set_log_var(self, log_var):
+        log_var = float(log_var)
         self._set_log_var(log_var)
         var = calculate_variance_given_log_var(log_var)
         self._set_variance(var)
@@ -68,6 +69,7 @@ class Gene:
         self._set_std(std)
 
     def set_mean(self, mean):
+        mean = float(mean)
         mean = self._clip(value=mean, parameter_type='mean')
         setattr(self, self.mean_name, mean)
 
