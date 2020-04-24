@@ -8,13 +8,19 @@ from experiments.logger import logger
 from experiments.slack_client import Notifier
 from neat.configuration import get_configuration
 from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
+from neat.evaluation.utils import get_dataset
+from neat.evolution_operators.backprop_mutation import BackPropMutation, BACKPROP_MUTATION
 from neat.evolution_operators.crossover import Crossover
-from neat.evolution_operators.mutation import Mutation
+from neat.evolution_operators.mutation import RandomMutation, ArchitectureMutation, RANDOM_MUTATION
 from neat.genome import Genome
 from neat.reporting.reports_pyneat import EvolutionReport
 from neat.species import SpeciationEngine, FixSpeciationEngine
 from neat.stagnation import Stagnation
 from neat.utils import timeit
+
+N_EPOCHS = 30
+LR = 0.05
+WEIGHT_DECAY = 0.0005
 
 
 class EvolutionEngine:
@@ -107,9 +113,12 @@ class PopulationEngine:
     def __init__(self, stagnation_engine: Stagnation):
         self.stagnation_engine = stagnation_engine
         self.crossover = Crossover()
-        self.mutation = Mutation()
+        self.architecture_mutation = ArchitectureMutation()
+
 
         self.config = get_configuration()
+        self.mutation_type = self.config.mutation_type
+        self.params_mutation = self._initialize_params_mutation(mutation_type=self.mutation_type, config=self.config)
         self.pop_size = self.config.pop_size
         self.min_species_size = self.config.min_species_size
         self.elitism = self.config.elitism
@@ -266,8 +275,20 @@ class PopulationEngine:
                 # genetically identical clone of the parent (but with a different ID).
                 key = next(self.genome_indexer)
                 offspring = self.crossover.get_offspring(offspring_key=key, genome1=parent1, genome2=parent2)
-                mutated_offspring = self.mutation.mutate(genome=offspring)
+                mutated_offspring = self.architecture_mutation.mutate(genome=offspring)
+                mutated_offspring = self.params_mutation.mutate(genome=mutated_offspring)
 
                 new_population[key] = mutated_offspring
                 self.ancestors[key] = (parent1_id, parent2_id)
         return new_population
+
+    def _initialize_params_mutation(self, mutation_type, config):
+        if mutation_type == RANDOM_MUTATION:
+            return RandomMutation()
+        elif mutation_type == BACKPROP_MUTATION:
+            dataset = get_dataset(dataset=config.dataset, train_percentage=config.train_percentage, testing=False,
+                                  random_state=config.dataset_random_state, noise=config.noise)
+            return BackPropMutation(dataset=dataset, n_samples=config.n_samples, problem_type=config.problem_type,
+                                    beta=config.beta, n_epochs=N_EPOCHS, weight_decay=WEIGHT_DECAY, lr=LR)
+        else:
+            raise ValueError('Incorrect Mutation Type')

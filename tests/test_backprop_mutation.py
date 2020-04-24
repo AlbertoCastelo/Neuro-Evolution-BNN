@@ -92,7 +92,7 @@ class TestIntegrationMutation(TestCase):
                                              problem_type=self.config.problem_type,
                                              beta=0.0,
                                              n_epochs=150)
-        genome_mutated = backprop_mutation.mutated_genome(genome)
+        genome_mutated = backprop_mutation.mutate(genome)
 
         # evaluate genome
         loss = get_loss(problem_type=self.config.problem_type)
@@ -120,5 +120,18 @@ class TestIntegrationMutation(TestCase):
                                              problem_type=self.config.problem_type,
                                              beta=0.0,
                                              n_epochs=2)
-        genome_mutated = backprop_mutation.mutated_genome(genome)
+        genome_mutated = backprop_mutation.mutate(genome)
+        self.assertEqual(type(genome_mutated), Genome)
+
+    def test_non_existing_connections_are_updated_2(self):
+        connections = ((-1, 1), (-2, 1))
+        genome = generate_genome_given_graph(graph=connections,
+                                             connection_weights=(1.0, 2.0))
+        dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0)
+        backprop_mutation = BackPropMutation(dataset=dataset,
+                                             n_samples=10,
+                                             problem_type=self.config.problem_type,
+                                             beta=0.0,
+                                             n_epochs=20)
+        genome_mutated = backprop_mutation.mutate(genome)
         self.assertEqual(type(genome_mutated), Genome)

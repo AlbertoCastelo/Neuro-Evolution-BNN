@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 import os
 
@@ -49,6 +49,7 @@ class TestStochasticNetwork2Genome(TestCase):
 
         self.assertEqual(original_genome, new_genome)
 
+    @skip('Does not apply now')
     def test_genome_conversion_fails_when_some_parameter_is_different(self):
         config = create_configuration(filename='/classification-miso.json')
 

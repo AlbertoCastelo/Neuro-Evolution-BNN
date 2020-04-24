@@ -2,7 +2,6 @@ import jsons
 
 from experiments.file_utils import read_json_file_to_dict, write_json_file_from_dict
 
-
 class ConfigError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -123,6 +122,7 @@ class DefaultConfiguration(BaseConfiguration):
         self.min_species_size = 2
 
         # mutation
+        self.mutation_type = 'random_mutation'
         self.architecture_mutation_power = 2
         self.single_structural_mutation = False
         self.mutate_power = 0.5
