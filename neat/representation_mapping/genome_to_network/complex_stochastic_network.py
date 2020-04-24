@@ -24,7 +24,7 @@ class ComplexStochasticNetwork(nn.Module):
         self.config = genome.genome_config
         self.activation = get_activation(activation=self.config.node_activation)
         self.layers = transform_genome_to_layers(genome=genome)
-        self.layers_masks = generate_layer_masks(self.layers, genome)
+        self.layers_masks = generate_layer_masks(self.layers, genome, fix_std=self.config.fix_std)
         self.n_layers = len(self.layers)
         self._set_network_layers(layers=self.layers, layers_masks=self.layers_masks)
         self._cache = {}
@@ -149,21 +149,28 @@ def transform_genome_to_layers(genome: Genome) -> dict:
     return layers
 
 
-def generate_layer_masks(layers: dict, genome: Genome):
+def generate_layer_masks(layers: dict, genome: Genome, fix_std: bool):
     masks_per_layer = {}
     for layer_index, layer in layers.items():
         tensor_sizes = len(layer.output_keys), len(layer.input_keys)
         mask_mean = torch.ones(tensor_sizes)
-        mask_logvar = torch.zeros(tensor_sizes)
+        mask_logvar_mul = torch.ones(tensor_sizes)
+        if fix_std:
+            mask_logvar_mul *= DEFAULT_LOGVAR
+            mask_logvar_add = torch.zeros(tensor_sizes)
+        else:
+            mask_logvar_add = torch.zeros(tensor_sizes)
         for connection_input_index, input_node_key in enumerate(layer.input_keys):
             for connection_output_index, output_node_key in enumerate(layer.output_keys):
                 connection_key = (input_node_key, output_node_key)
                 if connection_key not in genome.connection_genes.keys():
 
                     mask_mean[connection_output_index, connection_input_index] = 0.0
-                    mask_logvar[connection_output_index, connection_input_index] = DEFAULT_LOGVAR
+                    if not fix_std:
+                        mask_logvar_add[connection_output_index, connection_input_index] = DEFAULT_LOGVAR
 
-        masks_per_layer[layer_index] = StochasticLinearMasks(mask_mean=mask_mean, mask_logvar=mask_logvar)
+        masks_per_layer[layer_index] = StochasticLinearMasks(mask_mean=mask_mean, mask_logvar_mul=mask_logvar_mul,
+                                                             mask_logvar_add=mask_logvar_add)
     return masks_per_layer
 
 

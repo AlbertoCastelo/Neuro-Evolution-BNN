@@ -21,11 +21,13 @@ class StochasticLinearParameters:
 
 
 class StochasticLinearMasks:
-    def __init__(self, mask_mean, mask_logvar):
+    def __init__(self, mask_mean, mask_logvar_mul, mask_logvar_add):
         self.mask_mean = mask_mean
-        self.mask_logvar = mask_logvar
+        self.mask_logvar_mul = mask_logvar_mul
+        self.mask_logvar_add = mask_logvar_add
 
-        assert self.mask_mean.shape == self.mask_logvar.shape
+        assert self.mask_mean.shape == self.mask_logvar_add.shape
+        assert self.mask_logvar_mul.shape == self.mask_logvar_add.shape
 
 
 class StochasticLinear(nn.Module):
@@ -292,7 +294,8 @@ class ComplexStochasticLinear(nn.Module):
 
         # prepare masks: needed to simulate non-existing connections (resets connections values to 0.0)
         self.mask_mean = masks.mask_mean
-        self.mask_logvar = masks.mask_logvar
+        self.mask_logvar_mul = masks.mask_logvar_mul
+        self.mask_logvar_add = masks.mask_logvar_add
 
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters
@@ -346,7 +349,7 @@ class ComplexStochasticLinear(nn.Module):
         #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
 
         # needed if we apply mask. Otherwise can be removed.
-        qw_logvar = self.qw_logvar * self.mask_mean + self.mask_logvar
+        qw_logvar = self.qw_logvar * self.mask_logvar_mul + self.mask_logvar_add
         qw_mean = self.qw_mean * self.mask_mean
 
         batch_size = x.shape[0]

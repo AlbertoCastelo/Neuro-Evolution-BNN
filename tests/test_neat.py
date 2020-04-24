@@ -24,6 +24,7 @@ class TestIntegrationNeat(TestCase):
     def test_neat_random_mutation_runs_happy_path(self):
         self.config.mutation_type = RANDOM_MUTATION
         self.config.parallel_evaluation = False
+        self.config.is_fine_tuning = False
 
         evolution_engine = EvolutionEngine(report=self.report, notifier=self.notifier)
         evolution_engine.run()
@@ -31,6 +32,7 @@ class TestIntegrationNeat(TestCase):
     def test_neat_backprop_mutation_runs_happy_path(self):
         self.config.mutation_type = BACKPROP_MUTATION
         self.config.parallel_evaluation = False
+        self.config.is_fine_tuning = False
 
         evolution_engine = EvolutionEngine(report=self.report, notifier=self.notifier)
         evolution_engine.run()
