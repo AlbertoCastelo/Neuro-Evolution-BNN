@@ -40,7 +40,8 @@ class EvolutionReport:
         generation_report = GenerationReport.create(population=population, generation=generation, species=species).run()
         generation_data = generation_report.generation_data
 
-        is_best_updated = self._update_best(generation_report=generation_report, population=population)
+        is_best_updated = self._update_best(
+            potential_best_individual=population.get(generation_data['best_individual_key']))
 
         self.generation_metrics[generation] = generation_data
 
@@ -50,6 +51,29 @@ class EvolutionReport:
 
             # show metrics for new one
             self.show_metrics_best()
+
+    def report_fine_tuning(self, species_best_genome):
+        self.fine_tuning = {}
+        self.fine_tuning['best_fitness_before_fine_tuning'] = self.best_individual.fitness
+
+        best_genome_per_specie = {}
+        best_genome_specie_key = -1
+        best_genome_fitness = -1000000
+        for specie_key, best_genome in species_best_genome.items():
+            best_genome_per_specie[specie_key] = best_genome.fitness
+            if best_genome.fitness > best_genome_fitness:
+                best_genome_fitness = best_genome.fitness
+                best_genome_specie_key = specie_key
+        best_genome = species_best_genome.get(best_genome_specie_key)
+
+        self.fine_tuning['best_genome_per_specie'] = best_genome_per_specie
+        is_best_updated = self._update_best(potential_best_individual=best_genome)
+
+        if is_best_updated:
+            # show metrics for new one
+            self.show_metrics_best()
+
+        print(f'Best Fitness after fine-tuning: {best_genome.fitness}')
 
     def show_metrics_best(self):
         # only for classification!!
@@ -88,9 +112,9 @@ class EvolutionReport:
         print(confusion_m)
         print(f'Accuracy: {acc} %')
 
-    def _update_best(self, generation_report, population):
-        if self.best_individual is None or self.best_individual.fitness < generation_report.best_individual_fitness:
-            self.best_individual = population.get(generation_report.best_individual_key)
+    def _update_best(self, potential_best_individual):
+        if self.best_individual is None or self.best_individual.fitness < potential_best_individual.fitness:
+            self.best_individual = potential_best_individual
             logger.info(f'    New best individual ({self.best_individual.key}) found '
                         f'with fitness {round(self.best_individual.fitness, 3)}')
             logger.debug(f'         best individual has {len(self.best_individual.node_genes)} Nodes '

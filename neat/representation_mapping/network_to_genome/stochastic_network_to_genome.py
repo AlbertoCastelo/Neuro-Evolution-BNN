@@ -2,29 +2,31 @@ from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 
 
-def convert_stochastic_network_to_genome(network: ComplexStochasticNetwork, original_genome: Genome = None) -> Genome:
+def convert_stochastic_network_to_genome(network: ComplexStochasticNetwork, original_genome: Genome = None, fitness=None) -> Genome:
     if original_genome is None:
         raise ValueError('Not implemented')
 
     genome = original_genome.copy()
 
-    layers = network.layers
-    for layer_index, layer in layers.items():
+    for layer_index in range(network.n_layers):
+        stochastic_linear_layer = getattr(network, f'layer_{layer_index}')
+        layer = network.layers[layer_index]
+
         for bias_index, node_key in enumerate(layer.output_keys):
-            genome.node_genes[node_key].set_mean(layer.bias_mean[bias_index])
-            genome.node_genes[node_key].set_log_var(layer.bias_log_var[bias_index])
+            # if node_key in genome.node_genes.keys():
+            genome.node_genes[node_key].set_mean(stochastic_linear_layer.qb_mean[bias_index])
+            genome.node_genes[node_key].set_log_var(stochastic_linear_layer.qb_logvar[bias_index])
 
         for connection_input_index, input_node_key in enumerate(layer.input_keys):
             for connection_output_index, output_node_key in enumerate(layer.output_keys):
                 connection_key = (input_node_key, output_node_key)
-                mean = layer.weight_mean[connection_output_index, connection_input_index]
-                log_var = layer.weight_log_var[connection_output_index, connection_input_index]
+                mean = stochastic_linear_layer.qw_mean[connection_output_index, connection_input_index]
+                log_var = stochastic_linear_layer.qw_logvar[connection_output_index, connection_input_index]
                 if connection_key in genome.connection_genes.keys():
                     genome.connection_genes[connection_key].set_mean(mean)
                     genome.connection_genes[connection_key].set_log_var(log_var)
-                else:
-                    assert mean == 0.0
-                    assert log_var <= -10.0
+
+    genome.fitness = fitness
 
     return genome
 

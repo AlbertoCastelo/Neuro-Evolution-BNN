@@ -12,6 +12,7 @@ from neat.evaluation.utils import get_dataset
 from neat.evolution_operators.backprop_mutation import BackPropMutation, BACKPROP_MUTATION
 from neat.evolution_operators.crossover import Crossover
 from neat.evolution_operators.mutation import RandomMutation, ArchitectureMutation, RANDOM_MUTATION
+from neat.finetuning import FineTuner
 from neat.genome import Genome
 from neat.reporting.reports_pyneat import EvolutionReport
 from neat.species import SpeciationEngine, FixSpeciationEngine
@@ -62,14 +63,18 @@ class EvolutionEngine:
 
             elapsed = time.perf_counter() - self.start_time
             if elapsed > 3600:
-                raise Exception
+                end_condition = 'timeout'
+                break
+
+        if self.evolution_configuration.is_fine_tuning:
+            fine_tuner = FineTuner(species=self.speciation_engine.species, config=self.evolution_configuration)
+            fine_tuner.run()
+            best_genomes = fine_tuner.species_best_genome
+            # best_genomes = self.evaluation_engine.evaluate(population=best_genomes)
+            self.report.report_fine_tuning(best_genomes)
 
         self.evaluation_engine.close()
-        # except Exception as e:
-        #     end_condition = 'exception'
-        #     logger.exception(str(e))
-        #     self.notifier.send(str(e))
-        # finally:
+
         self.report.generate_final_report(end_condition=end_condition)\
                    .persist_report()
         self.report.persist_logs()
@@ -83,11 +88,12 @@ class EvolutionEngine:
         self.population = self.population_engine.reproduce(species=self.speciation_engine.species,
                                                            pop_size=self.population_engine.pop_size,
                                                            generation=generation)
-        # create new species based on new population
-        self.speciation_engine.speciate(self.population, generation=generation)
 
         # evaluate
         self.population = self.evaluation_engine.evaluate(population=self.population)
+
+        # create new species based on new population
+        self.speciation_engine.speciate(self.population, generation=generation)
 
         # generation report
         self.report.report_new_generation(generation=generation,
@@ -114,7 +120,6 @@ class PopulationEngine:
         self.stagnation_engine = stagnation_engine
         self.crossover = Crossover()
         self.architecture_mutation = ArchitectureMutation()
-
 
         self.config = get_configuration()
         self.mutation_type = self.config.mutation_type

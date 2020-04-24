@@ -34,3 +34,11 @@ class TestIntegrationNeat(TestCase):
 
         evolution_engine = EvolutionEngine(report=self.report, notifier=self.notifier)
         evolution_engine.run()
+
+    def test_final_fine_tuning(self):
+        self.config.mutation_type = RANDOM_MUTATION
+        self.config.is_fine_tuning = True
+        self.config.parallel_evaluation = False
+        self.config.epochs_fine_tuning = 2
+        evolution_engine = EvolutionEngine(report=self.report, notifier=self.notifier)
+        evolution_engine.run()
