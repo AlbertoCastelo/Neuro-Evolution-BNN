@@ -8,6 +8,8 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network im
 from neat.representation_mapping.network_to_genome.stochastic_network_to_genome import \
     convert_stochastic_network_to_genome
 
+BACKPROP_MUTATION = 'backprop_mutation'
+
 
 class BackPropMutation:
     def __init__(self, dataset, n_samples, problem_type, beta, n_epochs, weight_decay=0.0005, lr=0.01):

@@ -1,9 +1,12 @@
 from unittest import TestCase
-
-from neat.evolution_operators.mutation import Mutation, exist_cycle, adds_multihop_jump
+import os
+from config_files.configuration_utils import create_configuration
+from neat.evolution_operators.mutation import exist_cycle, adds_multihop_jump, ArchitectureMutation
 from neat.genome import Genome
-from config_files import create_configuration
+from neat.neat_logger import get_neat_logger
 from tests.utils.generate_genome import generate_genome_with_hidden_units
+LOGS_PATH = f'{os.getcwd()}/'
+logger = get_neat_logger(path=LOGS_PATH)
 
 
 class TestArchitectureMutationAddNode(TestCase):
@@ -17,7 +20,7 @@ class TestArchitectureMutationDeleteConnection(TestCase):
         self.config.n_initial_hidden_neurons = 0
         genome = Genome(key='foo').create_random_genome()
 
-        possible_connections_to_delete = set(Mutation._calculate_possible_connections_to_delete(genome=genome))
+        possible_connections_to_delete = set(ArchitectureMutation._calculate_possible_connections_to_delete(genome=genome))
         expected_possible_connections_to_delete = {(-1, 0), (-2, 0)}
         self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
 
@@ -26,7 +29,7 @@ class TestArchitectureMutationDeleteConnection(TestCase):
         self.config.n_initial_hidden_neurons = 1
         genome = Genome(key='foo').create_random_genome()
 
-        possible_connections_to_delete = set(Mutation._calculate_possible_connections_to_delete(genome=genome))
+        possible_connections_to_delete = set(ArchitectureMutation._calculate_possible_connections_to_delete(genome=genome))
         expected_possible_connections_to_delete = {(-1, 1), (-2, 1), (1, 0)}
         self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
 
@@ -36,7 +39,7 @@ class TestArchitectureMutationDeleteConnection(TestCase):
         self.config.n_input = 1
         genome = Genome(key='foo').create_random_genome()
 
-        possible_connections_to_delete = set(Mutation._calculate_possible_connections_to_delete(genome=genome))
+        possible_connections_to_delete = set(ArchitectureMutation._calculate_possible_connections_to_delete(genome=genome))
         expected_possible_connections_to_delete = {(-1, 1), (1, 0)}
         self.assertSetEqual(expected_possible_connections_to_delete, possible_connections_to_delete)
 
@@ -49,9 +52,9 @@ class TestArchitectureMutation(TestCase):
                                                    n_hidden=3)
         out_node = genome.node_genes[0]
 
-        possible_inputs = list(Mutation._calculate_possible_inputs_when_adding_connection(genome=genome,
-                                                                                          out_node_key=out_node.key,
-                                                                                          config=self.config))
+        possible_inputs = list(ArchitectureMutation._calculate_possible_inputs_when_adding_connection(genome=genome,
+                                                                                                      out_node_key=out_node.key,
+                                                                                                      config=self.config))
         expected_possible_inputs = [-2, -1]
         self.assertEqual(expected_possible_inputs, possible_inputs)
 
@@ -63,8 +66,8 @@ class TestArchitectureMutation(TestCase):
         possible_connection_set = {(1, 2), (2, 2), (2, 3)}
 
         possible_connection_set = \
-            Mutation._remove_connection_that_introduces_multihop_jumps(genome=genome,
-                                                                       possible_connection_set=possible_connection_set)
+            ArchitectureMutation._remove_connection_that_introduces_multihop_jumps(genome=genome,
+                                                                                   possible_connection_set=possible_connection_set)
         expected_possible_connection_set = set()
         self.assertSetEqual(possible_connection_set, expected_possible_connection_set)
 
@@ -76,8 +79,8 @@ class TestArchitectureMutation(TestCase):
         possible_connection_set = {(1, 2), (2, 2), (2, 3)}
 
         possible_connection_set = \
-            Mutation._remove_connection_that_introduces_cycles(genome=genome,
-                                                               possible_connection_set=possible_connection_set)
+            ArchitectureMutation._remove_connection_that_introduces_cycles(genome=genome,
+                                                                           possible_connection_set=possible_connection_set)
         expected_possible_connection_set = {(1, 2), (2, 3)}
         self.assertSetEqual(possible_connection_set, expected_possible_connection_set)
 

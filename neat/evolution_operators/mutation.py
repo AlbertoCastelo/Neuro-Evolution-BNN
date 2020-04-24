@@ -1,4 +1,3 @@
-import numpy as np
 import itertools
 import random
 
@@ -9,17 +8,20 @@ from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.graph_utils import adds_multihop_jump, exist_cycle
 from neat.utils import timeit
 
+RANDOM_MUTATION = 'random_mutation'
+
 
 class Mutation:
+    def mutate(self, genome: Genome):
+        raise NotImplemented
 
+
+class ArchitectureMutation(Mutation):
     def __init__(self):
         self.config = get_configuration()
 
         self.fix_architecture = self.config.fix_architecture
         self.single_structural_mutation = self.config.single_structural_mutation
-        self.mutate_rate = self.config.mutate_rate
-        self.mutate_power = self.config.mutate_power
-        self.replace_rate = self.config.replace_rate
 
         self.architecture_mutation_power = self.config.architecture_mutation_power
         self.node_add_prob = self.config.node_add_prob
@@ -32,17 +34,7 @@ class Mutation:
         if not self.config.fix_architecture:
             genome = self._mutate_architecture(genome)
 
-        self._mutate_weights_and_biases(genome)
         return genome
-
-    @timeit
-    def _mutate_weights_and_biases(self, genome):
-        # Mutate connection genes.
-        for key in genome.connection_genes.keys():
-            genome.connection_genes[key].mutate()
-        # Mutate node genes (bias, response, etc.).
-        for key in genome.node_genes.keys():
-            genome.node_genes[key].mutate()
 
     @timeit
     def _mutate_architecture(self, genome: Genome):
@@ -178,7 +170,7 @@ class Mutation:
 
         if connection_add_prob > 0:
             possible_connections_to_delete_set = \
-                Mutation._remove_connection_that_introduces_cycles(
+                ArchitectureMutation._remove_connection_that_introduces_cycles(
                     genome=genome,
                     possible_connection_set=possible_connections_to_delete_set)
 
@@ -209,8 +201,8 @@ class Mutation:
 
         # remove possible connections that introduce cycles
         possible_connection_set = \
-            Mutation._remove_connection_that_introduces_cycles(genome=genome,
-                                                               possible_connection_set=possible_connection_set)
+            ArchitectureMutation._remove_connection_that_introduces_cycles(genome=genome,
+                                                                           possible_connection_set=possible_connection_set)
 
         # # remove possible connections that introduce multihop jumps
         # possible_connection_set = \
@@ -249,3 +241,23 @@ class Mutation:
                 connections_to_remove.append(connection)
         possible_connection_set -= set(connections_to_remove)
         return possible_connection_set
+
+
+class RandomMutation(Mutation):
+
+    def __init__(self):
+        self.config = get_configuration()
+
+    @timeit
+    def mutate(self, genome: Genome):
+        self._mutate_weights_and_biases(genome)
+        return genome
+
+    @timeit
+    def _mutate_weights_and_biases(self, genome):
+        # Mutate connection genes.
+        for key in genome.connection_genes.keys():
+            genome.connection_genes[key].mutate()
+        # Mutate node genes (bias, response, etc.).
+        for key in genome.node_genes.keys():
+            genome.node_genes[key].mutate()
