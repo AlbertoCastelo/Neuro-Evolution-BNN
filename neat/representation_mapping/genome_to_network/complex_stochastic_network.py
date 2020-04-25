@@ -87,7 +87,7 @@ class ComplexStochasticNetwork(nn.Module):
                             DEFAULT_LOGVAR
 
 
-def equal(network_1, network_2):
+def equal(network_1, network_2, skip_logvar=True):
     if network_1.n_layers != network_2.n_layers:
         return False
 
@@ -98,12 +98,14 @@ def equal(network_1, network_2):
         # check weights and biases are equal
         if not torch.allclose(layer_self.qw_mean, layer_other.qw_mean, atol=1e-03):
             return False
-        if not torch.allclose(layer_self.qw_logvar, layer_other.qw_logvar, atol=1e-03):
-            return False
         if not torch.allclose(layer_self.qb_mean, layer_other.qb_mean, atol=1e-03):
             return False
-        if not torch.allclose(layer_self.qb_logvar, layer_other.qb_logvar, atol=1e-03):
-            return False
+
+        if not skip_logvar:
+            if not torch.allclose(layer_self.qw_logvar, layer_other.qw_logvar, atol=1e-03):
+                return False
+            if not torch.allclose(layer_self.qb_logvar, layer_other.qb_logvar, atol=1e-03):
+                return False
 
     return True
 

@@ -37,7 +37,8 @@ class FineTuner:
         network = stg_trainer.network
 
         return convert_stochastic_network_to_genome(network=network, original_genome=genome,
-                                                    fitness=-stg_trainer.final_loss)
+                                                    fitness=-stg_trainer.final_loss,
+                                                    fix_std=genome.genome_config.fix_std)
 
     def _get_dataset(self):
         return get_dataset(dataset=self.config.dataset, train_percentage=self.config.train_percentage,

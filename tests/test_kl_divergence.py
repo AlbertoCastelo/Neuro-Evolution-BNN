@@ -3,9 +3,9 @@ from unittest import TestCase
 import torch
 from torch.distributions import MultivariateNormal, kl_divergence, Normal
 
+from config_files.configuration_utils import get_config_files_path
 from neat.configuration import get_configuration
 from neat.fitness.kl_divergence import get_qw, get_pw, compute_kl_qw_pw, compute_kl_qw_pw_by_sum
-from config_files import get_config_files_path
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 
 

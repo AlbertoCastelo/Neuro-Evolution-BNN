@@ -80,6 +80,7 @@ class TestIntegrationMutation(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/classification-miso.json')
         self.config.node_activation = 'identity'
+        self.config.fix_std = False
 
     def test_loss_is_equal_when_no_jumps(self):
         connections = ((-1, 2), (-2, 2), (2, 0), (2, 1))
@@ -87,7 +88,7 @@ class TestIntegrationMutation(TestCase):
                                              connection_weights=(1.0, 2.0, 3.0, 0.5))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0,
                               random_state=self.config.dataset_random_state)
-        n_samples = 100
+        n_samples = 1
         backprop_mutation = BackPropMutation(dataset=dataset,
                                              n_samples=n_samples,
                                              problem_type=self.config.problem_type,
