@@ -50,7 +50,8 @@ class StandardTrainer:
             # self.network.clear_non_existing_weights()  # zero_grad for those unexistent parameters
             self.optimizer.step()  # Optimizer update
             # self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
-            if epoch % 10 == 0:
+            if epoch % 200 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
         self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
         self.final_loss = loss.item()
+        print(f'Final Epoch = {epoch}. Error: {self.final_loss}')

@@ -176,11 +176,12 @@ def generate_layer_masks(layers: dict, genome: Genome, fix_std: bool):
     for layer_index, layer in layers.items():
         tensor_sizes = len(layer.output_keys), len(layer.input_keys)
         mask_mean = torch.ones(tensor_sizes)
-        mask_logvar_mul = torch.ones(tensor_sizes)
+
         if fix_std:
-            mask_logvar_mul *= DEFAULT_LOGVAR
-            mask_logvar_add = torch.zeros(tensor_sizes)
+            mask_logvar_mul = torch.zeros(tensor_sizes)
+            mask_logvar_add = DEFAULT_LOGVAR * torch.ones(tensor_sizes)
         else:
+            mask_logvar_mul = torch.ones(tensor_sizes)
             mask_logvar_add = torch.zeros(tensor_sizes)
         for connection_input_index, input_node_key in enumerate(layer.input_keys):
             for connection_output_index, output_node_key in enumerate(layer.output_keys):

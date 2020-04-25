@@ -12,6 +12,9 @@ from neat.neat_logger import get_neat_logger
 DATASET = 'iris'
 
 config = create_configuration(filename=f'/{DATASET}.json')
+config.noise = 0.5
+
+
 # config.n_output = 3
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
