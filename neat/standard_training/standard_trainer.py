@@ -52,5 +52,5 @@ class StandardTrainer:
             # self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_epoch}')
-
+        self.network.clear_non_existing_weights(clear_grad=False)  # reset non-existing weights
         self.final_loss = loss.item()

@@ -4,7 +4,7 @@ import os
 
 from config_files.configuration_utils import create_configuration
 from neat.neat_logger import get_neat_logger
-from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork, equal
 
 from neat.representation_mapping.network_to_genome.stochastic_network_to_genome import \
     convert_stochastic_network_to_genome
@@ -47,7 +47,9 @@ class TestStochasticNetwork2Genome(TestCase):
         network = ComplexStochasticNetwork(genome=original_genome)
         new_genome = convert_stochastic_network_to_genome(network=network, original_genome=original_genome)
 
+        new_network = ComplexStochasticNetwork(genome=new_genome)
         self.assertEqual(original_genome, new_genome)
+        self.assertTrue(equal(network, new_network))
 
     @skip('Does not apply now')
     def test_genome_conversion_fails_when_some_parameter_is_different(self):

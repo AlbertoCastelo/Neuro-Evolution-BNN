@@ -7,7 +7,8 @@ from neat.evaluation.utils import get_dataset
 from neat.evolution_operators.backprop_mutation import BackPropMutation
 from neat.genome import Genome
 from neat.loss.vi_loss import get_loss
-from neat.representation_mapping.genome_to_network.complex_stochastic_network import DEFAULT_LOGVAR
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import DEFAULT_LOGVAR, \
+    ComplexStochasticNetwork, equal
 from tests.representation_mapping.genome_to_network.test_complex_stochastic_network import generate_genome_given_graph
 
 
@@ -119,9 +120,12 @@ class TestIntegrationMutation(TestCase):
                                              n_samples=10,
                                              problem_type=self.config.problem_type,
                                              beta=0.0,
-                                             n_epochs=2)
+                                             n_epochs=5)
         genome_mutated = backprop_mutation.mutate(genome)
+        network_mutated = ComplexStochasticNetwork(genome=genome_mutated)
+
         self.assertEqual(type(genome_mutated), Genome)
+        self.assertTrue(equal(backprop_mutation.network, network_mutated))
 
     def test_non_existing_connections_are_updated_2(self):
         connections = ((-1, 1), (-2, 1))
@@ -134,4 +138,7 @@ class TestIntegrationMutation(TestCase):
                                              beta=0.0,
                                              n_epochs=20)
         genome_mutated = backprop_mutation.mutate(genome)
+        network_mutated = ComplexStochasticNetwork(genome=genome_mutated)
+
         self.assertEqual(type(genome_mutated), Genome)
+        self.assertTrue(equal(backprop_mutation.network, network_mutated))
