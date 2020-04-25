@@ -1,6 +1,9 @@
 {
   "parallel_evaluation": true,
   "n_processes": 10,
+  "is_fine_tuning": true,
+  "epochs_fine_tuning": 2000,
+
   "is_discrete": true,
   "is_gpu": false,
   "train_percentage": 0.9,
@@ -20,6 +23,8 @@
 
   "dataset": "mnist_downsampled",
   "dataset_random_state": 35,
+  "noise": 0.0,
+  "initial_genome_filename": null,
   "n_generations": 200,
   "generation_fix_architecture": 150,
   "node_activation": "tanh",
@@ -86,6 +91,7 @@
   "min_species_size": 2,
 
   "single_structural_mutation": false,
+  "mutation_type": "random_mutation",
   "mutate_power": 0.5,
   "mutate_rate": 0.8,
   "replace_rate": 0.1,

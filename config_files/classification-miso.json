@@ -1,6 +1,8 @@
 {
   "parallel_evaluation": true,
   "n_processes": 12,
+  "is_fine_tuning": true,
+  "epochs_fine_tuning": 2000,
   "is_discrete": false,
   "is_gpu": false,
   "train_percentage": 0.9,
@@ -90,6 +92,7 @@
   "min_species_size": 2,
 
   "single_structural_mutation": false,
+  "mutation_type": "random_mutation",
   "mutate_power": 0.5,
   "mutate_rate": 0.8,
   "replace_rate": 0.1,

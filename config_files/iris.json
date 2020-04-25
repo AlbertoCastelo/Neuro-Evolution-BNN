@@ -42,13 +42,13 @@
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
-  "bias_mean_max_value": 1.0,
-  "bias_mean_min_value": -1.0,
+  "bias_mean_max_value": 10.0,
+  "bias_mean_min_value": -10.0,
   "bias_mean_prior": 0.0,
 
   "bias_std_init_mean": 0.001,
   "bias_std_init_std": 0.0,
-  "bias_std_max_value": 0.5,
+  "bias_std_max_value": 2.0,
   "bias_std_min_value": 0.000001,
   "bias_std_prior": 1.0,
 
@@ -71,13 +71,13 @@
 
   "weight_mean_init_mean": 0,
   "weight_mean_init_std": 1,
-  "weight_mean_max_value": 1.0,
-  "weight_mean_min_value": -1.0,
+  "weight_mean_max_value": 10.0,
+  "weight_mean_min_value": -10.0,
   "weight_mean_prior": 0.0,
 
   "weight_std_init_mean": 0.001,
   "weight_std_init_std": 0,
-  "weight_std_max_value": 0.5,
+  "weight_std_max_value": 2.0,
   "weight_std_min_value": 0.000001,
   "weight_std_prior": 1.0,
 
