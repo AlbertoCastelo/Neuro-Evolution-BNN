@@ -86,6 +86,29 @@ class ComplexStochasticNetwork(nn.Module):
                         stochastic_linear_layer.qw_logvar[connection_output_index, connection_input_index] = \
                             DEFAULT_LOGVAR
 
+    def __eq__(self, other):
+        if self.n_layers != other.n_layers:
+            return False
+
+        for i in range(self.n_layers):
+            layer_self = getattr(self, f'layer_{i}')
+            layer_other = getattr(other, f'layer_{i}')
+
+            # check weights and biases are equal
+            if not torch.allclose(layer_self.qw_mean, layer_other.qw_mean, atol=1e-03):
+                return False
+            if not torch.allclose(layer_self.qw_logvar, layer_other.qw_logvar, atol=1e-03):
+                return False
+            if not torch.allclose(layer_self.qb_mean, layer_other.qb_mean, atol=1e-03):
+                return False
+            if not torch.allclose(layer_self.qb_logvar, layer_other.qb_logvar, atol=1e-03):
+                return False
+
+
+
+        return True
+
+
 
 @timeit
 def transform_genome_to_layers(genome: Genome) -> dict:
