@@ -10,7 +10,7 @@ class TestClassificationExample1Dataset(TestCase):
         pass
 
     def test__get_x_y(self):
-        dataset = ClassificationExample1Dataset()
+        dataset = ClassificationExample1Dataset(train_percentage=0.5, noise=0.0)
         x = np.zeros((3, 2))
         x[1][1] = 6.0
         x[2][0] = 2.0
@@ -21,7 +21,7 @@ class TestClassificationExample1Dataset(TestCase):
         self.assertEqual(type(y), np.ndarray)
 
     def test_generate_data(self):
-        dataset = ClassificationExample1Dataset()
+        dataset = ClassificationExample1Dataset(train_percentage=0.5, noise=0.0)
         dataset.generate_data()
 
         x = dataset.x

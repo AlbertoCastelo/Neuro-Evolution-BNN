@@ -10,7 +10,7 @@ from neat.dataset.abstract import NeatTestingDataset
 
 class MNISTDataset(NeatTestingDataset, MNIST):
 
-    def __init__(self, train_percentage, dataset_type='train', random_state=42):
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0):
         self.x = None
         self.y = None
         self.train = False
@@ -25,7 +25,7 @@ class MNISTDataset(NeatTestingDataset, MNIST):
         path = ''.join([os.path.dirname(os.path.realpath(__file__)), '/data/mnist'])
         MNIST.__init__(self, root=path, train=self.train, download=True, transform=self.transform)
         NeatTestingDataset.__init__(self, train_percentage=train_percentage, dataset_type=dataset_type,
-                                    random_state=random_state)
+                                    random_state=random_state, noise=noise)
 
     def generate_data(self):
         def _data_generator(x_data: torch.Tensor):

@@ -116,6 +116,7 @@ class TestRepresentationFeedForwardWithoutHiddenLayers(TestCase):
 
 class TestRepresentationFeedForwardWithOneHiddenLayers(TestCase):
 
+    @skip('Not mantained')
     def test_network_structure(self):
         genome_sample = generate_feedforward_with_one_hidden_unit()
 

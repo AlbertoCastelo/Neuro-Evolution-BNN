@@ -44,3 +44,4 @@ class TestIntegrationNeat(TestCase):
         self.config.epochs_fine_tuning = 2
         evolution_engine = EvolutionEngine(report=self.report, notifier=self.notifier)
         evolution_engine.run()
+
