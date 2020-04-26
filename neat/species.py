@@ -278,6 +278,15 @@ class Specie:
     def get_fitnesses(self):
         return [m.fitness for m in self.members.values()]
 
+    def get_fittest(self):
+        best_genome_key = -1
+        best_genome_fitness = -1000000
+        for genome_key, genome in self.members.items():
+            if genome.fitness > best_genome_fitness:
+                best_genome_key = genome_key
+                best_genome_fitness = genome.fitness
+        return self.members.get(best_genome_key)
+
 
 class DistanceCalculation:
     def __init__(self):

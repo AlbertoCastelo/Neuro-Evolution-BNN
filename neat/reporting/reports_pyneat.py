@@ -91,7 +91,8 @@ class EvolutionReport:
         dataset = get_dataset(config.dataset,
                               train_percentage=config.train_percentage,
                               testing=False,
-                              random_state=config.dataset_random_state)
+                              random_state=config.dataset_random_state,
+                              noise=config.noise)
         loss = get_loss(problem_type=config.problem_type)
         x, y_true, y_pred, loss_value = evaluate_genome(genome=self.best_individual,
                                                         dataset=dataset,
