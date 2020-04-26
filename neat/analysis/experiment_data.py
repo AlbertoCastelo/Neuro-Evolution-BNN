@@ -52,7 +52,7 @@ class ExperimentData:
             print(f'Train percentage: {config.train_percentage}')
             print(f'Random state: {config.dataset_random_state}')
             dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=True,
-                                  random_state=config.dataset_random_state)
+                                  random_state=config.dataset_random_state, noise=config.noise)
 
             x, y_true, y_pred, loss_value = evaluate_genome(genome=genome,
                                                             dataset=dataset,

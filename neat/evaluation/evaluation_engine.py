@@ -35,7 +35,6 @@ class EvaluationStochasticEngine:
             return int(self.config.n_processes)
         return min(cpu_count() // 2, 8)
 
-
     @timeit
     def evaluate(self, population: dict):
         '''

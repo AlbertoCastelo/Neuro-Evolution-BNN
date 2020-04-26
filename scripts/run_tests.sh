@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-pytest
+# still a problem testing parallel evaluation
+
+pytest tests/

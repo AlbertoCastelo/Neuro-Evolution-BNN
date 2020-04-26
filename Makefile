@@ -10,6 +10,9 @@ build: create-networks
 shell: build
 	cd docker && (docker-compose run --service-ports $(SERVICE) /bin/bash) ;
 
+test: build
+	cd docker && (docker-compose run --service-ports $(SERVICE) /bin/bash scripts/run_tests.sh) ;
+
 jupyter: build
 	cd docker && (docker-compose run --service-ports $(SERVICE) )
 
