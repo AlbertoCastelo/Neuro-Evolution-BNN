@@ -248,7 +248,7 @@ class ComplexStochasticLinear(nn.Module):
         # q_logvar_init: float, the approximate posterior is currently always a factorized gaussian
         super(ComplexStochasticLinear, self).__init__()
         self.is_trainable = is_trainable
-
+        self.masks = masks
         self.in_features = in_features
         self.out_features = out_features
         self.is_cuda = is_cuda
@@ -293,9 +293,10 @@ class ComplexStochasticLinear(nn.Module):
                 self.log_alpha = Parameter(self.log_alpha)
 
         # prepare masks: needed to simulate non-existing connections (resets connections values to 0.0)
-        self.mask_mean = masks.mask_mean
-        self.mask_logvar_mul = masks.mask_logvar_mul
-        self.mask_logvar_add = masks.mask_logvar_add
+        if masks is not None:
+            self.mask_mean = masks.mask_mean
+            self.mask_logvar_mul = masks.mask_logvar_mul
+            self.mask_logvar_add = masks.mask_logvar_add
 
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters
@@ -349,8 +350,12 @@ class ComplexStochasticLinear(nn.Module):
         #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
 
         # needed if we apply mask. Otherwise can be removed.
-        qw_logvar = self.qw_logvar * self.mask_logvar_mul + self.mask_logvar_add
-        qw_mean = self.qw_mean * self.mask_mean
+        if self.masks:
+            qw_logvar = self.qw_logvar * self.mask_logvar_mul + self.mask_logvar_add
+            qw_mean = self.qw_mean * self.mask_mean
+        else:
+            qw_logvar = self.qw_logvar
+            qw_mean = self.qw_mean
 
         batch_size = x.shape[0]
 
@@ -373,7 +378,12 @@ class ComplexStochasticLinear(nn.Module):
         output = 1e-8 + x_w_mu + x_w_var * w_samples + \
                  b_mu + b_var * b_samples
 
-        return output
+        # calculate KL(q(theta)||p(theta))
+        kl_qw_pw = self.get_kl_qw_pw(torch.sqrt(qb_var), torch.sqrt(qw_var))
+        if self.is_cuda:
+            kl_qw_pw = kl_qw_pw.cuda()
+
+        return output, kl_qw_pw
 
     def get_kl_qw_pw(self, qb_std, qw_std):
         kl_qw_pw = 0.0

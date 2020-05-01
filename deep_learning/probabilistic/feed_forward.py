@@ -1,6 +1,6 @@
 from torch import nn
 
-from neat.representation_mapping.genome_to_network.layers import StochasticLinear
+from neat.representation_mapping.genome_to_network.layers import StochasticLinear, ComplexStochasticLinear
 from neat.representation_mapping.genome_to_network.utils import get_activation
 
 
@@ -17,7 +17,8 @@ class ProbabilisticFeedForward(nn.Module):
         # hidden layers
         for i in range(n_hidden_layers, 0, -1):
             # layer = nn.Linear(in_features=in_features, out_features=n_neurons_per_layer)
-            layer = StochasticLinear(in_features=in_features, out_features=n_neurons_per_layer, is_cuda=is_cuda)
+            layer = ComplexStochasticLinear(in_features=in_features, out_features=n_neurons_per_layer,
+                                            is_cuda=is_cuda)
             setattr(self, f'layer_{i}', layer)
             setattr(self, f'activation_{i}', self.activation)
             in_features = n_neurons_per_layer

@@ -42,7 +42,8 @@ class ComplexStochasticNetwork(nn.Module):
             for index_needed in self.layers[i].indices_of_needed_nodes:
                 chunks.append(self._cache[index_needed])
             x = torch.cat(chunks, 1)
-            x = getattr(self, f'layer_{i}')(x)
+            x, kl_qw_pw_layer = getattr(self, f'layer_{i}')(x)
+            kl_qw_pw += kl_qw_pw_layer
             if i > 0:
                 x = getattr(self, f'activation_{i}')(x)
         return x, kl_qw_pw
