@@ -57,14 +57,16 @@ class EvaluateProbabilisticDL:
         for epoch in range(self.n_epochs):
             loss_train = self._train_one(x_train, y_train)
             if epoch % 10 == 0:
-                print(f'Epoch = {epoch}. Error: {loss_train}')
+                # print(f'Epoch = {epoch}. Error: {loss_train}')
                 _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
 
                 if loss_val < self.best_loss_val:
 
                     self.best_loss_val = loss_val
                     self.best_network_state = copy.deepcopy(self.network.state_dict())
-                    print(f'New best network: {loss_val}')
+                    # print(f'New best network: {loss_val}')
+        print(f'Final Train Error: {loss_train}')
+        print(f'Best Val Error: {loss_val}')
 
     def _initialize(self):
         self.dataset.generate_data()
