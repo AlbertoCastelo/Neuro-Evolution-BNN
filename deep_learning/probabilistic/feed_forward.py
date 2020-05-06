@@ -16,27 +16,25 @@ class ProbabilisticFeedForward(nn.Module):
 
         # hidden layers
         for i in range(n_hidden_layers, 0, -1):
-            # layer = nn.Linear(in_features=in_features, out_features=n_neurons_per_layer)
             layer = ComplexStochasticLinear(in_features=in_features, out_features=n_neurons_per_layer,
                                             is_cuda=is_cuda)
             setattr(self, f'layer_{i}', layer)
             setattr(self, f'activation_{i}', self.activation)
             in_features = n_neurons_per_layer
 
-        # output layer
-        # print(in_features)
-        # print(n_output)
         layer = StochasticLinear(in_features=in_features, out_features=n_output, is_cuda=is_cuda)
         setattr(self, f'layer_0', layer)
+
+    def reset_parameters(self):
+        # hidden layers
+        for i in range(self.n_hidden_layers, -1, -1):
+            getattr(self, f'layer_{i}').reset_parameters()
 
     def forward(self, x):
         kl_qw_pw = 0.0
         start_index = self.n_layers
         for i in range(start_index, -1, -1):
-            # print(f'Calculating layer {i}')
             x, kl_layer = getattr(self, f'layer_{i}')(x)
-            # print(x)
-            # print(kl_layer)
             kl_qw_pw += kl_layer
             if i > 0:
                 x = getattr(self, f'activation_{i}')(x)

@@ -10,20 +10,23 @@ import matplotlib.pyplot as plt
 from neat.evaluation.utils import get_dataset
 
 # dataset_name = 'classification-miso'
-dataset_name = 'iris'
+# dataset_name = 'iris'
+dataset_name = 'mnist_downsampled'
+
 config = create_configuration(filename=f'/{dataset_name}.json')
-config.noise = 1.0
-config.train_percentage = 0.75
-config.n_samples = 100
+config.noise = 0.0
+# config.n_input = 64
+# config.n_output = 10
+
+config.n_samples = 1
 # network_filename = f'network-probabilistic-classification.pt'
 dataset = get_dataset(dataset=config.dataset,
                       train_percentage=config.train_percentage,
                       random_state=config.dataset_random_state,
                       noise=config.noise)
 
-is_cuda = False
+is_cuda = True
 
-n_samples = 100
 lr = 0.01
 weight_decay = 0.0005
 n_epochs = 500
@@ -36,7 +39,7 @@ if is_cuda:
 
 evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     batch_size=batch_size,
-                                    n_samples=n_samples,
+                                    n_samples=config.n_samples,
                                     lr=lr,
                                     weight_decay=weight_decay,
                                     n_epochs=n_epochs,
