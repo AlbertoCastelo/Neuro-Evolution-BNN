@@ -10,9 +10,10 @@ class FineTuner:
     '''
     Given a population or species, it will fine tune the most promising models and select the best
     '''
-    def __init__(self, species, config, weight_decay=0.0005, lr=0.01):
+    def __init__(self, species, config, is_cuda=False, weight_decay=0.0005, lr=0.01):
         self.species = species
         self.config = config
+        self.is_cuda = is_cuda
         self.n_epochs = config.epochs_fine_tuning
         self.weight_decay = weight_decay
         self.lr = lr
@@ -34,12 +35,13 @@ class FineTuner:
         stg_trainer = StandardTrainer(dataset=self._get_dataset(), n_samples=self.config.n_samples,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
-                                      n_epochs=self.n_epochs, weight_decay=self.weight_decay, lr=self.lr)
+                                      n_epochs=self.n_epochs, is_cuda=self.is_cuda,
+                                      weight_decay=self.weight_decay, lr=self.lr)
         stg_trainer.train(genome)
-        network = stg_trainer.network
+        network = stg_trainer.get_best_network()
 
         return convert_stochastic_network_to_genome(network=network, original_genome=genome,
-                                                    fitness=-stg_trainer.final_loss,
+                                                    fitness=-stg_trainer.best_loss_val,
                                                     fix_std=genome.genome_config.fix_std)
 
     def _get_dataset(self):

@@ -295,24 +295,7 @@ class Genome:
         return general_data
 
     def __eq__(self, other):
-        # check node keys
-        nodes_self_but_other = set(self.node_genes.keys()) - set(other.node_genes.keys())
-        nodes_other_but_self = set(other.node_genes.keys()) - set(self.node_genes.keys())
-        if nodes_self_but_other != set():
-            print(f'Nodes in self but not in other: {nodes_self_but_other}')
-            return False
-        if nodes_other_but_self != set():
-            print(f'Nodes in other but not in self: {nodes_other_but_self}')
-            return False
-
-        # check connection keys
-        connections_self_but_other = set(self.connection_genes.keys()) - set(other.connection_genes.keys())
-        connections_other_but_self = set(other.connection_genes.keys()) - set(self.connection_genes.keys())
-        if connections_self_but_other != set():
-            print(f'Connections in self but not in other: {connections_self_but_other}')
-            return False
-        if connections_other_but_self != set():
-            print(f'Connections in other but not in self: {connections_other_but_self}')
+        if not self.check_same_architecture(other):
             return False
 
         # check Bias values
@@ -339,4 +322,26 @@ class Genome:
             if std_difference != 0.0:
                 print(f'Std difference in Connection')
 
+        return True
+
+    def check_same_architecture(self, other):
+        # check node keys
+        nodes_self_but_other = set(self.node_genes.keys()) - set(other.node_genes.keys())
+        nodes_other_but_self = set(other.node_genes.keys()) - set(self.node_genes.keys())
+        if nodes_self_but_other != set():
+            print(f'Nodes in self but not in other: {nodes_self_but_other}')
+            return False
+        if nodes_other_but_self != set():
+            print(f'Nodes in other but not in self: {nodes_other_but_self}')
+            return False
+
+        # check connection keys
+        connections_self_but_other = set(self.connection_genes.keys()) - set(other.connection_genes.keys())
+        connections_other_but_self = set(other.connection_genes.keys()) - set(self.connection_genes.keys())
+        if connections_self_but_other != set():
+            print(f'Connections in self but not in other: {connections_self_but_other}')
+            return False
+        if connections_other_but_self != set():
+            print(f'Connections in other but not in self: {connections_other_but_self}')
+            return False
         return True

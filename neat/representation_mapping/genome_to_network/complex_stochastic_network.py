@@ -57,7 +57,6 @@ class ComplexStochasticNetwork(nn.Module):
                                                            qb_mean=layer.bias_mean,
                                                            qb_logvar=layer.bias_log_var)
 
-
             layer = ComplexStochasticLinear(in_features=layer.n_input,
                                             out_features=layer.n_output,
                                             parameters=parameters,

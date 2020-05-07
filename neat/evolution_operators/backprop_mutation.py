@@ -17,19 +17,17 @@ class BackPropMutation(Mutation):
         self.n_samples = n_samples
         self.beta = beta
 
-
-        self.network = None
-
     def mutate(self, genome: Genome):
-        if self.network is None:
-            self._mutate(genome)
-        return convert_stochastic_network_to_genome(network=self.network, original_genome=genome,
-                                                    fitness=-self.final_loss, fix_std=genome.genome_config.fix_std)
+        network, final_loss = self._mutate(genome)
+        return convert_stochastic_network_to_genome(network=network, original_genome=genome,
+                                                    fitness=-final_loss, fix_std=genome.genome_config.fix_std)
 
     def _mutate(self, genome: Genome):
         stg_trainer = StandardTrainer(dataset=self.dataset, n_samples=self.n_samples, problem_type=self.problem_type,
                                       beta=self.beta,
-                                      n_epochs=self.n_epochs, weight_decay=self.weight_decay, lr=self.lr)
+                                      n_epochs=self.n_epochs, is_cuda=False,
+                                      weight_decay=self.weight_decay, lr=self.lr)
         stg_trainer.train(genome)
-        self.network = stg_trainer.network
-        self.final_loss = stg_trainer.final_loss
+        network = stg_trainer.get_best_network()
+        final_loss = stg_trainer.best_loss_val
+        return network, final_loss

@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 import torch
 
@@ -6,6 +6,7 @@ from neat.dataset.classification_xray_binary import XRayBinary
 
 
 class TestXRayBinary(TestCase):
+    @skip
     def test_generate_data(self):
         dataset = XRayBinary(train_percentage=0.5, dataset_type='test', is_debug=True)
         dataset.generate_data()

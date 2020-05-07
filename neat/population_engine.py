@@ -26,9 +26,10 @@ WEIGHT_DECAY = 0.0005
 
 class EvolutionEngine:
 
-    def __init__(self, report: EvolutionReport, notifier: Notifier):
+    def __init__(self, report: EvolutionReport, notifier: Notifier, is_cuda: bool = False):
         self.report = report
         self.notifier = notifier
+        self.is_cuda = is_cuda
 
         self.population_engine = PopulationEngine(stagnation_engine=Stagnation())
         # self.speciation_engine = SpeciationEngine()
@@ -67,7 +68,8 @@ class EvolutionEngine:
                 break
 
         if self.evolution_configuration.is_fine_tuning:
-            fine_tuner = FineTuner(species=self.speciation_engine.species, config=self.evolution_configuration)
+            fine_tuner = FineTuner(species=self.speciation_engine.species, config=self.evolution_configuration,
+                                   is_cuda=self.is_cuda)
             fine_tuner.run()
             best_genomes = fine_tuner.species_best_genome
             # best_genomes = self.evaluation_engine.evaluate(population=best_genomes)
