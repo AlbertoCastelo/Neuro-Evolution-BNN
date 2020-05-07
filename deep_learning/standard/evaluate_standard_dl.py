@@ -22,9 +22,6 @@ class EvaluateStandardDL:
         self.n_hidden_layers = n_hidden_layers
 
     def run(self):
-        # self.dataset.generate_data()
-        # self.data_loader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, num_workers=4)
-
         self.network = FeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
                                    n_neurons_per_layer=self.n_neurons_per_layer,
                                    n_hidden_layers=self.n_hidden_layers)
@@ -46,13 +43,13 @@ class EvaluateStandardDL:
                                                n_output=self.config.n_output,
                                                n_samples=1)
 
+        if self.is_cuda:
+            x_batch = x_batch.cuda()
+            y_batch = y_batch.cuda()
         # train
         for epoch in range(self.n_epochs):
             # with torch.no_grad():
             loss_epoch = 0
-            if self.is_cuda:
-                x_batch.cuda()
-                y_batch.cuda()
             output = self.network(x_batch)
             loss = self.criterion(output, y_batch)
             loss_epoch += loss.data.item()
@@ -78,9 +75,7 @@ class EvaluateStandardDL:
             # y_batch = y_batch.long()
             # print(y_batch.shape)
             # forward pass
-            if self.is_cuda:
-                x_batch.cuda()
-                y_batch.cuda()
+
             output = self.network(x_batch)
             loss = self.criterion(output, y_batch)
             loss_epoch += loss.data.item()
@@ -107,14 +102,18 @@ class EvaluateStandardDL:
                                                n_samples=1)
 
         if self.is_cuda:
-            x_batch.cuda()
-            y_batch.cuda()
+            x_batch = x_batch.cuda()
+
         with torch.no_grad():
             y_pred = self.network(x_batch)
 
-            chunks_x.append(x_batch)
-            chunks_y_pred.append(y_pred)
-            chunks_y_true.append(y_batch)
+        if self.is_cuda:
+            x_batch = x_batch.cpu()
+            y_pred = y_pred.cpu()
+
+        chunks_x.append(x_batch)
+        chunks_y_pred.append(y_pred)
+        chunks_y_true.append(y_batch)
 
         x = torch.cat(chunks_x, dim=0)
         y_pred = torch.cat(chunks_y_pred, dim=0)

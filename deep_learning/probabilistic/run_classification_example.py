@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from config_files.configuration_utils import create_configuration
-from deep_learning.probabilistic.evaluate_prababilistic_dl import EvaluateProbabilisticDL
+from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -16,9 +16,9 @@ dataset_name = 'mnist_downsampled'
 config = create_configuration(filename=f'/{dataset_name}.json')
 config.noise = 0.0
 # config.n_input = 64
-# config.n_output = 10
+config.n_output = 10
 
-config.n_samples = 1
+config.n_samples = 100
 # network_filename = f'network-probabilistic-classification.pt'
 dataset = get_dataset(dataset=config.dataset,
                       train_percentage=config.train_percentage,
@@ -29,7 +29,7 @@ is_cuda = True
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 500
+n_epochs = 5000
 
 batch_size = 50000
 

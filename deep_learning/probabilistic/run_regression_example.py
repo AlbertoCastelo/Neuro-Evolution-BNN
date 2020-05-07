@@ -1,25 +1,31 @@
 import torch
 
-from deep_learning.probabilistic.train_eval import EvaluateProbabilisticDL
+from config_files.configuration_utils import create_configuration
+from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
 from neat.dataset.regression_example import RegressionExample1Dataset
 
-from config_files import create_configuration
 import matplotlib.pyplot as plt
 
-config_file = '/regression-siso.json'
-dataset = RegressionExample1Dataset()
-network_filename = f'network-probabilistic-regression_1.pt'
+from neat.evaluation.utils import get_dataset
 
-
-config = create_configuration(filename=config_file)
+# config_file = '/regression-siso.json'
+dataset_name = 'regression-siso'
+config = create_configuration(filename=f'/{dataset_name}.json')
+config.train_percentage = 0.75
+config.n_samples = 100
+# network_filename = f'network-probabilistic-classification.pt'
+dataset = get_dataset(dataset=config.dataset,
+                      train_percentage=config.train_percentage,
+                      random_state=config.dataset_random_state,
+                      noise=config.noise)
 
 # TODO: fix Memory-leakage in this network when doing backprop
-n_samples = 2
+n_samples = 1000
 is_cuda = False
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 2
+n_epochs = 1000
 
 batch_size = 50000
 
@@ -36,10 +42,11 @@ evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     n_epochs=n_epochs,
                                     n_neurons_per_layer=10,
                                     n_hidden_layers=1,
-                                    is_cuda=is_cuda)
+                                    is_cuda=is_cuda,
+                                    beta=0.0001)
 evaluator.run()
 
-evaluator.save_network(network_filename)
+# evaluator.save_network(network_filename)
 
 # predict
 print('Evaluating')

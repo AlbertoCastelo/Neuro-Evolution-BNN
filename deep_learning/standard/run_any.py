@@ -10,9 +10,12 @@ from neat.evaluation.utils import get_dataset
 from neat.neat_logger import get_neat_logger
 
 DATASET = 'iris'
+DATASET = 'mnist_downsampled'
+
 
 config = create_configuration(filename=f'/{DATASET}.json')
 config.noise = 0.5
+config.train_percentage = 0.75
 
 
 # config.n_output = 3

@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
-from deep_learning.probabilistic.evaluate_prababilistic_dl import EvaluateProbabilisticDL
+from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
 from deep_learning.probabilistic.probabilistic_report import BackpropReport
 from neat.evaluation.utils import get_dataset
 
