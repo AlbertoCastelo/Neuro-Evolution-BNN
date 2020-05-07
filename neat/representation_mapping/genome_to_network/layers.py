@@ -298,6 +298,11 @@ class ComplexStochasticLinear(nn.Module):
             self.mask_logvar_mul = masks.mask_logvar_mul
             self.mask_logvar_add = masks.mask_logvar_add
 
+            if is_cuda:
+                self.mask_mean = self.mask_mean.cuda()
+                self.mask_logvar_mul = self.mask_logvar_mul.cuda()
+                self.mask_logvar_add = self.mask_logvar_add.cuda()
+
     def reset_parameters(self):
         # initialize (trainable) approximate posterior parameters
         stdv = 10. / math.sqrt(self.in_features)

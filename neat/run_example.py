@@ -1,8 +1,7 @@
 import sys
 import random
-
 sys.path.append('./')
-
+import torch
 from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
@@ -26,6 +25,12 @@ class ExecutionRunner:
         LOGS_PATH = f'{os.getcwd()}/'
         logger = get_neat_logger(path=LOGS_PATH)
 
+        is_cuda = False
+        if torch.cuda.is_available():
+            torch.cuda.set_device(0)
+            is_cuda = True
+            print('Using GPU for FineTuning')
+
         report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
         notifier = SlackNotifier.create(channel='batch-jobs')
 
@@ -36,7 +41,7 @@ class ExecutionRunner:
                                      correlation_id=correlation_id)
             notifier.send(f'New job using: node_add_prob={config_parameters}')
             print(report.report.execution_id)
-            evolution_engine = EvolutionEngine(report=report, notifier=notifier)
+            evolution_engine = EvolutionEngine(report=report, notifier=notifier, is_cuda=is_cuda)
             evolution_engine.run()
         except Exception as e:
             print(e)

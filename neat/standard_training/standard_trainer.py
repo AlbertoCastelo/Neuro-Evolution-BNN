@@ -22,7 +22,7 @@ class StandardTrainer:
         self.beta = beta
 
         self.network = None
-        self.loss = None
+        self.criterion = None
         self.optimizer = None
         self.final_loss = None
         self.best_loss_val = 10000
@@ -31,11 +31,11 @@ class StandardTrainer:
     def train(self, genome):
         kl_qw_pw = compute_kl_qw_pw(genome=genome)
         # setup network
-        self.network = ComplexStochasticNetwork(genome=genome, is_trainable=True)
-        self.loss = get_loss(problem_type=self.problem_type)
+        self.network = ComplexStochasticNetwork(genome=genome, is_trainable=True, is_cuda=self.is_cuda)
+        self.criterion = get_loss(problem_type=self.problem_type)
         if self.is_cuda:
             self.network.cuda()
-            self.loss.cuda()
+            self.criterion.cuda()
 
         self.optimizer = Adam(self.network.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         x_batch, y_batch = self.dataset.x_train, self.dataset.y_train
@@ -86,7 +86,7 @@ class StandardTrainer:
     def _train_one(self, x_batch, y_batch, kl_qw_pw):
         # TODO: the kl_qw_pw returned by the network gives problems with backprop.
         output, _ = self.network(x_batch)
-        loss = self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
+        loss = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
         loss_epoch = loss.data.item()
         self.optimizer.zero_grad()
         loss.backward()  # Backward Propagation
@@ -106,7 +106,7 @@ class StandardTrainer:
             output, kl_qw_pw = network(x_batch)
             # output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
             #                                           n_output=genome.n_output, problem_type=problem_type, is_pass=is_pass)
-            loss = self.loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
+            loss = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
             # loss = self.criterion(output, y_batch)
             loss_epoch = loss.data.item()
             chunks_x.append(x_batch)
@@ -134,7 +134,6 @@ class StandardTrainer:
         return x_train, x_val, y_train, y_val
 
     def get_best_network(self):
-        # return self.network
         network = ComplexStochasticNetwork(genome=self.network.genome, is_trainable=True)
         network.load_state_dict(self.best_network_state)
         return network

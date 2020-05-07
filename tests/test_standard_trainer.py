@@ -71,7 +71,7 @@ class TestClearGradients(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/classification-miso.json')
         self.config.node_activation = 'identity'
-        self.n_epochs = 1
+        self.n_epochs = 2
 
     def test_non_existing_connections_are_updated(self):
         genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1), (-1, 1)),

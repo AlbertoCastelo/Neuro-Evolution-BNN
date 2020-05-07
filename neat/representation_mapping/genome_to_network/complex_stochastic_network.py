@@ -13,9 +13,10 @@ DEFAULT_LOGVAR = -33.0
 
 
 class ComplexStochasticNetwork(nn.Module):
-    def __init__(self, genome: Genome, is_trainable=False):
+    def __init__(self, genome: Genome, is_trainable=False, is_cuda=False):
         super(ComplexStochasticNetwork, self).__init__()
         self.is_trainable = is_trainable
+        self.is_cuda = is_cuda
         self.genome = genome
         self.n_output = genome.n_output
         self.n_input = genome.n_input
@@ -61,6 +62,7 @@ class ComplexStochasticNetwork(nn.Module):
                                             out_features=layer.n_output,
                                             parameters=parameters,
                                             masks=layer_masks,
+                                            is_cuda=self.is_cuda,
                                             is_trainable=self.is_trainable)
 
             setattr(self, f'layer_{layer_key}', layer)
