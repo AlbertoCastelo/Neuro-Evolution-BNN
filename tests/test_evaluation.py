@@ -33,6 +33,8 @@ class TestCalculatePredictionDistribution(TestCase):
 
     def test_regression_case(self):
         config = create_configuration(filename='/regression-siso.json')
+        config.parallel_evaluation = False
+
         genome = Genome(key=1)
         genome.create_random_genome()
 

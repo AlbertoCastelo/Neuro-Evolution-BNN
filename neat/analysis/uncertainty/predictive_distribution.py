@@ -93,14 +93,12 @@ class PredictionDistributionEstimator:
 
             row = [i]
             for metric_name, metric in metrics.items():
-                metric_value = metric(results_filtered['y_true'], results_filtered['y_pred'])
+                if metric == f1_score:
+                    metric_value = metric(results_filtered['y_true'], results_filtered['y_pred'], average='weighted')
+                else:
+                    metric_value = metric(results_filtered['y_true'], results_filtered['y_pred'])
                 row.append(metric_value)
-            # if self.config.problem_type == 'classification':
-            #     accuracy = accuracy_score(results_filtered['y_true'], results_filtered['y_pred'])
-            #     f1 = f1_score(results_filtered['y_true'], results_filtered['y_pred'])
-            # elif self.config.problem_type == 'regression':
-            #     mse = mean_squared_error(results_filtered['y_true'], results_filtered['y_pred'])
-            #     mae = mean_absolute_error(results_filtered['y_true'], results_filtered['y_pred'])
+
             metrics_by_quantile_list.append(row)
 
         columns = ['order_std'] + list(metrics.keys())

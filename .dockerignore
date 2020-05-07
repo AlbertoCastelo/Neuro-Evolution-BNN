@@ -21,3 +21,5 @@ tmp/
 
 # avoid saving pipenv files
 Pipfile
+
+.bash_history

@@ -55,7 +55,7 @@ class EvolutionReport:
     def report_fine_tuning(self, species_best_genome):
         self.fine_tuning = {}
         self.fine_tuning['best_fitness_before_fine_tuning'] = self.best_individual.fitness
-
+        self.fine_tuning['best_genome_before_fine_tuning'] = self.best_individual.to_dict()
         best_genome_per_specie = {}
         best_genome_specie_key = -1
         best_genome_fitness = -1000000

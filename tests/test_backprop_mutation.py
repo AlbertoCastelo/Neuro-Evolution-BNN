@@ -16,6 +16,7 @@ class TestBackpropMutation(TestCase):
     def setUp(self) -> None:
         self.config = create_configuration(filename='/classification-miso.json')
         self.config.node_activation = 'identity'
+        self.config.parallel_evaluation = False
 
     def test_normal_feedforward(self):
         genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1)),
