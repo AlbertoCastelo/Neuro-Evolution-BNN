@@ -17,13 +17,14 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 class ExperimentData:
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat', keep_top=0.8):
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
         self.correlation_ids = correlation_ids
         self.dataset_name = dataset_name
         self.n_samples = n_samples
         self.project = project
         self.algorithm_version = algorithm_version
         self.keep_top = keep_top
+        self.filter_normal_finish = filter_normal_finish
 
         self.reports = None
         self.best_genomes = {}
@@ -103,7 +104,8 @@ class ExperimentData:
         experiment_data = pd.concat(data_chunks, sort=False)
 
         self.experiment_data = self._drop_worse_executions_per_correlation(experiment_data, self.keep_top)
-
+        if self.filter_normal_finish:
+            self.experiment_data = self.experiment_data.loc[self.experiment_data['end_condition'] == 'normal']
         return self
 
     def generate_evolution_data(self):

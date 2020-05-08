@@ -20,6 +20,7 @@ class PredictionDistributionEstimator:
         self.testing = testing
         self.config = config
         self.n_samples = n_samples
+        self.is_bayesian = not config.fix_std
 
         self.dataset = None
 
@@ -27,6 +28,8 @@ class PredictionDistributionEstimator:
         self.y_true = None
         self.output_distribution = None
         self.y_pred = None
+        self.output_stds = None
+
         self.results = None
         self.results_enriched = None
         self.metrics_by_quantile = None
@@ -42,7 +45,7 @@ class PredictionDistributionEstimator:
         x, y_true, output_distribution = calculate_prediction_distribution(genome=self.genome,
                                                                            dataset=self.get_dataset(),
                                                                            problem_type=self.config.problem_type,
-                                                                           is_testing=True,
+                                                                           is_testing=self.testing,
                                                                            n_samples=self.n_samples)
         if self.config.problem_type == 'classification':
             y_pred = torch.argmax(output_distribution.mean(1), 1)
@@ -63,6 +66,12 @@ class PredictionDistributionEstimator:
         results.loc[(results['y_true'] == results['y_pred']), 'correct'] = True
 
         self.results = results
+
+        self.x = x
+        self.y_pred = y_pred
+        self.y_true = y_true
+        self.output_distribution = output_distribution
+        self.output_stds = output_stds
 
         return self
 
@@ -104,3 +113,6 @@ class PredictionDistributionEstimator:
         columns = ['order_std'] + list(metrics.keys())
         self.metrics_by_quantile = pd.DataFrame(metrics_by_quantile_list, columns=columns)
         return self
+
+    def __len__(self):
+        return self.output_distribution.shape[0]

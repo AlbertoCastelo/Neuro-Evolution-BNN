@@ -22,6 +22,7 @@ class FineTuner:
 
     def run(self):
         for specie_key, specie in self.species.items():
+            print(f'Fine-tuning: {specie_key}')
             # genome_to_finetune = specie.representative
             genome_to_finetune = specie.get_fittest()
             self.species_best_genome[specie_key] = self._finetune_genome(genome_to_finetune)
