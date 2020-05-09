@@ -1,5 +1,7 @@
 import copy
 import os
+from unittest.mock import Mock
+
 import torch
 from sklearn.model_selection import train_test_split
 from torch.optim import Adam
@@ -12,7 +14,7 @@ from neat.loss.vi_loss import get_loss
 class EvaluateProbabilisticDL:
 
     def __init__(self, dataset, batch_size, n_samples, lr, weight_decay, n_epochs, n_neurons_per_layer, n_hidden_layers,
-                 is_cuda, beta):
+                 is_cuda, beta, backprop_report=Mock()):
         self.config = get_configuration()
         self.is_cuda = is_cuda
         self.dataset = dataset
@@ -24,8 +26,10 @@ class EvaluateProbabilisticDL:
         self.n_neurons_per_layer = n_neurons_per_layer
         self.n_hidden_layers = n_hidden_layers
         self.beta = beta
+        self.backprop_report = backprop_report
+
         self.best_loss_val = 10000
-        self.best_network_state = None
+        self.best_network = None
 
     def run(self):
 
@@ -62,11 +66,11 @@ class EvaluateProbabilisticDL:
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_train}')
                 _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
-
+                self.backprop_report.report_epoch(epoch, loss_train, loss_val)
                 if loss_val < self.best_loss_val:
 
                     self.best_loss_val = loss_val
-                    self.best_network_state = copy.deepcopy(self.network.state_dict())
+                    self.best_network = copy.deepcopy(self.network.state_dict())
                     print(f'New best network: {loss_val}')
         print(f'Final Train Error: {loss_train}')
         print(f'Best Val Error: {loss_val}')
@@ -112,11 +116,12 @@ class EvaluateProbabilisticDL:
                                                n_output=self.config.n_output,
                                                n_samples=self.config.n_samples)
 
-        network = ProbabilisticFeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
-                                           is_cuda=self.is_cuda,
-                                           n_neurons_per_layer=self.n_neurons_per_layer,
-                                           n_hidden_layers=self.n_hidden_layers)
-        network.load_state_dict(self.best_network_state)
+        network = self.best_network
+        # network = ProbabilisticFeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
+        #                                    is_cuda=self.is_cuda,
+        #                                    n_neurons_per_layer=self.n_neurons_per_layer,
+        #                                    n_hidden_layers=self.n_hidden_layers)
+        # network.load_state_dict(self.best_network)
 
         if self.is_cuda:
             network.cuda()

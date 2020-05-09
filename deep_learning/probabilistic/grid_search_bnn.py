@@ -8,16 +8,19 @@ from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 
-# dataset_name = 'iris'
+dataset_name = 'iris'
 # dataset_name = 'mnist_downsampled'
-dataset_name = 'titanic'
-CORRELATION_ID = 'nas_v1'
-N_REPETITIONS = 20
+# dataset_name = 'titanic'
+CORRELATION_ID = 'nas_v2'
+# CORRELATION_ID = 'nas_v1'
+N_REPETITIONS = 2
 is_debug = False
 
 ## PARAMETERS THAT WON'T CHANGE MUCH
 N_HIDDEN_LAYERS_VALUES = [1, 2]
 N_NEURONS_PER_LAYER_VALUES = list(range(2, 21))
+# N_HIDDEN_LAYERS_VALUES = [1]
+# N_NEURONS_PER_LAYER_VALUES = [10]
 NOISES = [0.0]
 # NOISES = [0.0, 0.5, 1.0, 2.0, 5.0]
 
@@ -27,7 +30,7 @@ logger = get_neat_logger(path=LOGS_PATH)
 is_cuda = False
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 1000
+n_epochs = 2000
 batch_size = 50000
 
 report_repository = ReportRepository.create(project='nas', logs_path=LOGS_PATH)
