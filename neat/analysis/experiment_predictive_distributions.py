@@ -1,7 +1,8 @@
 import pandas as pd
 
 from neat.analysis.experiment_data import ExperimentData
-from neat.analysis.uncertainty.predictive_distribution import PredictionDistributionEstimator
+from neat.analysis.uncertainty.predictive_distribution import PredictionDistributionEstimator, \
+    PredictionDistributionEstimatorGenome
 
 
 class ExecutionsPredictionDistributions:
@@ -21,7 +22,7 @@ class ExecutionsPredictionDistributions:
         for execution_id in execution_ids:
             genome = self.experiment_data.best_genomes[execution_id]
             config = self.experiment_data.configurations[execution_id]
-            predictor = PredictionDistributionEstimator(genome=genome, config=config, testing=testing) \
+            predictor = PredictionDistributionEstimatorGenome(genome=genome, config=config, testing=testing) \
                 .estimate() \
                 .enrich_with_dispersion_quantile() \
                 .calculate_metrics_by_dispersion_quantile(log=False)

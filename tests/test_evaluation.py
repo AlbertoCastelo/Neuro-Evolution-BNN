@@ -7,6 +7,7 @@ from neat.evaluation.evaluation_engine import EvaluationStochasticEngine
 from neat.evaluation.utils import get_dataset
 from neat.genome import Genome
 from neat.neat_logger import get_neat_logger
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -41,7 +42,9 @@ class TestCalculatePredictionDistribution(TestCase):
         dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=True)
 
         n_samples = 3
-        x, y_true, output_distribution = calculate_prediction_distribution(genome=genome, dataset=dataset,
+        network = ComplexStochasticNetwork(genome=genome)
+
+        x, y_true, output_distribution = calculate_prediction_distribution(network, dataset=dataset,
                                                                            problem_type=config.problem_type,
                                                                            is_testing=True, n_samples=n_samples,
                                                                            use_sigmoid=False)

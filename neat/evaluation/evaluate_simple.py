@@ -68,14 +68,12 @@ def evaluate_genome(genome: Genome, dataset, loss, beta_type, problem_type, is_t
 
 
 @timeit
-def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_testing, n_samples=1000,
+def calculate_prediction_distribution(network, dataset, problem_type, is_testing, n_samples=1000,
                                       use_sigmoid=False):
-
     '''
-    Calculate Predictive Distribution for a genome and dataset
+    Calculate Predictive Distribution for a network and dataset
     '''
     # setup network
-    network = ComplexStochasticNetwork(genome=genome)
     network.eval()
 
     # calculate Data log-likelihood (p(y*|x*,D))
@@ -88,8 +86,8 @@ def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_
                                            y_batch=y_batch,
                                            problem_type=problem_type,
                                            is_gpu=False,
-                                           n_input=genome.n_input,
-                                           n_output=genome.n_output,
+                                           n_input=network.n_input,
+                                           n_output=network.n_output,
                                            n_samples=n_samples)
     chunks_x = []
     chunks_output_distribution = []
@@ -99,7 +97,7 @@ def calculate_prediction_distribution(genome: Genome, dataset, problem_type, is_
         output, _ = network(x_batch)
 
         _, output_distribution, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
-                                                               n_output=genome.n_output, problem_type=problem_type,
+                                                               n_output=network.n_output, problem_type=problem_type,
                                                                is_pass=True)
 
         chunks_x.append(x_batch)

@@ -27,12 +27,86 @@ class ExperimentData:
         self.filter_normal_finish = filter_normal_finish
 
         self.reports = None
-        self.best_genomes = {}
         self.experiment_data = None
         self.configurations = {}
 
     def process_data(self):
         reports = self.get_reports()
+        self.experiment_data = self._process_reports(reports)
+
+        if self.keep_top < 1.0:
+            self.experiment_data = self._drop_worse_executions_per_correlation(self.experiment_data, self.keep_top)
+        if self.filter_normal_finish:
+            self.experiment_data = self.experiment_data.loc[self.experiment_data['end_condition'] == 'normal']
+        return self
+
+    def get_experiment_data(self):
+        return self.experiment_data
+
+    def get_reports(self):
+        if self.reports is None:
+            self.reports = self._get_reports()
+        return self.reports
+
+    def _get_reports(self):
+        reports = {}
+        report_repository = ReportRepository.create(project=self.project, logs_path=LOGS_PATH)
+        for correlation_id in self.correlation_ids:
+            print('###########')
+            print(f'CORRELATION ID: {correlation_id}')
+            execution_ids = list(report_repository.get_executions(algorithm_version=self.algorithm_version,
+                                                                  dataset=self.dataset_name,
+                                                                  correlation_id=correlation_id))
+            for execution_id in execution_ids:
+                report = report_repository.get_report(algorithm_version=self.algorithm_version,
+                                                      dataset=self.dataset_name,
+                                                      correlation_id=correlation_id,
+                                                      execution_id=execution_id)
+                reports[execution_id] = report
+
+        return reports
+
+    @staticmethod
+    def _drop_worse_executions_per_correlation(experiment_data, keep_top,
+                                               filtering_group=('correlation_id', 'noise', 'train_percentage')):
+        print(f'Original Size: {len(experiment_data)}')
+        experiment_data.sort_values('loss_training', ascending=True, inplace=True)
+        executions_per_experiment = experiment_data.groupby(filtering_group)['execution_id'].nunique().reset_index()\
+            .rename(columns={'execution_id': 'n_executions'})
+        executions_per_experiment['n_executions'] = \
+            round(executions_per_experiment['n_executions'] * keep_top, 0)
+
+        experiment_data = experiment_data.merge(executions_per_experiment, on=filtering_group)
+        chunks = []
+        for filtering_group_values, experiment_data_per_correlation_id in experiment_data.groupby(filtering_group):
+            # n_executions = int(executions_per_experiment.loc[
+            #                        executions_per_experiment['correlation_id'] == correlation_id,
+            #                        'n_executions'].values[0])
+            n_executions = int(experiment_data_per_correlation_id['n_executions'].values[0])
+            print(n_executions)
+            experiment_data_per_correlation_id.sort_values('loss_training', ascending=True, inplace=True)
+
+            chunks.append(experiment_data_per_correlation_id.head(n_executions))
+
+        experiment_data_filtered = pd.concat(chunks, sort=False, ignore_index=True)
+        experiment_data_filtered.drop(columns='n_executions', inplace=True)
+        print(f'Size after filtering: {len(experiment_data_filtered)}')
+        return experiment_data_filtered
+
+    def _process_reports(self, reports):
+        raise NotImplementedError
+
+
+class ExperimentDataNE(ExperimentData):
+    def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
+
+        self.best_genomes = {}
+        super().__init__(correlation_ids=correlation_ids, dataset_name=dataset_name, n_samples=n_samples,
+                         project=project, algorithm_version=algorithm_version, keep_top=keep_top,
+                         filter_normal_finish=filter_normal_finish)
+
+    def _process_reports(self, reports):
         data_chunks = []
         for report in reports.values():
             execution_id = report.execution_id
@@ -102,11 +176,7 @@ class ExperimentData:
             data_chunks.append(chunk)
 
         experiment_data = pd.concat(data_chunks, sort=False)
-
-        self.experiment_data = self._drop_worse_executions_per_correlation(experiment_data, self.keep_top)
-        if self.filter_normal_finish:
-            self.experiment_data = self.experiment_data.loc[self.experiment_data['end_condition'] == 'normal']
-        return self
+        return experiment_data
 
     def generate_evolution_data(self):
         fitness_evolution_chunks = []
@@ -145,9 +215,6 @@ class ExperimentData:
         fitness_by_specie['execution_id'] = report.execution_id
         return fitness_evolution, fitness_by_specie
 
-    def get_experiment_data(self):
-        return self.experiment_data
-
     def _get_execution_configuration(self, report):
         genome_dict = report.data['best_individual']
         best_individual_fitness = report.data['best_individual_fitness']
@@ -157,55 +224,69 @@ class ExperimentData:
         config = genome.genome_config
         return config
 
-    def get_reports(self):
-        if self.reports is None:
-            self.reports = self._get_reports()
-        return self.reports
 
-    def _get_reports(self):
-        reports = {}
-        report_repository = ReportRepository.create(project=self.project, logs_path=LOGS_PATH)
-        for correlation_id in self.correlation_ids:
-            print('###########')
-            print(f'CORRELATION ID: {correlation_id}')
-            execution_ids = list(report_repository.get_executions(algorithm_version=self.algorithm_version,
-                                                                  dataset=self.dataset_name,
-                                                                  correlation_id=correlation_id))
-            for execution_id in execution_ids:
-                report = report_repository.get_report(algorithm_version=self.algorithm_version,
-                                                      dataset=self.dataset_name,
-                                                      correlation_id=correlation_id,
-                                                      execution_id=execution_id)
-                reports[execution_id] = report
+class ExperimentDataNAS(ExperimentData):
+    def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
+        self.best_networks = {}
+        super().__init__(correlation_ids=correlation_ids, dataset_name=dataset_name, n_samples=n_samples,
+                         project=project, algorithm_version=algorithm_version, keep_top=keep_top,
+                         filter_normal_finish=filter_normal_finish)
 
-        return reports
+    def _process_reports(self, reports):
+        chunks = []
+        for execution_id, report in reports.items():
+            chunks.append(self._process_nas_execution(report))
+
+        return pd.concat(chunks, sort=False)
 
     @staticmethod
-    def _drop_worse_executions_per_correlation(experiment_data, keep_top,
-                                               filtering_group=('correlation_id', 'noise', 'train_percentage')):
-        print(f'Original Size: {len(experiment_data)}')
-        experiment_data.sort_values('loss_training', ascending=True, inplace=True)
-        executions_per_experiment = experiment_data.groupby(filtering_group)['execution_id'].nunique().reset_index()\
-            .rename(columns={'execution_id': 'n_executions'})
-        executions_per_experiment['n_executions'] = \
-            round(executions_per_experiment['n_executions'] * keep_top, 0)
+    def _calculate_network_size(n_input, n_output, n_hidden_layers, n_neurons_per_layer):
+        n_nodes = n_output + n_neurons_per_layer * n_hidden_layers
+        n_connections = n_input * n_neurons_per_layer
+        for i in range(n_hidden_layers - 1):
+            n_connections += n_neurons_per_layer ** 2
+        n_connections += n_neurons_per_layer * n_output
+        return n_nodes, n_connections
 
-        experiment_data = experiment_data.merge(executions_per_experiment, on=filtering_group)
-        chunks = []
-        for filtering_group_values, experiment_data_per_correlation_id in experiment_data.groupby(filtering_group):
-            # n_executions = int(executions_per_experiment.loc[
-            #                        executions_per_experiment['correlation_id'] == correlation_id,
-            #                        'n_executions'].values[0])
-            n_executions = int(experiment_data_per_correlation_id['n_executions'].values[0])
-            print(n_executions)
-            experiment_data_per_correlation_id.sort_values('loss_training', ascending=True, inplace=True)
+    @staticmethod
+    def _process_nas_execution(report):
+        correlation_id = report.correlation_id
+        execution_id = report.execution_id
+        train_percentage = report.configuration['train_percentage']
+        noise = report.configuration['noise']
+        beta = report.configuration['beta']
+        n_input = report.configuration['n_input']
+        n_output = report.configuration['n_output']
+        end_condition = report.end_condition
+        duration = report.duration
+        accuracy = report.metrics['accuracy']
+        f1 = report.metrics['f1']
 
-            chunks.append(experiment_data_per_correlation_id.head(n_executions))
+        n_hidden_layers = report.best_network_params['n_hidden_layers']
+        n_neurons_per_layer = report.best_network_params['n_neurons_per_layer']
 
-        experiment_data_filtered = pd.concat(chunks, sort=False, ignore_index=True)
-        experiment_data_filtered.drop(columns='n_executions', inplace=True)
-        print(f'Size after filtering: {len(experiment_data_filtered)}')
-        return experiment_data_filtered
+        n_nodes, n_connections = ExperimentDataNAS._calculate_network_size(n_input, n_output, n_hidden_layers,
+                                                                           n_neurons_per_layer)
+
+        n_parameters = (n_nodes + n_connections) * 2
+        df_report = pd.DataFrame({'correlation_id': correlation_id,
+                                  'execution_id': execution_id,
+                                  'train_percentage': train_percentage,
+                                  'noise': noise,
+                                  'is_bayesian': True,
+                                  'beta': beta,
+                                  'duration': duration,
+                                  'end_condition': end_condition,
+                                  'n_parameters': n_parameters,
+                                  'n_nodes': n_nodes,
+                                  'n_connections': n_connections,
+                                  'f1': f1,
+                                  'accuracy': accuracy,
+                                  }, index=[0])
+
+        return df_report
+
 
 def get_mean_std(genome: Genome):
     stds = _get_stds(genome)

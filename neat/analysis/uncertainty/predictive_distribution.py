@@ -1,5 +1,8 @@
 import torch
 from sklearn.metrics import accuracy_score, f1_score, mean_squared_error, mean_absolute_error
+from torch import nn
+
+from deep_learning.probabilistic.feed_forward import ProbabilisticFeedForward
 from neat.configuration import set_configuration
 from neat.evaluation.evaluate_simple import calculate_prediction_distribution
 from neat.evaluation.utils import get_dataset
@@ -7,6 +10,8 @@ from neat.genome import Genome
 import pandas as pd
 import numpy as np
 from experiments.logger import logger
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+
 EXTREME_QUANTILES = 10
 CLASSFICATION_METRICS_DICT = {'accuracy': accuracy_score,
                               'f1': f1_score}
@@ -15,12 +20,10 @@ REGRESSION_METRICS_DICT = {'mse': mean_squared_error,
 
 
 class PredictionDistributionEstimator:
-    def __init__(self, genome: Genome, config, testing=True, n_samples=1000):
-        self.genome = genome
+    def __init__(self, config, testing=True, n_samples=1000):
         self.testing = testing
         self.config = config
         self.n_samples = n_samples
-        self.is_bayesian = not config.fix_std
 
         self.dataset = None
 
@@ -34,29 +37,52 @@ class PredictionDistributionEstimator:
         self.results_enriched = None
         self.metrics_by_quantile = None
 
+    def estimate(self):
+        set_configuration(self.config)
+        network = self._get_network()
+        self._estimate(network)
+        return self
+
+    def _get_network(self):
+        raise NotImplementedError
+
     def get_dataset(self):
         if self.dataset is None:
             self.dataset = get_dataset(self.config.dataset, train_percentage=self.config.train_percentage,
                                        testing=self.testing, random_state=self.config.dataset_random_state)
         return self.dataset
 
-    def estimate(self):
-        set_configuration(self.config)
-        x, y_true, output_distribution = calculate_prediction_distribution(genome=self.genome,
+    def _estimate(self, network: nn.Module):
+        x, y_true, output_distribution = calculate_prediction_distribution(network=network,
                                                                            dataset=self.get_dataset(),
                                                                            problem_type=self.config.problem_type,
                                                                            is_testing=self.testing,
                                                                            n_samples=self.n_samples)
         if self.config.problem_type == 'classification':
             y_pred = torch.argmax(output_distribution.mean(1), 1)
+            n_classes = output_distribution.shape[2]
+            zeros_ = torch.zeros_like(output_distribution.std(1)[:, 1])
+            output_stds = torch.zeros_like(output_distribution.std(1)[:, 1])
+            for i in range(n_classes):
+                output_stds += torch.where(y_pred == i, output_distribution.std(1)[:, i], zeros_)
+
+            # output_stds = output_distribution.std(1)[:, 0]
+            min_ = torch.min(output_distribution, 1).values
+            max_ = torch.max(output_distribution, 1).values
+
+            zeros_ = torch.zeros_like(output_distribution.std(1)[:, 1])
+            output_range = torch.zeros_like(output_distribution.std(1)[:, 1])
+            for i in range(n_classes):
+                output_range += torch.where(y_pred == i, (max_ - min_)[:, i], zeros_)
+            # output_range = (max_ - min_)[:, 0]
         else:
             y_pred = output_distribution.mean(1).squeeze()
             y_true = y_true.squeeze()
-        # output_means = output_distribution.mean(1)
-        output_stds = output_distribution.std(1)[:, 0]
-        min_ = torch.min(output_distribution, 1).values
-        max_ = torch.max(output_distribution, 1).values
-        output_range = (max_ - min_)[:, 0]
+            # TODO: review 0 index below
+            output_stds = output_distribution.std(1)[:, 0]
+            min_ = torch.min(output_distribution, 1).values
+            max_ = torch.max(output_distribution, 1).values
+            output_range = (max_ - min_)[:, 0]
 
         results = pd.DataFrame({'y_pred': y_pred.numpy(),
                                 'y_true': y_true.numpy(),
@@ -72,8 +98,6 @@ class PredictionDistributionEstimator:
         self.y_true = y_true
         self.output_distribution = output_distribution
         self.output_stds = output_stds
-
-        return self
 
     def enrich_with_dispersion_quantile(self):
         std_quantiles = self.results[['example_id', 'std']] \
@@ -116,3 +140,24 @@ class PredictionDistributionEstimator:
 
     def __len__(self):
         return self.output_distribution.shape[0]
+
+
+class PredictionDistributionEstimatorGenome(PredictionDistributionEstimator):
+    def __init__(self, genome: Genome, config, testing=True, n_samples=1000):
+        self.genome = genome
+        self.is_bayesian = not config.fix_std
+
+        super().__init__(config, testing, n_samples)
+
+    def _get_network(self):
+        return ComplexStochasticNetwork(genome=self.genome)
+
+
+class PredictionDistributionEstimatorNetwork(PredictionDistributionEstimator):
+    def __init__(self, network: ProbabilisticFeedForward, config, testing=True, n_samples=1000):
+        self.network = network
+        self.is_bayesian = True
+        super().__init__(config, testing, n_samples)
+
+    def _get_network(self):
+        return self.network
