@@ -67,8 +67,6 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
     f1 = f1_score(y_true, y_pred, average='weighted')
     confusion_m = confusion_matrix(y_true, y_pred)
 
-
-
     backprop_report.report_best_network(best_network, params, accuracy, f1)
     backprop_report.set_config(config)
     backprop_report.persist_report()

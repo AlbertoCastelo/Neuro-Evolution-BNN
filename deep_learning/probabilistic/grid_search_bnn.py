@@ -8,26 +8,29 @@ from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 
-dataset_name = 'iris'
+# dataset_name = 'iris'
 # dataset_name = 'mnist_downsampled'
 # dataset_name = 'titanic'
+dataset_name = 'classification-miso'
+
 CORRELATION_ID = 'nas_v2'
+CORRELATION_ID = 'nas_v2_new_layer'
 # CORRELATION_ID = 'nas_v1'
-N_REPETITIONS = 2
+N_REPETITIONS = 1
 is_debug = False
 
 ## PARAMETERS THAT WON'T CHANGE MUCH
-N_HIDDEN_LAYERS_VALUES = [1, 2]
-N_NEURONS_PER_LAYER_VALUES = list(range(2, 21))
-# N_HIDDEN_LAYERS_VALUES = [1]
-# N_NEURONS_PER_LAYER_VALUES = [10]
+# N_HIDDEN_LAYERS_VALUES = [1, 2]
+# N_NEURONS_PER_LAYER_VALUES = list(range(2, 21))
+N_HIDDEN_LAYERS_VALUES = [1]
+N_NEURONS_PER_LAYER_VALUES = [15]
 NOISES = [0.0]
 # NOISES = [0.0, 0.5, 1.0, 2.0, 5.0]
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
-is_cuda = False
+is_cuda = True
 lr = 0.01
 weight_decay = 0.0005
 n_epochs = 2000
@@ -44,6 +47,7 @@ config.n_samples = 100
 if is_cuda:
     use_cuda = torch.cuda.is_available()
     torch.cuda.set_device(0)
+    print('Using GPU')
 
 if is_debug:
     N_HIDDEN_LAYERS_VALUES = [1]
@@ -67,4 +71,4 @@ for rep in range(N_REPETITIONS):
                                    n_epochs=n_epochs,
                                    notifier=notifier,
                                    report_repository=report_repository,
-                                   is_cuda=False)
+                                   is_cuda=is_cuda)

@@ -29,7 +29,7 @@ is_cuda = True
 
 lr = 0.01
 weight_decay = 0.0005
-n_epochs = 5000
+n_epochs = 2000
 
 batch_size = 50000
 

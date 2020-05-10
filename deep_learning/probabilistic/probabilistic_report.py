@@ -35,6 +35,8 @@ class BackpropReport:
                         'f1': f1}
         self.report.add('metrics', metrics_best)
         self.report.add('best_network_params', best_network_params)
+        if best_network.is_cuda:
+            best_network.cpu()
         self.report.add('best_network', ProbabilisticFeedForwardDeser.to_dict(best_network))
         self.report.add('end_condition', 'normal')
         self.report.add('epochs', self.epochs)
