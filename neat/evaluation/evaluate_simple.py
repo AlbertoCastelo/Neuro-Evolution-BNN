@@ -1,7 +1,7 @@
 import math
 
 import torch
-from torch.nn import Sigmoid
+from torch.nn import Sigmoid, Softmax
 from neat.evaluation.utils import _prepare_batch_data
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.genome import Genome
@@ -49,8 +49,8 @@ def evaluate_genome(genome: Genome, dataset, loss, beta_type, problem_type, is_t
     with torch.no_grad():
         # forward pass
         output, _ = network(x_batch)
-        # output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
-        #                                           n_output=genome.n_output, problem_type=problem_type, is_pass=is_pass)
+        output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
+                                                  n_output=genome.n_output, problem_type=problem_type, is_pass=is_pass)
         beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
         kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
         if return_all:
@@ -162,12 +162,20 @@ def convert_to_multinomial_2(y_pred, n_samples, n_output):
 
 def calculate_multinomial_3(y_pred, n_samples, n_output):
     logits = _reshape_output(y_pred, n_samples, n_output)
+    m = Softmax()
     m = Sigmoid()
     multinomial_dist = m(logits)
     sum_ = multinomial_dist.sum(2)
     for output in range(n_output):
         multinomial_dist[:, :, output] = multinomial_dist[:, :, output] / sum_
     return multinomial_dist.mean(1), multinomial_dist
+
+
+def calculate_multinomial(y_pred, n_samples, n_output):
+    logits = _reshape_output(y_pred, n_samples, n_output)
+    m = Softmax(dim=2)
+    output = m(logits)
+    return output.mean(1), output
 
 
 def _reshape_output(output, n_samples, n_output):
