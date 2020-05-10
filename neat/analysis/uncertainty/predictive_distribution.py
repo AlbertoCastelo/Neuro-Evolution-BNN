@@ -106,7 +106,6 @@ class PredictionDistributionEstimator:
             .reset_index() \
             .rename(columns={'index': 'order_std'}) \
             .drop('std', axis=1)
-        std_quantiles.head()
         self.results_enriched = self.results.merge(std_quantiles, on='example_id')
         return self
 
@@ -117,7 +116,7 @@ class PredictionDistributionEstimator:
             metrics = REGRESSION_METRICS_DICT
 
         metrics_by_quantile_list = []
-        for i in range(EXTREME_QUANTILES, len(self.results_enriched) - EXTREME_QUANTILES):
+        for i in range(0, len(self.results_enriched) - EXTREME_QUANTILES):
             results_filtered = self.results_enriched.loc[self.results_enriched['order_std'] > i]
 
             mean_std = np.mean(results_filtered['std'].values)

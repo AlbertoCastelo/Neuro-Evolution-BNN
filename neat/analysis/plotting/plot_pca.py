@@ -1,14 +1,16 @@
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
+COLORS = ['navy', 'turquoise', 'darkorange', 'forestgreen', 'red', 'darkblue', 'crimson', 'lawngreen', 'peru', 'grey']
+
 
 def plot_dimensionality_reduction(x, y, index_to_plot, ax=None):
     pca = PCA(n_components=2)
     X_r = pca.fit(x).transform(x)
 
-    colors = ['navy', 'turquoise', 'darkorange']
     n_classes = len(set(y))
     target_names = list(range(n_classes))
+    colors = COLORS[:n_classes]
     lw = 0.5
     if not ax:
         fig, ax = plt.subplots()

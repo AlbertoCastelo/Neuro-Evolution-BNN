@@ -41,11 +41,14 @@ def plot_prediction_probabilities(estimator: PredictionDistributionEstimator, in
     if plot_pca:
         dataset = estimator.get_dataset()
         if estimator.testing:
-            x = dataset.x_test.numpy()
+            x = dataset.x_test
+            x = x.view(-1, estimator.config.n_input).numpy()
             y = dataset.y_test.numpy()
         else:
-            x = dataset.x_train.numpy()
+            x = dataset.x_train
+            x = x.view(-1, estimator.config.n_input).numpy()
             y = dataset.y_train.numpy()
+
         plot_dimensionality_reduction(x, y, index_to_plot, ax=axes[-1])
 
     plt.show()
