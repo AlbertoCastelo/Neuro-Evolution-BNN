@@ -9,12 +9,14 @@ from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from neat.evaluation.utils import get_dataset
 from neat.neat_logger import get_neat_logger
 
-DATASET = 'iris'
-DATASET = 'mnist_downsampled'
+# DATASET = 'iris'
+DATASET = 'titanic'
+# DATASET = 'mnist_downsampled'
 
 
 config = create_configuration(filename=f'/{DATASET}.json')
-config.noise = 0.5
+config.noise = 0.0
+config.label_noise = 1.0
 config.train_percentage = 0.75
 
 
@@ -24,7 +26,8 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 network_filename = f'network-{DATASET}.pt'
 dataset = get_dataset(dataset=config.dataset, train_percentage=config.train_percentage,
-                      random_state=config.dataset_random_state, noise=config.noise)
+                      random_state=config.dataset_random_state, noise=config.noise,
+                      label_noise=config.label_noise)
 
 is_cuda = False
 
@@ -40,7 +43,7 @@ evaluator = EvaluateStandardDL(dataset=dataset,
                                lr=lr,
                                weight_decay=weight_decay,
                                n_epochs=n_epochs,
-                               n_neurons_per_layer=10,
+                               n_neurons_per_layer=15,
                                n_hidden_layers=1,
                                is_cuda=is_cuda)
 evaluator.run()
