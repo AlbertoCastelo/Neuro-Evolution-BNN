@@ -19,6 +19,7 @@ class DefaultConfiguration(BaseConfiguration):
         # problem definition
         self.dataset = 'regression_example_1'
         self.noise = 0.0
+        self.label_noise = 0.0
         self.dataset_random_state = 42
         self.problem_type = 'regression'
 

@@ -19,8 +19,9 @@ from neat.species import SpeciationEngine, FixSpeciationEngine
 from neat.stagnation import Stagnation
 from neat.utils import timeit
 
+TIMEOUT_SECONDS = 3600
 N_EPOCHS = 30
-LR = 0.05
+LR = 0.01
 WEIGHT_DECAY = 0.0005
 
 
@@ -63,7 +64,7 @@ class EvolutionEngine:
             self._run_generation(generation)
 
             elapsed = time.perf_counter() - self.start_time
-            if elapsed > 3600:
+            if elapsed > TIMEOUT_SECONDS:
                 end_condition = 'timeout'
                 break
 

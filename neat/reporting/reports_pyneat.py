@@ -86,13 +86,13 @@ class EvolutionReport:
         else:
             raise ConfigError(f'Problem Type is incorrect: {config.problem_type}')
 
-
     def _show_classification_metrics(self, config):
         dataset = get_dataset(config.dataset,
                               train_percentage=config.train_percentage,
                               testing=False,
                               random_state=config.dataset_random_state,
-                              noise=config.noise)
+                              noise=config.noise,
+                              label_noise=config.label_noise)
         loss = get_loss(problem_type=config.problem_type)
         x, y_true, y_pred, loss_value = evaluate_genome(genome=self.best_individual,
                                                         dataset=dataset,

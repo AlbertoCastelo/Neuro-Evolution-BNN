@@ -15,10 +15,10 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network_ju
 from neat.utils import timeit
 
 
-def process_initialization(dataset_name, train_percentage, testing, dataset_random_state, noise):
+def process_initialization(dataset_name, train_percentage, testing, dataset_random_state, noise, label_noise):
     global dataset
     dataset = get_dataset(dataset_name, train_percentage=train_percentage, testing=testing,
-                          random_state=dataset_random_state, noise=noise)
+                          random_state=dataset_random_state, noise=noise, label_noise=label_noise)
 
 
 def evaluate_genome_task(x):

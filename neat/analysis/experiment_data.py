@@ -127,7 +127,8 @@ class ExperimentDataNE(ExperimentData):
             print(f'Train percentage: {config.train_percentage}')
             print(f'Random state: {config.dataset_random_state}')
             dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=True,
-                                  random_state=config.dataset_random_state, noise=config.noise)
+                                  random_state=config.dataset_random_state, noise=config.noise,
+                                  label_noise=config.label_noise)
 
             x, y_true, y_pred, loss_value = evaluate_genome(genome=genome,
                                                             dataset=dataset,
@@ -144,6 +145,7 @@ class ExperimentDataNE(ExperimentData):
 
             train_percentage = config.train_percentage
             noise = config.noise
+            label_noise = config.label_noise
             duration = report.duration
             n_parameters = genome.calculate_number_of_parameters()
             n_nodes = genome.n_bias_parameters // 2
@@ -154,6 +156,7 @@ class ExperimentDataNE(ExperimentData):
                                   'execution_id': execution_id,
                                   'train_percentage': train_percentage,
                                   'noise': noise,
+                                  'label_noise': label_noise,
                                   'is_bayesian': False if config.fix_std else True,
                                   'beta': config.beta,
                                   'loss_training': -best_individual_fitness,

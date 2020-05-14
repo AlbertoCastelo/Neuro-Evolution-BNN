@@ -49,7 +49,9 @@ class PredictionDistributionEstimator:
     def get_dataset(self):
         if self.dataset is None:
             self.dataset = get_dataset(self.config.dataset, train_percentage=self.config.train_percentage,
-                                       testing=self.testing, random_state=self.config.dataset_random_state)
+                                       testing=self.testing, random_state=self.config.dataset_random_state,
+                                       noise=self.config.noise,
+                                       label_noise=self.config.label_noise)
         return self.dataset
 
     def _estimate(self, network: nn.Module):

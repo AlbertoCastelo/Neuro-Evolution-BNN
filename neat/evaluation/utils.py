@@ -27,7 +27,7 @@ def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_typ
     return x_batch, y_batch
 
 
-def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, noise=0.0):
+def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, noise=0.0, label_noise=0.0):
     if testing:
         dataset_type = 'test'
     else:
@@ -47,7 +47,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
                                                 random_state=random_state, noise=noise)
     elif dataset == 'titanic':
         dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                 random_state=random_state, noise=noise)
+                                 random_state=random_state, noise=noise, label_noise=label_noise)
     elif dataset == 'mnist':
         dataset = MNISTDataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                random_state=random_state, noise=noise)
@@ -65,7 +65,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
                                         random_state=random_state, noise=noise)
     elif dataset == 'iris':
         dataset = IrisDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                              random_state=random_state, noise=noise)
+                              random_state=random_state, noise=noise, label_noise=label_noise)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()

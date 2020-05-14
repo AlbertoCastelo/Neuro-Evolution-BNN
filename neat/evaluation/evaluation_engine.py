@@ -28,7 +28,7 @@ class EvaluationStochasticEngine:
             self.pool = Pool(processes=self.n_processes,
                              initializer=process_initialization,
                              initargs=(self.config.dataset, self.config.train_percentage, testing,
-                                       self.config.dataset_random_state, self.config.noise))
+                                       self.config.dataset_random_state, self.config.noise, self.config.label_noise))
 
     def _get_n_processes(self):
         if self.config.n_processes is not None:
@@ -86,7 +86,8 @@ class EvaluationStochasticEngine:
             self.dataset = get_dataset(self.config.dataset, testing=self.testing,
                                        train_percentage=self.config.train_percentage,
                                        random_state=self.config.dataset_random_state,
-                                       noise=self.config.noise)
+                                       noise=self.config.noise,
+                                       label_noise=self.config.label_noise)
         return self.dataset
 
     def _get_dataloader(self):
