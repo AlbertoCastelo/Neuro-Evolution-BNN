@@ -18,7 +18,8 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
     dataset = get_dataset(dataset=config.dataset,
                           train_percentage=config.train_percentage,
                           random_state=config.dataset_random_state,
-                          noise=config.noise)
+                          noise=config.noise,
+                          label_noise=config.label_noise)
 
     backprop_report = BackpropReport.create(report_repository=report_repository,
                                             algorithm_version=ALGORITHM_VERSION,

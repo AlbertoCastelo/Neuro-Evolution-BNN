@@ -19,6 +19,9 @@ config.noise = 0.0
 config.label_noise = 1.0
 config.train_percentage = 0.75
 
+lr = 0.01
+weight_decay = 0.0005
+n_epochs = 4000
 
 # config.n_output = 3
 LOGS_PATH = f'{os.getcwd()}/'
@@ -31,9 +34,7 @@ dataset = get_dataset(dataset=config.dataset, train_percentage=config.train_perc
 
 is_cuda = False
 
-lr = 0.01
-weight_decay = 0.0005
-n_epochs = 2000
+
 
 
 batch_size = 50000

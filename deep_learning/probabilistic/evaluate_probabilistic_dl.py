@@ -85,7 +85,7 @@ class EvaluateProbabilisticDL:
                     self.best_network = copy.deepcopy(self.network)
                     print(f'New best network: {loss_val}')
         print(f'Final Train Error: {loss_train}')
-        print(f'Best Val Error: {loss_val}')
+        print(f'Best Val Error: {self.best_loss_val}')
 
     def _initialize(self):
         if IS_ALTERNATIVE_NETWORK:
@@ -147,12 +147,12 @@ class EvaluateProbabilisticDL:
             x_batch, y_batch = self.dataset.x_train, self.dataset.y_train
 
         x_batch, _ = _prepare_batch_data(x_batch=x_batch,
-                                               y_batch=y_batch,
-                                               problem_type=self.config.problem_type,
-                                               is_gpu=self.config.is_gpu,
-                                               n_input=self.config.n_input,
-                                               n_output=self.config.n_output,
-                                               n_samples=EVALUATION_N_SAMPLES)
+                                         y_batch=y_batch,
+                                         problem_type=self.config.problem_type,
+                                         is_gpu=self.config.is_gpu,
+                                         n_input=self.config.n_input,
+                                         n_output=self.config.n_output,
+                                         n_samples=EVALUATION_N_SAMPLES)
 
         network = self.best_network
         # network = ProbabilisticFeedForward(n_input=self.config.n_input, n_output=self.config.n_output,

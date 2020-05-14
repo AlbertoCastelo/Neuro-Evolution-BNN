@@ -24,6 +24,7 @@
   "dataset": "iris",
   "dataset_random_state": 35,
   "noise": 0.0,
+  "label_noise": 0.0,
   "n_generations": 200,
   "generation_fix_architecture": 150,
   "node_activation": "tanh",

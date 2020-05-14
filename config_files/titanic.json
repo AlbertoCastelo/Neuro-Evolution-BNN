@@ -52,6 +52,7 @@
   "dataset_random_state": 35,
   "initial_genome_filename": null,
   "noise": 0.0,
+  "label_noise": 0.0,
   "n_generations": 200,
   "generation_fix_architecture": 150,
   "n_input": 6,
@@ -99,8 +100,8 @@
   "replace_rate": 0.1,
 
   "architecture_mutation_power": 1,
-  "node_add_prob": 0.2,
-  "node_delete_prob": 0.1,
-  "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.25
+  "node_add_prob": 1.0,
+  "node_delete_prob": 0.0,
+  "connection_add_prob": 1.0,
+  "connection_delete_prob": 0.0
 }

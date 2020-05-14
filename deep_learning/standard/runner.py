@@ -16,7 +16,8 @@ class StandardDLRunner:
 
     def run(self):
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=self.config.train_percentage,
-                              random_state=self.config.dataset_random_state, noise=self.config.noise)
+                              random_state=self.config.dataset_random_state, noise=self.config.noise,
+                              label_noise=self.config.label_noise)
 
         is_cuda = False
 
