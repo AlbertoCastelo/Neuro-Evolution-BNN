@@ -23,7 +23,9 @@ class TestPredictionDistributionEstimator(TestCase):
 
         estimator = PredictionDistributionEstimatorGenome(genome=genome, config=config, testing=True,
                                                           n_samples=n_samples)\
-            .estimate()
+            .estimate() \
+            .enrich_with_dispersion_quantile() \
+            .calculate_metrics_by_dispersion_quantile()
 
         results = estimator.results
         self.assertTrue(isinstance(results, pd.DataFrame))
@@ -34,7 +36,9 @@ class TestPredictionDistributionEstimator(TestCase):
         network = ProbabilisticFeedForward(1, 1, False, 1, 1)
         estimator = PredictionDistributionEstimatorNetwork(network=network, config=config, testing=True,
                                                            n_samples=n_samples)\
-            .estimate()
+            .estimate() \
+            .enrich_with_dispersion_quantile() \
+            .calculate_metrics_by_dispersion_quantile()
 
         results = estimator.results
         self.assertTrue(isinstance(results, pd.DataFrame))
@@ -43,11 +47,13 @@ class TestPredictionDistributionEstimator(TestCase):
         config = create_configuration(filename='/classification-miso.json')
         genome = Genome(key=1)
         genome.create_random_genome()
-        n_samples = 3
+        n_samples = 5
 
         estimator = PredictionDistributionEstimatorGenome(genome=genome, config=config, testing=True,
                                                           n_samples=n_samples)\
-            .estimate()
+            .estimate() \
+            .enrich_with_dispersion_quantile() \
+            .calculate_metrics_by_dispersion_quantile()
 
         results = estimator.results
         self.assertTrue(isinstance(results, pd.DataFrame))

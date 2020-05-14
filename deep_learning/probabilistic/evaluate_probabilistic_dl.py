@@ -19,7 +19,7 @@ IS_ALTERNATIVE_NETWORK = False
 class EvaluateProbabilisticDL:
 
     def __init__(self, dataset, batch_size, n_samples, lr, weight_decay, n_epochs, n_neurons_per_layer, n_hidden_layers,
-                 is_cuda, beta, backprop_report=Mock()):
+                 is_cuda, beta, n_repetitions=1, backprop_report=Mock()):
         self.config = get_configuration()
         self.is_cuda = is_cuda
         self.dataset = dataset
@@ -31,14 +31,27 @@ class EvaluateProbabilisticDL:
         self.n_neurons_per_layer = n_neurons_per_layer
         self.n_hidden_layers = n_hidden_layers
         self.beta = beta
+        self.n_repetitions = n_repetitions
         self.backprop_report = backprop_report
 
-        self.best_loss_val = 10000
+        self.best_loss_val = 100000
+        self.best_loss_val_rep = None
+        self.best_network_rep = None
         self.best_network = None
 
     def run(self):
+        self.best_loss_val_rep = 100000
+        self.best_network_rep = None
+
+        for i in range(self.n_repetitions):
+            self._run()
+            if self.best_loss_val_rep < self.best_loss_val:
+                self.best_loss_val = self.best_loss_val_rep
+                self.best_network = self.best_network_rep
+
+    def _run(self):
         # TODO: remove (just debugging)
-        torch.autograd.set_detect_anomaly(True)
+        # torch.autograd.set_detect_anomaly(True)
 
         self._initialize()
 
@@ -79,10 +92,10 @@ class EvaluateProbabilisticDL:
                 print(f'Epoch = {epoch}. Error: {loss_train}')
                 _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
                 self.backprop_report.report_epoch(epoch, loss_train, loss_val)
-                if loss_val < self.best_loss_val:
+                if loss_val < self.best_loss_val_rep:
 
-                    self.best_loss_val = loss_val
-                    self.best_network = copy.deepcopy(self.network)
+                    self.best_loss_val_rep = loss_val
+                    self.best_network_rep = copy.deepcopy(self.network)
                     print(f'New best network: {loss_val}')
         print(f'Final Train Error: {loss_train}')
         print(f'Best Val Error: {self.best_loss_val}')

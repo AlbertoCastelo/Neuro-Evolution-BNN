@@ -5,6 +5,8 @@ from neat.representation_mapping.genome_to_network.utils import get_activation
 class FeedForward(nn.Module):
     def __init__(self, n_input, n_output, n_neurons_per_layer=3, n_hidden_layers=2):
         super(FeedForward, self).__init__()
+        self.n_input = n_input
+        self.n_output = n_output
         self.n_neurons_per_layer = n_neurons_per_layer
         self.n_hidden_layers = n_hidden_layers
         self.activation = get_activation()

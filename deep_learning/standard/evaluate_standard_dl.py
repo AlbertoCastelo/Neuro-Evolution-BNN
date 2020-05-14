@@ -1,4 +1,5 @@
 import copy
+from unittest.mock import Mock
 
 import torch
 import os
@@ -14,7 +15,8 @@ from deep_learning.standard.feed_forward import FeedForward
 
 class EvaluateStandardDL:
 
-    def __init__(self, dataset, batch_size, lr, weight_decay, n_epochs, n_neurons_per_layer, n_hidden_layers, is_cuda):
+    def __init__(self, dataset, batch_size, lr, weight_decay, n_epochs, n_neurons_per_layer, n_hidden_layers, is_cuda,
+                 n_repetitions=1, backprop_report=Mock(), n_samples=0, beta=0.0):
         self.config = get_configuration()
         self.is_cuda = is_cuda
         self.dataset = dataset
@@ -24,22 +26,26 @@ class EvaluateStandardDL:
         self.n_epochs = n_epochs
         self.n_neurons_per_layer = n_neurons_per_layer
         self.n_hidden_layers = n_hidden_layers
+        self.n_repetitions = n_repetitions
+        self.backprop_report = backprop_report
 
         self.best_loss_val = 100000
+        self.best_loss_val_rep = None
+        self.best_network_rep = None
         self.best_network = None
 
     def run(self):
-        self.network = FeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
-                                   n_neurons_per_layer=self.n_neurons_per_layer,
-                                   n_hidden_layers=self.n_hidden_layers)
+        for i in range(self.n_repetitions):
+            self._run()
+            if self.best_loss_val_rep < self.best_loss_val:
+                self.best_loss_val = self.best_loss_val_rep
+                self.best_network = self.best_network_rep
 
-        self.criterion = _get_loss_by_problem(problem_type=self.config.problem_type)
+    def _run(self):
+        self.best_network_rep = None
+        self.best_loss_val_rep = 100000
 
-        self.optimizer = Adam(self.network.parameters(), lr=self.lr, weight_decay=self.weight_decay)
-
-        if self.is_cuda:
-            self.network.cuda()
-            self.criterion.cuda()
+        self._initialize()
 
         x_batch, y_batch = self.dataset.x_train, self.dataset.y_train
         x_train, x_val, y_train, y_val = self.train_val_split(x_batch, y_batch, val_ratio=0.2)
@@ -66,7 +72,6 @@ class EvaluateStandardDL:
             x_val = x_val.cuda()
             y_val = y_val.cuda()
 
-
         # train
         for epoch in range(self.n_epochs):
             loss_train = self._train_one(x_train, y_train)
@@ -74,13 +79,23 @@ class EvaluateStandardDL:
             if epoch % 10 == 0:
                 print(f'Epoch = {epoch}. Error: {loss_train}')
                 _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
-                # self.backprop_report.report_epoch(epoch, loss_train, loss_val)
-                if loss_val < self.best_loss_val:
-                    self.best_loss_val = loss_val
-                    self.best_network = copy.deepcopy(self.network)
+                self.backprop_report.report_epoch(epoch, loss_train, loss_val)
+                if loss_val < self.best_loss_val_rep:
+                    self.best_loss_val_rep = loss_val
+                    self.best_network_rep = copy.deepcopy(self.network)
                     print(f'New best network: {loss_val}')
         print(f'Final Train Error: {loss_train}')
         print(f'Best Val Error: {loss_val}')
+
+    def _initialize(self):
+        self.network = FeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
+                                   n_neurons_per_layer=self.n_neurons_per_layer,
+                                   n_hidden_layers=self.n_hidden_layers)
+        self.criterion = _get_loss_by_problem(problem_type=self.config.problem_type)
+        self.optimizer = Adam(self.network.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        if self.is_cuda:
+            self.network.cuda()
+            self.criterion.cuda()
 
     def _train_one(self, x_batch, y_batch):
         loss_epoch = 0
@@ -109,6 +124,7 @@ class EvaluateStandardDL:
 
         if self.is_cuda:
             x_batch = x_batch.cuda()
+            y_batch = y_batch.cuda()
 
         x, y_true, y_pred, _ = self._evaluate(x_batch, y_batch, network=self.best_network)
 
