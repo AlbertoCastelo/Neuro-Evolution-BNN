@@ -86,7 +86,7 @@ class IrisDataset(NeatTestingDataset):
         n_examples = len(y_train)
         # n_examples_flipped = int(round(n_examples * label_noise, 0))
         print(f'Label Noise: {label_noise}')
-        random.seed(0)
+        random.seed(self.random_state)
         for i in range(n_examples):
             r = random.random()
             if r < label_noise:
