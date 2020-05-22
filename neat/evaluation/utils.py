@@ -9,6 +9,7 @@ from neat.dataset.classification_titanic import TitanicDataset
 from neat.dataset.classification_xray_binary import XRayBinary
 from neat.dataset.iris import IrisDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
+from neat.dataset.wine import WineDataset
 
 
 def _prepare_batch_data(x_batch, y_batch, is_gpu, n_input, n_output, problem_type, n_samples):
@@ -65,6 +66,9 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
                                         random_state=random_state, noise=noise)
     elif dataset == 'iris':
         dataset = IrisDataset(train_percentage=train_percentage, dataset_type=dataset_type,
+                              random_state=random_state, noise=noise, label_noise=label_noise)
+    elif dataset == 'wine':
+        dataset = WineDataset(train_percentage=train_percentage, dataset_type=dataset_type,
                               random_state=random_state, noise=noise, label_noise=label_noise)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
