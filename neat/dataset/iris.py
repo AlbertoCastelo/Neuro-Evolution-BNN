@@ -14,8 +14,6 @@ class IrisDataset(NeatTestingDataset):
     '''
 
     def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, label_noise=0.0, is_debug=False):
-        self.label_noise = label_noise
-
         directory = os.path.dirname(os.path.realpath(__file__))
         original_filename = ''.join([directory, f'/data/iris/iris.csv'])
         if noise > 0:
@@ -31,9 +29,9 @@ class IrisDataset(NeatTestingDataset):
         self.data = data
 
         super().__init__(train_percentage=train_percentage, dataset_type=dataset_type,
-                         random_state=random_state, noise=noise)
+                         random_state=random_state, noise=noise, label_noise=label_noise)
 
-    def generate_data(self):
+    def _generate_data(self):
         self.y = self.data['target'].values
         df_x = self.data.iloc[:, :4]
         self.x_original = df_x.values
@@ -44,14 +42,8 @@ class IrisDataset(NeatTestingDataset):
         self.input_scaler.fit(self.x_original)
         self.x = self.input_scaler.transform(self.x_original)
 
-
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).long()
-
-        self._generate_train_test_sets()
-
-        self._add_noise_to_train_labels(self.label_noise)
-
 
     def __len__(self):
         return len(self.x)
@@ -75,22 +67,3 @@ class IrisDataset(NeatTestingDataset):
         data_noisy['target'] = y
         data_noisy.to_csv(filename, index=False)
         return data_noisy
-
-    def _add_noise_to_train_labels(self, label_noise):
-        '''
-        :param label_noise: percentage of labels flipped
-        '''
-
-        y_train = self.y_train.numpy()
-        n_classes = len(set(y_train))
-        n_examples = len(y_train)
-        # n_examples_flipped = int(round(n_examples * label_noise, 0))
-        print(f'Label Noise: {label_noise}')
-        random.seed(self.random_state)
-        for i in range(n_examples):
-            r = random.random()
-            if r < label_noise:
-                y_train[i] = random.choice(list(range(n_classes)))
-        print(f'Sum of 10 first labels: {np.sum(y_train[:10])}')
-        print(y_train[:10])
-        self.y_train = torch.tensor(y_train)

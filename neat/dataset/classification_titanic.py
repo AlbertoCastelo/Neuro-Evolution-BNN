@@ -15,7 +15,6 @@ class TitanicDataset(NeatTestingDataset):
     STD = [0.83766265,  0.48158299, 14.51632115,  0.92913212,  0.85269161, 52.88185844]
 
     def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, label_noise=0.0):
-        self.label_noise = label_noise
         directory = os.path.dirname(os.path.realpath(__file__))
         original_filename = ''.join([directory, f'/data/titanic/train.csv'])
 
@@ -29,9 +28,9 @@ class TitanicDataset(NeatTestingDataset):
 
         self.data = data
         super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state,
-                         noise=noise)
+                         noise=noise,label_noise=label_noise)
 
-    def generate_data(self):
+    def _generate_data(self):
         x = self.data.loc[:, self.COLUMNS_USED]
         x.dropna(axis=0, inplace=True)
 
@@ -46,9 +45,9 @@ class TitanicDataset(NeatTestingDataset):
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).long()
 
-        self._generate_train_test_sets()
-
-        self._add_noise_to_train_labels(self.label_noise)
+        # self._generate_train_test_sets()
+        #
+        # self._add_noise_to_train_labels(self.label_noise)
 
     def __len__(self):
         return len(self.x)
@@ -71,23 +70,3 @@ class TitanicDataset(NeatTestingDataset):
         data_noisy['Survived'] = y
         data_noisy.to_csv(filename, index=False)
         return data_noisy
-
-    def _add_noise_to_train_labels(self, label_noise):
-        '''
-        :param label_noise: percentage of labels flipped
-        '''
-
-        y_train = self.y_train.numpy()
-        n_classes = len(set(y_train))
-        n_examples = len(y_train)
-        # n_examples_flipped = int(round(n_examples * label_noise, 0))
-        print(f'Label Noise: {label_noise}')
-        random.seed(self.random_state)
-        for i in range(n_examples):
-            r = random.random()
-            if r < label_noise:
-                y_train[i] = random.choice(list(range(n_classes)))
-        print(f'Sum of 10 first labels: {np.sum(y_train[:10])}')
-        print(y_train[:10])
-        self.y_train = torch.tensor(y_train)
-

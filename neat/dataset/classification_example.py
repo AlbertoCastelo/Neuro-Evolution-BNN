@@ -1,7 +1,6 @@
 import pandas as pd
 import torch
-from sklearn.preprocessing import StandardScaler, LabelBinarizer, MultiLabelBinarizer
-from torch.utils.data import Dataset
+from sklearn.preprocessing import StandardScaler, LabelBinarizer
 import numpy as np
 
 from neat.dataset.abstract import NeatTestingDataset
@@ -17,7 +16,8 @@ class ClassificationExample1Dataset(NeatTestingDataset):
     X2_MIN = -1.0
     X2_MAX = 1.0
 
-    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, is_debug=False):
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, label_noise=0.0,
+                 is_debug=False):
         if dataset_type not in ['train', 'validation', 'test']:
             raise ValueError(f'Dataset Type {dataset_type} is not valid')
         self.dataset_type = dataset_type
@@ -29,9 +29,9 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.x_original = None
         self.y_original = None
         super().__init__(train_percentage=train_percentage, dataset_type=dataset_type,
-                         random_state=random_state, noise=noise)
+                         random_state=random_state, noise=noise, label_noise=label_noise)
 
-    def generate_data(self):
+    def _generate_data(self):
         self.input_scaler = StandardScaler()
         self.output_transformer = LabelBinarizer()
 
@@ -65,7 +65,7 @@ class ClassificationExample1Dataset(NeatTestingDataset):
         self.x = torch.tensor(self.x).float()
         self.y = torch.tensor(self.y).long()
 
-        self._generate_train_test_sets()
+        # self._generate_train_test_sets()
 
     def get_separation_line(self):
         x1 = np.linspace(self.X1_MIN, self.X1_MAX, 200)
