@@ -4,6 +4,7 @@ from config_files.configuration_utils import create_configuration
 from neat.evolution_operators.mutation import exist_cycle, adds_multihop_jump, ArchitectureMutation
 from neat.genome import Genome
 from neat.neat_logger import get_neat_logger
+from neat.representation_mapping.genome_to_network.graph_utils import exist_cycle_numba
 from tests.utils.generate_genome import generate_genome_with_hidden_units
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -142,3 +143,38 @@ class TestExistCycles(TestCase):
     def test_self_recursive_b(self):
         connections = [(-1, 1), (-1, 2), (-1, 3), (-2, 1),  (-2, 2), (-2, 3), (1, 0), (2, 0), (3, 0), (2, 2)]
         self.assertEqual(True, exist_cycle(connections))
+
+
+class TestExistCyclesNumba(TestCase):
+    def test_exists_cycle_positive_a(self):
+        connections = [(1, 2), (2, 3), (3, 1)]
+
+        self.assertEqual(True, exist_cycle_numba(connections))
+
+    def test_exists_cycle_positive_b(self):
+        connections = [(1, 2), (2, 3), (1, 4), (4, 3), (3, 1)]
+
+        self.assertEqual(True, exist_cycle_numba(connections))
+
+    def test_exists_cycle_when_negative_a(self):
+        connections = [(1, 2), (2, 3), (3, 4)]
+
+        self.assertEqual(False, exist_cycle_numba(connections))
+
+    def test_exists_cycle_when_negative_b(self):
+        connections = [(1, 2), (2, 3), (1, 4), (4, 3), (3, 5)]
+
+        self.assertEqual(False, exist_cycle_numba(connections))
+
+    def test_exists_cycle_when_negative_c(self):
+        connections = [(-1, 1), (-1, 2), (-1, 3), (-2, 1), (-2, 2), (-2, 3), (1, 0), (2, 0), (3, 0), (1, 2)]
+        self.assertEqual(False, exist_cycle_numba(connections))
+
+    def test_self_recursive(self):
+        connections = [(1, 1)]
+
+        self.assertEqual(True, exist_cycle_numba(connections))
+
+    def test_self_recursive_b(self):
+        connections = [(-1, 1), (-1, 2), (-1, 3), (-2, 1),  (-2, 2), (-2, 3), (1, 0), (2, 0), (3, 0), (2, 2)]
+        self.assertEqual(True, exist_cycle_numba(connections))

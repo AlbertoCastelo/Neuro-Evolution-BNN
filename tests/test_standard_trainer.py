@@ -28,6 +28,7 @@ class TestStandardTrainer(TestCase):
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.5, testing=False, noise=0.0)
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
                                       problem_type=self.config.problem_type,
+                                      n_output=genome.n_output,
                                       beta=self.config.beta,
                                       n_epochs=n_epochs, is_cuda=False)
         stg_trainer.train(genome)
@@ -42,6 +43,7 @@ class TestStandardTrainer(TestCase):
                                              connection_weights=(1.0, 2.0, 3.0, 0.5, 1.5))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.5, testing=False, noise=0.0)
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=n_epochs, is_cuda=False)
@@ -57,6 +59,7 @@ class TestStandardTrainer(TestCase):
                                              connection_weights=(1.0, 2.0))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.5, testing=False, noise=0.0)
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=n_epochs, is_cuda=False)
@@ -77,10 +80,13 @@ class TestClearGradients(TestCase):
         genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1), (-1, 1)),
                                              connection_weights=(1.0, 2.0, 3.0, 0.5, 1.5))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0)
-        stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+        stg_trainer = StandardTrainer(dataset=dataset,
+                                      n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
-                                      n_epochs=self.n_epochs, is_cuda=False)
+                                      n_epochs=self.n_epochs,
+                                      is_cuda=False)
         stg_trainer.train(genome)
 
     def test_network_structure_1(self):
@@ -89,10 +95,13 @@ class TestClearGradients(TestCase):
                                              connection_weights=(1.0, 2.0, 3.0,
                                                                  0.5, -0.5, 0.3))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0)
-        stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+        stg_trainer = StandardTrainer(dataset=dataset,
+                                      n_samples=self.config.n_samples,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
-                                      n_epochs=self.n_epochs, is_cuda=False)
+                                      n_output=genome.n_output,
+                                      n_epochs=self.n_epochs,
+                                      is_cuda=False)
         stg_trainer.train(genome)
 
 
@@ -111,6 +120,7 @@ class TestIntegrationMutation(TestCase):
                               random_state=self.config.dataset_random_state)
         n_samples = 100
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=100, is_cuda=False)
@@ -134,7 +144,7 @@ class TestIntegrationMutation(TestCase):
                                      is_gpu=False,
                                      is_testing=False,
                                      return_all=False,
-                                     is_pass=False)
+                                     is_pass=True)
         self.assertAlmostEqual(loss_value, -new_genome.fitness, places=0)
 
     def test_non_existing_connections_are_updated(self):
@@ -144,6 +154,7 @@ class TestIntegrationMutation(TestCase):
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0)
 
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=self.n_epochs, is_cuda=False)
@@ -165,6 +176,7 @@ class TestIntegrationMutation(TestCase):
                                              connection_weights=(1.0, 2.0))
         dataset = get_dataset(dataset=self.config.dataset, train_percentage=0.1, testing=False, noise=0.0)
         stg_trainer = StandardTrainer(dataset=dataset, n_samples=self.config.n_samples,
+                                      n_output=genome.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=self.n_epochs, is_cuda=False)

@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from config_files.configuration_utils import create_configuration
 from deep_learning.probabilistic.feed_forward import ProbabilisticFeedForward
-from neat.analysis.uncertainty.predictive_distribution import PredictionDistributionEstimator, \
+from neat.analysis.uncertainty.predictive_distribution import \
     PredictionDistributionEstimatorGenome, PredictionDistributionEstimatorNetwork
 import pandas as pd
 from neat.genome import Genome
