@@ -40,6 +40,8 @@ class EvaluateStandardDL:
             if self.best_loss_val_rep < self.best_loss_val:
                 self.best_loss_val = self.best_loss_val_rep
                 self.best_network = self.best_network_rep
+            print(f'BEST LOST: {self.best_loss_val_rep}')
+        print(f'BEST LOST: {self.best_loss_val}')
 
     def _run(self):
         self.best_network_rep = None
@@ -85,12 +87,13 @@ class EvaluateStandardDL:
                     self.best_network_rep = copy.deepcopy(self.network)
                     print(f'New best network: {loss_val}')
         print(f'Final Train Error: {loss_train}')
-        print(f'Best Val Error: {loss_val}')
+        print(f'Best Val Error: {self.best_loss_val_rep}')
 
     def _initialize(self):
         self.network = FeedForward(n_input=self.config.n_input, n_output=self.config.n_output,
                                    n_neurons_per_layer=self.n_neurons_per_layer,
                                    n_hidden_layers=self.n_hidden_layers)
+        self.network.reset_parameters()
         self.criterion = _get_loss_by_problem(problem_type=self.config.problem_type)
         self.optimizer = Adam(self.network.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         if self.is_cuda:

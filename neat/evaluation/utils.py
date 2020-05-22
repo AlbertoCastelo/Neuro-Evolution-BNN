@@ -41,7 +41,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
                                             random_state=random_state, noise=noise)
     elif dataset == 'classification-miso':
         dataset = ClassificationExample1Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                                random_state=random_state, noise=noise)
+                                                random_state=random_state, noise=noise, label_noise=label_noise)
     elif dataset == 'classification-miso-3':
         dataset = ClassificationExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                                 random_state=random_state, noise=noise)
@@ -53,7 +53,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
                                random_state=random_state, noise=noise)
     elif dataset == 'mnist_downsampled':
         dataset = MNISTDownsampledDataset(train_percentage=train_percentage, dataset_type=dataset_type,
-                                          random_state=random_state, noise=noise)
+                                          random_state=random_state, noise=noise, label_noise=label_noise)
     elif dataset == 'mnist_binary':
         dataset = MNISTBinaryDataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                      random_state=random_state, noise=noise)

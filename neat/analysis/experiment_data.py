@@ -258,6 +258,7 @@ class ExperimentDataNAS(ExperimentData):
         execution_id = report.execution_id
         train_percentage = report.configuration['train_percentage']
         noise = report.configuration['noise']
+        label_noise = report.configuration['label_noise']
         beta = report.configuration['beta']
         n_input = report.configuration['n_input']
         n_output = report.configuration['n_output']
@@ -277,6 +278,7 @@ class ExperimentDataNAS(ExperimentData):
                                   'execution_id': execution_id,
                                   'train_percentage': train_percentage,
                                   'noise': noise,
+                                  'label_noise': label_noise,
                                   'is_bayesian': True,
                                   'beta': beta,
                                   'duration': duration,

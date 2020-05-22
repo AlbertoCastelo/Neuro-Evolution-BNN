@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from neat.representation_mapping.genome_to_network.utils import get_activation
 
@@ -30,3 +31,9 @@ class FeedForward(nn.Module):
             x = getattr(self, f'activation_{i}')(x)
         x = getattr(self, f'layer_0')(x)
         return x
+
+    def reset_parameters(self):
+        for i in range(self.n_hidden_layers, -1, -1):
+            layer = getattr(self, f'layer_{i}')
+            torch.nn.init.xavier_uniform(layer.weight)
+            layer.bias.data.fill_(0.01)

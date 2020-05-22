@@ -9,18 +9,32 @@ export SLACK_API_TOKEN=xoxp-803548304551-788909703698-803912405606-3537f75bda859
 export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 ###################################################################
+# CLASSIFICATION-MISO
+#DATASET=classification-miso
+#n_input=2
+#n_output=2
+#POP_SIZE=50
+#PARALLEL_EVALUATION=1
+#n_processes=15
+#IS_DISCRETE=0
+#initial_nodes_sample=2
+#n_species=5
+#architecture_mutation_power=1
+#train_percentage=0.75
+
+###################################################################
 # IRIS
-DATASET=iris
-n_input=4
-n_output=3
-POP_SIZE=50
-PARALLEL_EVALUATION=1
-n_processes=15
-IS_DISCRETE=0
-initial_nodes_sample=4
-n_species=5
-architecture_mutation_power=1
-train_percentage=0.75
+#DATASET=iris
+#n_input=4
+#n_output=3
+#POP_SIZE=50
+#PARALLEL_EVALUATION=1
+#n_processes=15
+#IS_DISCRETE=0
+#initial_nodes_sample=4
+#n_species=5
+#architecture_mutation_power=1
+#train_percentage=0.75
 
 ###################################################################
 # TITANIC
@@ -39,22 +53,21 @@ train_percentage=0.75
 
 ###################################################################
 # MNIST-DOWNSAMPLED
-#DATASET=mnist_downsampled
-#n_input=256
-#n_output=10
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=10
-#IS_DISCRETE=0
-#initial_nodes_sample=50
-#n_species=5
-#architecture_mutation_power=1
-#train_percentage=0.75
+DATASET=mnist_downsampled
+n_input=256
+n_output=10
+POP_SIZE=50
+PARALLEL_EVALUATION=1
+n_processes=10
+IS_DISCRETE=0
+initial_nodes_sample=50
+n_species=5
+architecture_mutation_power=1
+train_percentage=0.75
 
 ###################################################################
 ## COMMON
 mutation_type="random_mutation"
-beta=0.000001
 
 is_fine_tuning=1
 epochs_fine_tuning=2000
@@ -81,16 +94,26 @@ mutate_rate=0.8
 compatibility_threshold=3.0
 
 
-N_GENERATIONS=155
+#N_GENERATIONS=155
+#generation_fix_architecture=150
+noise=0.0
+label_noise=0.0
+N_GENERATIONS=300
+generation_fix_architecture=300
+POP_SIZE=20
 
-N_REPETITIONS=20
+N_REPETITIONS=1
 function run_bneat {
 #  echo $1 $2 $3
   correlation_id=$1
   fix_std=$2
   n_samples=$3
 #  echo $correlation_id, $fix_std, $n_samples
-  for noise in 10.0 7.5 5.0 2.5 0.0
+#  for noise in 10.0 7.5 5.0 2.5 0.0
+#  for noise in 1.0 0.0
+#  for train_percentage in 0.05 0.1 0.15 0.2 0.3 0.4 0.5 0.7 0.9
+#  for train_percentage in 0.05 0.1 0.15 0.2
+  for label_noise in 0.25 0.5 0.75 0.0
   do
 #  for repetition in 1 2 3 4 5
   for repetition in $(seq 1 $N_REPETITIONS)
@@ -105,6 +128,7 @@ function run_bneat {
                               'beta': $beta,
                               'fix_std': $fix_std,
                               'n_generations': $N_GENERATIONS,
+                              'generation_fix_architecture': $generation_fix_architecture,
                               'parallel_evaluation': $PARALLEL_EVALUATION,
                               'n_processes': $n_processes,
                               'mutation_type': $mutation_type,
@@ -133,7 +157,8 @@ function run_bneat {
                               'n_samples': $n_samples,
                               'n_species': $n_species,
                               'architecture_mutation_power': $architecture_mutation_power,
-                              'noise': $noise
+                              'noise': $noise,
+                              'label_noise': $label_noise
         }"
   done
   done
@@ -146,16 +171,23 @@ function run_bneat {
 #run_bneat $correlation_id $fix_std $n_samples
 
 #experiment_name='_ft_2_'
+N_EXTERNAL_REPETITIONS=5
+for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
+  do
+  # RUN Neat
+  correlation_id='neat_ft_18_'$DATASET
+  fix_std=1
+  n_samples=1
+  beta=0.0
+  #N_GENERATIONS=100
+  run_bneat $correlation_id $fix_std $n_samples
 
-# RUN Neat
-correlation_id='neat_ft_2_'$DATASET
-fix_std=1
-n_samples=1
-run_bneat $correlation_id $fix_std $n_samples
+  # RUN Bayesian-Neat
+  correlation_id='bayesian_neat_ft_18_'$DATASET
+  fix_std=0
+  n_samples=50
+  beta=0.0001
+  #N_GENERATIONS=150
+  run_bneat $correlation_id $fix_std $n_samples
 
-# RUN Bayesian-Neat
-correlation_id='bayesian_neat_ft_2_'$DATASET
-fix_std=0
-n_samples=50
-run_bneat $correlation_id $fix_std $n_samples
-
+done
