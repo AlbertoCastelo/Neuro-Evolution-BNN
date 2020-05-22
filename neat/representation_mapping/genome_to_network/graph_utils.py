@@ -1,5 +1,5 @@
 import copy
-
+import numba
 from experiments.logger import logger
 from neat.utils import timeit
 
@@ -130,6 +130,32 @@ def exist_cycle(connections: list) -> bool:
 
     for node_in, nodes_out in con.items():
         if _go_throgh_graph(node_in, graph=con, past=[]):
+            return True
+    return False
+
+
+@numba.jit
+def _go_through_graph(node_in, graph, past=[]):
+    if node_in in graph.keys():
+        for node in graph[node_in]:
+            if node in past:
+                return True
+            else:
+                past_copy = copy.deepcopy(past)
+                past_copy.append(node_in)
+                if _go_through_graph(node_in=node, graph=graph, past=past_copy):
+                    return True
+    else:
+        return False
+
+
+@timeit
+def exist_cycle_numba(connections: list) -> bool:
+    # change data structure
+    con = _get_connections_per_node(connections)
+    #     print(con)
+    for node_in, nodes_out in con.items():
+        if _go_through_graph(node_in, graph=con, past=[]):
             return True
     return False
 

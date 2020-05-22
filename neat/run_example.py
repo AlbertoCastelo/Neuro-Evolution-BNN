@@ -7,13 +7,9 @@ from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 import os
-
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
 import fire
-
-node_add_probs = [0.3, 0.5, 0.7]
-connection_add_probs = [0.3, 0.5, 0.7]
 
 
 class ExecutionRunner:
@@ -41,7 +37,7 @@ class ExecutionRunner:
                                      correlation_id=correlation_id)
             notifier.send(f'New job using: node_add_prob={config_parameters}')
             print(report.report.execution_id)
-            evolution_engine = EvolutionEngine(report=report, notifier=notifier, is_cuda=is_cuda)
+            evolution_engine = EvolutionEngine(report=report, notifier=notifier, is_cuda=False)
             evolution_engine.run()
         except Exception as e:
             print(e)

@@ -4,6 +4,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.optim import Adam
 
+from neat.evaluation.evaluate_simple import calculate_multinomial
 from neat.evaluation.utils import _prepare_batch_data
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.loss.vi_loss import get_loss
@@ -11,12 +12,13 @@ from neat.representation_mapping.genome_to_network.complex_stochastic_network im
 
 
 class StandardTrainer:
-    def __init__(self, dataset, n_epochs, problem_type, n_samples, beta, is_cuda, weight_decay=0.0005, lr=0.01):
+    def __init__(self, dataset, n_epochs, n_output, problem_type, n_samples, beta, is_cuda, weight_decay=0.0005, lr=0.01):
         self.dataset = dataset
         self.is_cuda = is_cuda
         self.lr = lr
         self.weight_decay = weight_decay
         self.n_epochs = n_epochs
+        self.n_output = n_output
         self.problem_type = problem_type
         self.n_samples = n_samples
         self.beta = beta
@@ -42,21 +44,21 @@ class StandardTrainer:
         x_train, x_val, y_train, y_val = self.train_val_split(x_batch, y_batch,
                                                               problem_type=self.problem_type,
                                                               val_ratio=0.2)
-        x_train, y_train = _prepare_batch_data(x_batch=x_train,
-                                               y_batch=y_train,
-                                               problem_type=self.problem_type,
-                                               is_gpu=False,    # this could be removed
-                                               n_input=genome.n_input,
-                                               n_output=genome.n_output,
-                                               n_samples=self.n_samples)
+        x_train, _ = _prepare_batch_data(x_batch=x_train,
+                                         y_batch=y_train,
+                                         problem_type=self.problem_type,
+                                         is_gpu=False,    # this could be removed
+                                         n_input=genome.n_input,
+                                         n_output=genome.n_output,
+                                         n_samples=self.n_samples)
 
-        x_val, y_val = _prepare_batch_data(x_batch=x_val,
-                                           y_batch=y_val,
-                                           problem_type=self.problem_type,
-                                           is_gpu=False,
-                                           n_input=genome.n_input,
-                                           n_output=genome.n_output,
-                                           n_samples=self.n_samples)
+        x_val, _ = _prepare_batch_data(x_batch=x_val,
+                                       y_batch=y_val,
+                                       problem_type=self.problem_type,
+                                       is_gpu=False,
+                                       n_input=genome.n_input,
+                                       n_output=genome.n_output,
+                                       n_samples=self.n_samples)
 
         if self.is_cuda:
             x_train = x_train.cuda()
@@ -86,6 +88,8 @@ class StandardTrainer:
     def _train_one(self, x_batch, y_batch, kl_qw_pw):
         # TODO: the kl_qw_pw returned by the network gives problems with backprop.
         output, _ = self.network(x_batch)
+        output, _ = calculate_multinomial(output, self.n_samples, self.n_output)
+
         loss = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
         loss_epoch = loss.data.item()
         self.optimizer.zero_grad()
@@ -104,6 +108,8 @@ class StandardTrainer:
 
         with torch.no_grad():
             output, kl_qw_pw = network(x_batch)
+            output, _ = calculate_multinomial(output, self.n_samples, self.n_output)
+
             # output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
             #                                           n_output=genome.n_output, problem_type=problem_type, is_pass=is_pass)
             loss = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)

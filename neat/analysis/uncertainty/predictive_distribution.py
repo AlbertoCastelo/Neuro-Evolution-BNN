@@ -61,7 +61,9 @@ class PredictionDistributionEstimator:
                                                                            is_testing=self.testing,
                                                                            n_samples=self.n_samples)
         if self.config.problem_type == 'classification':
-            y_pred = torch.argmax(output_distribution.mean(1), 1)
+            y_pred_prob = output_distribution.mean(1)
+
+            y_pred = torch.argmax(y_pred_prob, 1)
             n_classes = output_distribution.shape[2]
             zeros_ = torch.zeros_like(output_distribution.std(1)[:, 1])
             output_stds = torch.zeros_like(output_distribution.std(1)[:, 1])

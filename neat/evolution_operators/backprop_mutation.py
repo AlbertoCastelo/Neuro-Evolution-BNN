@@ -23,7 +23,10 @@ class BackPropMutation(Mutation):
                                                     fitness=-final_loss, fix_std=genome.genome_config.fix_std)
 
     def _mutate(self, genome: Genome):
-        stg_trainer = StandardTrainer(dataset=self.dataset, n_samples=self.n_samples, problem_type=self.problem_type,
+        stg_trainer = StandardTrainer(dataset=self.dataset,
+                                      n_samples=self.n_samples,
+                                      n_output=genome.n_output,
+                                      problem_type=self.problem_type,
                                       beta=self.beta,
                                       n_epochs=self.n_epochs, is_cuda=False,
                                       weight_decay=self.weight_decay, lr=self.lr)

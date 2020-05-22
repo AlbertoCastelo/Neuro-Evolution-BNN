@@ -33,7 +33,9 @@ class FineTuner:
 
     def _finetune_genome(self, genome: Genome):
 
-        stg_trainer = StandardTrainer(dataset=self._get_dataset(), n_samples=self.config.n_samples,
+        stg_trainer = StandardTrainer(dataset=self._get_dataset(),
+                                      n_samples=self.config.n_samples,
+                                      n_output=self.config.n_output,
                                       problem_type=self.config.problem_type,
                                       beta=self.config.beta,
                                       n_epochs=self.n_epochs, is_cuda=self.is_cuda,
