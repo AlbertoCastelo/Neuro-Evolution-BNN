@@ -1,0 +1,106 @@
+{
+  "parallel_evaluation": true,
+  "n_processes": 10,
+  "is_fine_tuning": true,
+  "epochs_fine_tuning": 2000,
+  "is_discrete": false,
+  "is_gpu": false,
+  "train_percentage": 0.75,
+  "batch_size": 100000000,
+  "beta_type": "other",
+  "beta": 0.000001,
+
+  "fix_std": true,
+  "fix_architecture": false,
+  "log_network": true,
+  "log_time": true,
+
+  "feed_forward": true,
+  "is_initial_fully_connected": false,
+  "initial_genome_filename": null,
+  "n_initial_hidden_neurons": 0,
+  "initial_nodes_sample": 50,
+
+  "dataset": "breast_cancer",
+  "dataset_random_state": 35,
+  "noise": 0.0,
+  "label_noise": 0.0,
+  "n_generations": 200,
+  "generation_fix_architecture": 150,
+  "node_activation": "tanh",
+  "pop_size": 150,
+
+  "problem_type": "classification",
+  "n_input": 30,
+  "n_output": 2,
+  "n_samples": 100,
+
+  "bias_mean_discrete": [-1, 0.0, 1],
+  "bias_std_discrete": [0.1, 0.5, 1.0],
+
+  "weight_mean_discrete": [-1, 0.0, 1],
+  "weight_std_discrete": [0.1, 0.5, 1.0],
+
+  "bias_mean_init_mean": 0.0,
+  "bias_mean_init_std": 1.0,
+  "bias_mean_max_value": 10.0,
+  "bias_mean_min_value": -10.0,
+  "bias_mean_prior": 0.0,
+
+  "bias_std_init_mean": 0.001,
+  "bias_std_init_std": 0.0,
+  "bias_std_max_value": 2.0,
+  "bias_std_min_value": 0.000001,
+  "bias_std_prior": 1.0,
+
+  "bias_mutate_power": 0.5,
+  "bias_mutate_rate": 0.7,
+  "bias_replace_rate": 0.1,
+
+  "compatibility_threshold": 3.0,
+  "compatibility_weight_coefficient": 0.5,
+  "compatibility_disjoint_coefficient": 1.0,
+  "n_species": 5,
+
+  "response_init_mean": 1.0,
+  "response_init_std": 0.0,
+  "response_max_value": 30.0,
+  "response_min_value": -30.0,
+  "response_mutate_power": 0.0,
+  "response_mutate_rate": 0.0,
+  "response_replace_rate": 0.0,
+
+  "weight_mean_init_mean": 0,
+  "weight_mean_init_std": 1,
+  "weight_mean_max_value": 10.0,
+  "weight_mean_min_value": -10.0,
+  "weight_mean_prior": 0.0,
+
+  "weight_std_init_mean": 0.001,
+  "weight_std_init_std": 0,
+  "weight_std_max_value": 2.0,
+  "weight_std_min_value": 0.000001,
+  "weight_std_prior": 1.0,
+
+  "species_fitness_function": "max",
+  "species_elitism": 2,
+  "max_stagnation": 30,
+
+  "elitism": 2,
+  "survival_threshold": 0.2,
+  "min_species_size": 2,
+
+  "single_structural_mutation": false,
+  "mutation_type": "random_mutation",
+  "mutate_power": 0.5,
+  "mutate_rate": 0.8,
+  "replace_rate": 0.1,
+
+  "architecture_mutation_power": 1,
+  "node_add_prob": 0.5,
+  "node_delete_prob": 0.1,
+  "connection_add_prob": 0.5,
+  "connection_delete_prob": 0.25,
+
+  "node_aggregation": "sum"
+}
