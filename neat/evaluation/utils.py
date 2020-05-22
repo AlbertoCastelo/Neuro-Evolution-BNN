@@ -1,4 +1,5 @@
 from neat.configuration import ConfigError
+from neat.dataset.breast_cancer import BreastCancerDataset
 from neat.dataset.classification_cancer import HistoPathologicCancer
 from neat.dataset.classification_example import ClassificationExample1Dataset
 from neat.dataset.classification_example_3 import ClassificationExample2Dataset
@@ -70,6 +71,9 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
     elif dataset == 'wine':
         dataset = WineDataset(train_percentage=train_percentage, dataset_type=dataset_type,
                               random_state=random_state, noise=noise, label_noise=label_noise)
+    elif dataset == 'breast_cancer':
+        dataset = BreastCancerDataset(train_percentage=train_percentage, dataset_type=dataset_type,
+                                      random_state=random_state, noise=noise, label_noise=label_noise)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()
