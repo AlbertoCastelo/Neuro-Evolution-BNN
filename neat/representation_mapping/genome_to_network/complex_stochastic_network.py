@@ -37,7 +37,11 @@ class ComplexStochasticNetwork(nn.Module):
         for i in range(start_index, -1, -1):
             # cache needed values from past layers
             for index_to_cache in self.layers[i].indices_of_nodes_to_cache:
-                self._cache[(i, index_to_cache)] = x.index_select(1, torch.LongTensor((index_to_cache,)))
+                if self.is_cuda:
+                    index = torch.cuda.LongTensor((index_to_cache,))
+                else:
+                    index = torch.LongTensor((index_to_cache,))
+                self._cache[(i, index_to_cache)] = x.index_select(1, index)
             # append needed values for next layers
             chunks = [x]
             for index_needed in self.layers[i].indices_of_needed_nodes:
