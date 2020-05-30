@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-
 from experiments.logger import logger
 from neat.genome import Genome
 from neat.representation_mapping.genome_to_network.graph_utils import calculate_nodes_per_layer
@@ -114,7 +113,6 @@ def equal(network_1, network_2, skip_logvar=True):
                 return False
 
     return True
-
 
 
 @timeit

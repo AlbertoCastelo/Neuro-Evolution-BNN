@@ -11,6 +11,8 @@ import pandas as pd
 import numpy as np
 import torch
 
+from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
@@ -150,8 +152,10 @@ class ExperimentDataNE(ExperimentData):
             n_parameters = genome.calculate_number_of_parameters()
             n_nodes = genome.n_bias_parameters // 2
             n_connections = genome.n_weight_parameters // 2
+            n_layers = self._get_number_of_layers(genome)
             mean_genome_std = get_mean_std(genome)
             end_condition = report.data['end_condition']
+
             chunk = pd.DataFrame({'correlation_id': correlation_id,
                                   'execution_id': execution_id,
                                   'train_percentage': train_percentage,
@@ -166,6 +170,7 @@ class ExperimentDataNE(ExperimentData):
                                   'n_parameters': n_parameters,
                                   'n_nodes': n_nodes,
                                   'n_connections': n_connections,
+                                  'n_layers': n_layers,
                                   'mean_genome_std': mean_genome_std,
                                   }, index=[0])
 
@@ -226,6 +231,10 @@ class ExperimentDataNE(ExperimentData):
         genome = Genome.from_dict(genome_dict)
         config = genome.genome_config
         return config
+
+    def _get_number_of_layers(self, genome):
+        network = ComplexStochasticNetwork(genome=genome)
+        return len(network.layers)
 
 
 class ExperimentDataNAS(ExperimentData):

@@ -76,7 +76,6 @@ class StandardTrainer:
 
                     self.best_loss_val = loss_val
                     self.best_network_state = copy.deepcopy(self.network.state_dict())
-                    print(f'New best Val Loss: {loss_val}')
 
             if epoch % 200 == 0:
                 print(f'Epoch = {epoch}. Training Loss: {loss_epoch}. '
