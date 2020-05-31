@@ -49,6 +49,9 @@ class MNISTDownsampledDataset(NeatTestingDataset, MNIST):
         self.x = self.data
         self.y = self.targets
 
+        self.x = self.x[:5000]
+        self.y = self.y[:5000]
+
     def __getitem__(self, item):
         return self.x[item], self.y[item]
 

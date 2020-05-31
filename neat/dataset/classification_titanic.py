@@ -70,3 +70,72 @@ class TitanicDataset(NeatTestingDataset):
         data_noisy['Survived'] = y
         data_noisy.to_csv(filename, index=False)
         return data_noisy
+
+
+class Titanic2Dataset(NeatTestingDataset):
+    COLUMNS_USED = ['survived', 'pclass', 'sex', 'age', 'sibsp', 'parch', 'fare']
+    MEAN = [2.206699,  0.371292, 29.851834,  0.503349,  0.421053, 36.686080]
+    STD = [0.841542,  0.483382, 14.389201,  0.912471,  0.840052, 55.732533]
+
+    def __init__(self, train_percentage, dataset_type='train', random_state=42, noise=0.0, label_noise=0.0):
+        directory = os.path.dirname(os.path.realpath(__file__))
+        original_filename = ''.join([directory, f'/data/titanic/titanic_complete.csv'])
+        if noise > 0:
+            raise ValueError
+            # filename_noisy = ''.join([directory, f'/data/titanic/titanic_complete_{noise}.csv'])
+            # if os.path.isfile(filename_noisy):
+            #     data = pd.read_csv(filename_noisy)
+            # else:
+            #     # create noisy dataset and save it.
+            #     data_original = pd.read_csv(original_filename)
+            #     data = self._create_noisy_dataset(data_original, filename=filename_noisy, noise=noise)
+
+        self.data = pd.read_csv(original_filename)
+        super().__init__(train_percentage=train_percentage, dataset_type=dataset_type, random_state=random_state,
+                         noise=noise, label_noise=label_noise)
+
+    def _generate_data(self):
+        x = self.data.loc[:, self.COLUMNS_USED]
+        x.dropna(axis=0, inplace=True)
+        x.loc[x['sex'] == 'male', 'sex'] = 0
+        x.loc[x['sex'] == 'female', 'sex'] = 1
+        x = x.loc[x['age'] != '?']
+        x = x.loc[x['fare'] != '?']
+        x['age'] = pd.to_numeric(x['age'])
+        x['fare'] = pd.to_numeric(x['fare'])
+        self.y = x['survived'].values
+        x.drop('survived', axis=1, inplace=True)
+        self.x_original = x.values
+
+        self.input_scaler = StandardScaler()
+        self.input_scaler.fit(self.x_original)
+        self.x = self.input_scaler.transform(self.x_original)
+
+        self.x = torch.tensor(self.x).float()
+        self.y = torch.tensor(self.y).long()
+
+        # self._generate_train_test_sets()
+        #
+        # self._add_noise_to_train_labels(self.label_noise)
+
+    def __len__(self):
+        return len(self.x)
+
+    def _create_noisy_dataset(self, data_original, filename, noise):
+        data_original = data_original.loc[:, self.COLUMNS_USED]
+        data_original.dropna(axis=0, inplace=True)
+        data_original.loc[data_original['Sex'] == 'male', 'Sex'] = 0
+        data_original.loc[data_original['Sex'] == 'female', 'Sex'] = 1
+        y = data_original['Survived'].values
+        x = data_original.drop(columns=['Survived'], axis=1)
+
+        means = np.mean(x, 0)
+        stds = np.std(x, 0)
+        x_noisy = ((x - means) / stds +
+                   np.random.normal(0, noise, size=x.shape)
+                   + means) * stds
+
+        data_noisy = pd.DataFrame(x_noisy, columns=data_original.columns[1:])
+        data_noisy['Survived'] = y
+        data_noisy.to_csv(filename, index=False)
+        return data_noisy
