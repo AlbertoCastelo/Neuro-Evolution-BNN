@@ -9,17 +9,21 @@ from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
+from neat.utils import get_slack_channel
 
-# dataset_name = 'iris'
-dataset_name = 'mnist_downsampled'
+dataset_name = 'iris'
+# dataset_name = 'mnist_downsampled'
 # dataset_name = 'titanic'
 # dataset_name = 'classification-miso'
+# dataset_name = 'breast_cancer'
 
-CORRELATION_ID = 'standard_nas_v1'
-CORRELATION_ID = 'standard_nas_v2' # using Xabier initiliazation
-CORRELATION_ID = 'standard_nas_v3' # 2 per network and 5 per nas
-CORRELATION_ID = 'standard_nas_v4' # 5 per network and 5 per nas LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
-CORRELATION_ID = 'standard_nas_v5' # 1 rep per network and 20 per nas and each execution has random dataset
+# CORRELATION_ID = 'standard_nas_v1'
+# CORRELATION_ID = 'standard_nas_v2' # using Xabier initiliazation
+# CORRELATION_ID = 'standard_nas_v3' # 2 per network and 5 per nas
+# CORRELATION_ID = 'standard_nas_v4' # 5 per network and 5 per nas LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+# CORRELATION_ID = 'standard_nas_v5' # 1 rep per network and 20 per nas and each execution has random dataset
+CORRELATION_ID = 'standard_nas_final'
+CORRELATION_ID = 'standard_nas_final_with_reps'
 
 # CORRELATION_ID = 'standard_nas_v6' # 1 rep per network and 20 per nas and each execution has random dataset with attribute noise
 
@@ -36,11 +40,10 @@ N_NEURONS_PER_LAYER_VALUES = [5, 10, 15, 20]
 # NOISES = [0.0, 1.0, 2.0]
 
 
-LABEL_NOISES = [0.6, 0.7, 0.8]
-# LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+# LABEL_NOISES = [0.6, 0.7, 0.8]
+LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+LABEL_NOISES = [0.0]
 
-# LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
-# LABEL_NOISES = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 
 
 # NOISES = [0.0, 0.5, 1.0, 2.0, 5.0]
@@ -55,13 +58,13 @@ n_epochs = 2000
 batch_size = 50000
 
 report_repository = ReportRepository.create(project='nas', logs_path=LOGS_PATH)
-notifier = SlackNotifier.create(channel='batch-jobs')
+notifier = SlackNotifier.create(channel=get_slack_channel(dataset_name=dataset_name))
 
 config = create_configuration(filename=f'/{dataset_name}.json')
 config.noise = 0.0
-config.label_noise = 0.75
+# config.label_noise = 0.75
 config.train_percentage = 0.75
-config.n_input = 64
+# config.n_input = 64
 
 # LABEL_NOISES = [i * config.n_output for i in [0.0, 0.25, ] ]
 
@@ -99,4 +102,4 @@ for i in range(N_REPETITIONS):
                                    notifier=notifier,
                                    report_repository=report_repository,
                                    is_cuda=is_cuda,
-                                   n_repetitions=1)
+                                   n_repetitions=10)

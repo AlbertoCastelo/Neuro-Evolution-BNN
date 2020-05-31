@@ -1,10 +1,9 @@
-import pandas as pd
+import random
+
 import numpy as np
 import os
 from config_files.configuration_utils import create_configuration
-from neat.dataset.classification_example import ClassificationExample1Dataset
-import seaborn as sns
-import matplotlib.pyplot as plt
+
 from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from neat.evaluation.utils import get_dataset
 from neat.neat_logger import get_neat_logger
@@ -23,6 +22,8 @@ lr = 0.01
 weight_decay = 0.0005
 n_epochs = 4000
 
+config.dataset_random_state = random.sample(list(range(100)), k=1)[0]
+
 # config.n_output = 3
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -32,7 +33,7 @@ dataset = get_dataset(dataset=config.dataset, train_percentage=config.train_perc
                       random_state=config.dataset_random_state, noise=config.noise,
                       label_noise=config.label_noise)
 
-is_cuda = False
+is_cuda = True
 
 batch_size = 50000
 
@@ -44,7 +45,7 @@ evaluator = EvaluateStandardDL(dataset=dataset,
                                n_neurons_per_layer=10,
                                n_hidden_layers=1,
                                is_cuda=is_cuda,
-                               n_repetitions=5)
+                               n_repetitions=1)
 evaluator.run()
 
 evaluator.save_network(network_filename)

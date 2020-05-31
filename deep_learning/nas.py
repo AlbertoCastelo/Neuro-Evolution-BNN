@@ -1,5 +1,5 @@
 import torch
-from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, precision_score, recall_score
 
 from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
 from deep_learning.report import BackpropReport
@@ -15,6 +15,7 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
 
     best_loss = 10000
     best_network = None
+
     dataset = get_dataset(dataset=config.dataset,
                           train_percentage=config.train_percentage,
                           random_state=config.dataset_random_state,
@@ -67,9 +68,11 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
     y_pred = torch.argmax(y_pred, dim=1).numpy()
     accuracy = accuracy_score(y_true, y_pred) * 100
     f1 = f1_score(y_true, y_pred, average='weighted')
+    precision = precision_score(y_true, y_pred, average='weighted')
+    recall = recall_score(y_true, y_pred, average='weighted')
     confusion_m = confusion_matrix(y_true, y_pred)
 
-    backprop_report.report_best_network(best_network, params, accuracy, f1)
+    backprop_report.report_best_network(best_network, params, accuracy, f1, precision, recall)
     backprop_report.set_config(config)
     backprop_report.persist_report()
     # backprop_report.persist_logs()

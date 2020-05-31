@@ -11,14 +11,20 @@ from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 
 # dataset_name = 'iris'
+from neat.utils import get_slack_channel
+
 dataset_name = 'mnist_downsampled'
 # dataset_name = 'titanic'
 # dataset_name = 'classification-miso'
+# dataset_name = 'breast_cancer'
 
-CORRELATION_ID = 'nas_v3'
-CORRELATION_ID = 'bayesian_nas_v3' # 2 per network and 5 per nas
-CORRELATION_ID = 'bayesian_nas_v4' # 1 rep per network and 20 per nas and each execution has random dataset
+# CORRELATION_ID = 'nas_v3'
+# CORRELATION_ID = 'bayesian_nas_v3' # 2 per network and 5 per nas
+# CORRELATION_ID = 'bayesian_nas_v4' # 1 rep per network and 20 per nas and each execution has random dataset
 # CORRELATION_ID = 'bayesian_nas_v6' # 1 rep per network and 20 per nas and each execution has random dataset with attribute noise
+# CORRELATION_ID = 'bayesian_nas_final_alternative'   # using alternative network
+CORRELATION_ID = 'bayesian_nas_final_new_layer'     # using update Stochastic layer
+
 
 
 # CORRELATION_ID = 'nas_v1'

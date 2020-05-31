@@ -34,9 +34,11 @@ class BackpropReport:
         self.epochs[epoch] = {'loss_training': loss_train,
                               'loss_val': loss_val}
 
-    def report_best_network(self, best_network, best_network_params, accuracy, f1):
+    def report_best_network(self, best_network, best_network_params, accuracy, f1, precision, recall):
         metrics_best = {'accuracy': accuracy,
-                        'f1': f1}
+                        'f1': f1,
+                        'precision': precision,
+                        'recall': recall}
         self.report.add('metrics', metrics_best)
         self.report.add('best_network_params', best_network_params)
         # if best_network.is_cuda:

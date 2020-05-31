@@ -1,17 +1,12 @@
-import pandas as pd
-import numpy as np
 import torch
 
 from config_files.configuration_utils import create_configuration
 from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 from neat.evaluation.utils import get_dataset
 
 # dataset_name = 'classification-miso'
-# dataset_name = 'iris'
-dataset_name = 'mnist_downsampled'
+dataset_name = 'iris'
+# dataset_name = 'mnist_downsampled'
 
 config = create_configuration(filename=f'/{dataset_name}.json')
 config.label_noise = 0.0
