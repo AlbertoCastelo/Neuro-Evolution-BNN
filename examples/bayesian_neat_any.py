@@ -19,7 +19,7 @@ dataset_name = 'mnist_downsampled'
 config = create_configuration(filename=f'/{dataset_name}.json')
 
 config.n_generations = 150
-config.epochs_fine_tuning = 3000
+config.epochs_fine_tuning = 4000
 
 config.n_input = 64
 config.is_discrete = False

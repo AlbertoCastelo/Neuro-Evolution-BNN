@@ -6,14 +6,13 @@ from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
-from neat.utils import timeit
+from neat.utils import timeit, get_slack_channel
 
+dataset_name = 'breast_cancer'
 
-config_file = 'cancer'
-
-config = create_configuration(filename=f'/{config_file}.json')
-config.n_input = 1024
-config.n_output = 2
+config = create_configuration(filename=f'/{dataset_name}.json')
+# config.n_input = 1024
+# config.n_output = 2
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -32,7 +31,7 @@ config.max_stagnation = 30
 # config.pop_size = 25
 
 ALGORITHM_VERSION = 'bayes-neat'
-DATASET = config_file
+DATASET = dataset_name
 # CORRELATION_ID = 'parameters_grid'
 # CORRELATION_ID = 'many-generations'
 CORRELATION_ID = 'tests'
@@ -41,7 +40,7 @@ CORRELATION_ID = 'tests'
 @timeit
 def main():
     report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
-    notifier = SlackNotifier.create(channel='batch-jobs')
+    notifier = SlackNotifier.create(channel=get_slack_channel(dataset_name=dataset_name))
     failed = 0
     total = 0
     # for pop_size in range(25, 201, 25):

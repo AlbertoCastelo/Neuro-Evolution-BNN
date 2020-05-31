@@ -10,7 +10,7 @@
   "beta_type": "other",
   "beta": 0.0001,
 
-  "fix_std": true,
+  "fix_std": false,
   "fix_architecture": false,
   "log_network": true,
   "log_time": true,
@@ -97,10 +97,10 @@
   "replace_rate": 0.1,
 
   "architecture_mutation_power": 1,
-  "node_add_prob": 0.5,
-  "node_delete_prob": 0.1,
-  "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.25,
+  "node_add_prob": 1.0,
+  "node_delete_prob": 0.0,
+  "connection_add_prob": 1.0,
+  "connection_delete_prob": 0.0,
 
   "node_aggregation": "sum"
 }

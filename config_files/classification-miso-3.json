@@ -3,7 +3,7 @@
   "n_processes": 12,
   "is_discrete": false,
   "is_gpu": false,
-  "train_percentage": 0.9,
+  "train_percentage": 0.75,
   "batch_size": 100000000,
   "beta_type": "other",
 
@@ -26,13 +26,13 @@
 
   "bias_mean_init_mean": 0.0,
   "bias_mean_init_std": 1.0,
-  "bias_mean_max_value": 30.0,
-  "bias_mean_min_value": -30.0,
+  "bias_mean_max_value": 10.0,
+  "bias_mean_min_value": -10.0,
   "bias_mean_prior": 0.0,
 
   "bias_std_init_mean": 0.001,
   "bias_std_init_std": 0.0,
-  "bias_std_max_value": 0.5,
+  "bias_std_max_value": 2.0,
   "bias_std_min_value": 0.000001,
   "bias_std_prior": 1.0,
 
@@ -76,7 +76,7 @@
 
   "weight_std_init_mean": 0.001,
   "weight_std_init_std": 0,
-  "weight_std_max_value": 0.5,
+  "weight_std_max_value": 2.0,
   "weight_std_min_value": 0.000001,
   "weight_std_prior": 1.0,
 
@@ -94,8 +94,8 @@
   "replace_rate": 0.1,
 
   "architecture_mutation_power": 1,
-  "node_add_prob": 0.2,
-  "node_delete_prob": 0.1,
-  "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.25
+  "node_add_prob": 1.0,
+  "node_delete_prob": 0.0,
+  "connection_add_prob": 1.0,
+  "connection_delete_prob": 0.0
 }
