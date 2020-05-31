@@ -1,15 +1,14 @@
 import sys
 import random
-
-from neat.utils import get_slack_channel
-
+import os
 sys.path.append('./')
+
 import torch
 from config_files.configuration_utils import create_configuration
 from experiments.reporting.report_repository import ReportRepository
 from experiments.slack_client import SlackNotifier
 from neat.neat_logger import get_neat_logger
-import os
+from neat.utils import get_slack_channel
 from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
 import fire
