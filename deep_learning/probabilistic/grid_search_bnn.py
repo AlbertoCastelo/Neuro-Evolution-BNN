@@ -49,7 +49,7 @@ n_epochs = 2000
 batch_size = 50000
 
 report_repository = ReportRepository.create(project='nas', logs_path=LOGS_PATH)
-notifier = SlackNotifier.create(channel='batch-jobs')
+notifier = SlackNotifier.create(channel=get_slack_channel(dataset_name=dataset_name))
 
 config = create_configuration(filename=f'/{dataset_name}.json')
 config.noise = 0.0

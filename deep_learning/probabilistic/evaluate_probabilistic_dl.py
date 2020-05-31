@@ -12,6 +12,8 @@ from neat.evaluation.evaluate_simple import calculate_multinomial
 from neat.evaluation.utils import _prepare_batch_data
 from neat.loss.vi_loss import get_loss
 
+N_EPOCHS_WITHOUT_IMPROVING = 200
+
 EVALUATION_N_SAMPLES = 500
 IS_ALTERNATIVE_NETWORK = False
 
@@ -34,6 +36,7 @@ class EvaluateProbabilisticDL:
         self.n_repetitions = n_repetitions
         self.backprop_report = backprop_report
 
+        self.last_update = 0
         self.best_loss_val = 100000
         self.best_loss_val_rep = None
         self.best_network_rep = None
@@ -88,15 +91,21 @@ class EvaluateProbabilisticDL:
         # train
         for epoch in range(self.n_epochs):
             loss_train = self._train_one(x_train, y_train)
-            if epoch % 10 == 0:
-                print(f'Epoch = {epoch}. Error: {loss_train}')
-                _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
-                self.backprop_report.report_epoch(epoch, loss_train, loss_val)
-                if loss_val < self.best_loss_val_rep:
+            _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
+            self.backprop_report.report_epoch(epoch, loss_train, loss_val)
+            if loss_val < self.best_loss_val_rep:
+                self.best_loss_val_rep = loss_val
+                self.best_network_rep = copy.deepcopy(self.network)
+                self.last_update = epoch
+                print(f'New best network: {loss_val}')
 
-                    self.best_loss_val_rep = loss_val
-                    self.best_network_rep = copy.deepcopy(self.network)
-                    print(f'New best network: {loss_val}')
+            if epoch - self.last_update > N_EPOCHS_WITHOUT_IMPROVING:
+                print(f'Breaking training as not improving for {N_EPOCHS_WITHOUT_IMPROVING} epochs')
+                break
+
+            if epoch % 100 == 0:
+                print(f'Epoch = {epoch}. Error: {loss_train}')
+
         print(f'Final Train Error: {loss_train}')
         print(f'Best Val Error: {self.best_loss_val}')
 

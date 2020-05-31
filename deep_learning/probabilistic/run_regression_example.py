@@ -17,7 +17,8 @@ config.n_samples = 100
 dataset = get_dataset(dataset=config.dataset,
                       train_percentage=config.train_percentage,
                       random_state=config.dataset_random_state,
-                      noise=config.noise)
+                      noise=config.noise,
+                      label_noise=config.label_noise)
 
 # TODO: fix Memory-leakage in this network when doing backprop
 n_samples = 1000

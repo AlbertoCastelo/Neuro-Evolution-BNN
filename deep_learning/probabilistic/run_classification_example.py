@@ -14,16 +14,18 @@ from neat.evaluation.utils import get_dataset
 dataset_name = 'mnist_downsampled'
 
 config = create_configuration(filename=f'/{dataset_name}.json')
-config.noise = 0.0
+config.label_noise = 0.0
+
 # config.n_input = 64
 config.n_output = 10
-
+config.beta = 0.0001
 config.n_samples = 100
 # network_filename = f'network-probabilistic-classification.pt'
 dataset = get_dataset(dataset=config.dataset,
                       train_percentage=config.train_percentage,
                       random_state=config.dataset_random_state,
-                      noise=config.noise)
+                      noise=config.noise,
+                      label_noise=config.label_noise)
 
 is_cuda = True
 
@@ -46,7 +48,7 @@ evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     n_neurons_per_layer=10,
                                     n_hidden_layers=1,
                                     is_cuda=is_cuda,
-                                    beta=0.0)
+                                    beta=config.beta)
 evaluator.run()
 
 # evaluator.save_network(network_filename)
