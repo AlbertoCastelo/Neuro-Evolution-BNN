@@ -1,5 +1,8 @@
 import sys
 import random
+
+from neat.utils import get_slack_channel
+
 sys.path.append('./')
 import torch
 from config_files.configuration_utils import create_configuration
@@ -28,7 +31,7 @@ class ExecutionRunner:
             print('Using GPU for FineTuning')
 
         report_repository = ReportRepository.create(project='neuro-evolution', logs_path=LOGS_PATH)
-        notifier = SlackNotifier.create(channel='batch-jobs')
+        notifier = SlackNotifier.create(channel=get_slack_channel(dataset_name=dataset_name))
 
         try:
             report = EvolutionReport(report_repository=report_repository,
