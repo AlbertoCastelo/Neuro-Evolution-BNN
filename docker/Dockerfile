@@ -36,6 +36,8 @@ RUN chmod 600 /root/.ssh/id_rsa \
     && echo "[url \"git@github.com:\"]\n\tinsteadOf = https://github.com/" >> /root/.gitconfig \
     && echo "StrictHostKeyChecking no " > /root/.ssh/config
 
+RUN apt update -y && \
+    apt install graphviz -y
 
 
 RUN conda update -n base conda && \
@@ -45,14 +47,19 @@ RUN conda update -n base conda && \
 COPY requirements.txt /tmp/neat/requirements.txt
 RUN pip install -r /tmp/neat/requirements.txt
 
+RUN pip install pyarrow && \
+    pip install pytest
+
+USER $NB_UID
+
 
 # R pre-requisites
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    fonts-dejavu \
-    gfortran \
-    gcc && \
-    rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && \
+#    apt-get install -y --no-install-recommends \
+#    fonts-dejavu \
+#    gfortran \
+#    gcc && \
+#    rm -rf /var/lib/apt/lists/*
 
 # Julia dependencies
 # install Julia packages in /opt/julia instead of $HOME
@@ -123,10 +130,9 @@ RUN apt-get update && \
 #RUN jupyter notebook --generate-config
 
 #RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/mykey.key -out /root/mycert.pem -subj "/C=ES/ST=Madrid/L=Madrid/O=Nextail/OU=NextailCerts/CN=etc/emailAddress=infraops@nextail.com"
-RUN apt update -y && \
-    apt install graphviz -y
 
-USER $NB_UID
+
+#USER $NB_UID
 
 #RUN echo "c.NotebookApp.allow_password_change = False" >> /home/jovyan/.jupyter/jupyter_notebook_config
 RUN echo "c.NotebookApp.token = ''" >> /home/jovyan/.jupyter/jupyter_notebook_config.py && \
@@ -134,4 +140,4 @@ RUN echo "c.NotebookApp.token = ''" >> /home/jovyan/.jupyter/jupyter_notebook_co
 
 EXPOSE 8888
 
-CMD ["jupyter", "lab"]
+#CMD ["jupyter", "lab"]

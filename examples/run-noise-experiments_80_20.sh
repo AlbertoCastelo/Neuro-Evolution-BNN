@@ -22,6 +22,35 @@ n_species=5
 architecture_mutation_power=1
 train_percentage=0.75
 
+###################################################################
+# TITANIC
+#DATASET=titanic
+#n_input=6
+#n_output=2
+#POP_SIZE=50
+#PARALLEL_EVALUATION=1
+#n_processes=15
+#IS_DISCRETE=0
+#initial_nodes_sample=6
+#n_species=5
+#architecture_mutation_power=1
+#train_percentage=0.75
+
+
+###################################################################
+# MNIST-DOWNSAMPLED
+DATASET=mnist-downsampled
+n_input=256
+n_output=10
+POP_SIZE=50
+PARALLEL_EVALUATION=1
+n_processes=10
+IS_DISCRETE=0
+initial_nodes_sample=50
+n_species=5
+architecture_mutation_power=1
+train_percentage=0.75
+
 
 node_delete_prob=0.0
 connection_delete_prob=0.0
@@ -47,7 +76,7 @@ function run_bneat {
   fix_std=$2
   n_samples=$3
 #  echo $correlation_id, $fix_std, $n_samples
-  for noise in 0.0 0.5 1.0 1.5 2.0
+  for noise in 10.0 5.0 0.0
   do
 #  for repetition in 1 2 3 4 5
   for repetition in $(seq 1 $N_REPETITIONS)
@@ -89,13 +118,13 @@ function run_bneat {
 #run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Neat
-correlation_id='neat_5_'$DATASET
+correlation_id='neat_7_'$DATASET
 fix_std=1
 n_samples=1
 run_bneat $correlation_id $fix_std $n_samples
 
 # RUN Bayesian-Neat
-correlation_id='bayesian_neat_5_'$DATASET
+correlation_id='bayesian_neat_7_'$DATASET
 fix_std=0
 n_samples=50
 run_bneat $correlation_id $fix_std $n_samples

@@ -1,5 +1,4 @@
 #!/bin/bash
-clear
 
 export AWS_S3_HOST=http://localhost:9000
 export AWS_ACCESS_KEY_ID=minioKey
@@ -7,65 +6,6 @@ export AWS_SECRET_ACCESS_KEY=minioSecret
 export AWS_REGION=eu-west-1
 export SLACK_API_TOKEN=xoxp-803548304551-788909703698-803912405606-3537f75bda859d01dafc0bffcb200ade
 export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
-
-###################################################################
-# CLASSIFICATION-MISO
-#DATASET=classification-miso
-#n_input=2
-#n_output=2
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=15
-#IS_DISCRETE=0
-#initial_nodes_sample=2
-#n_species=5
-#architecture_mutation_power=1
-#train_percentage=0.75
-
-###################################################################
-# IRIS
-#DATASET=iris
-#n_input=4
-#n_output=3
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=15
-#IS_DISCRETE=0
-#initial_nodes_sample=4
-#n_species=5
-#architecture_mutation_power=1
-#is_initial_fully_connected=1
-#train_percentage=0.75
-
-###################################################################
-# TITANIC
-#DATASET=titanic
-#n_input=6
-#n_output=2
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=15
-#IS_DISCRETE=0
-#initial_nodes_sample=6
-#n_species=5
-#architecture_mutation_power=1
-#is_initial_fully_connected=1
-#train_percentage=0.75
-
-###################################################################
-# BREAST CANCER
-#DATASET=breast_cancer
-#n_input=30
-#n_output=2
-#POP_SIZE=50
-#PARALLEL_EVALUATION=1
-#n_processes=15
-#IS_DISCRETE=0
-#initial_nodes_sample=6
-#n_species=5
-#architecture_mutation_power=1
-#is_initial_fully_connected=1
-#train_percentage=0.75
 
 
 ###################################################################
@@ -75,13 +15,13 @@ n_input=64
 n_output=10
 POP_SIZE=50
 PARALLEL_EVALUATION=1
-n_processes=12
+n_processes=14
 IS_DISCRETE=0
 initial_nodes_sample=32
 n_species=5
-architecture_mutation_power=10
+architecture_mutation_power=1
 train_percentage=0.75
-is_initial_fully_connected=0
+is_initial_fully_connected=1
 
 ###################################################################
 ## COMMON
@@ -132,9 +72,9 @@ function run_bneat {
 #  for train_percentage in 0.05 0.1 0.15 0.2 0.3 0.4 0.5 0.7 0.9
 #  for train_percentage in 0.05 0.1 0.15 0.2
 #  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
-  for label_noise in 0.0 0.1 0.2 0.3
-
-  do
+#  for label_noise in 0.0 0.1 0.2 0.3
+#
+#  do
 #  for repetition in 1 2 3 4 5
   for repetition in $(seq 1 $N_REPETITIONS)
   do
@@ -182,7 +122,7 @@ function run_bneat {
                               'label_noise': $label_noise
         }"
   done
-  done
+#  done
 }
 
 # test
@@ -192,7 +132,7 @@ function run_bneat {
 #run_bneat $correlation_id $fix_std $n_samples
 
 #experiment_name='_ft_2_'
-PREFIX=''
+PREFIX='testing'
 N_EXTERNAL_REPETITIONS=5
 for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
   do
