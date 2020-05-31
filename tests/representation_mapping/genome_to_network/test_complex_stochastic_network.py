@@ -212,7 +212,7 @@ class TestComplexStochasticNetwork(TestCase):
         y, _ = model(input_data)
 
         expected_y = 9.0
-        self.assertAlmostEqual(expected_y, y.numpy()[0][0])
+        self.assertAlmostEqual(expected_y, y.numpy()[0][0], places=2)
 
     def test_network_structure_miso(self):
         genome = generate_genome_given_graph(graph=((-1, 1), (-2, 1), (1, 0), (-1, 0)),
@@ -226,10 +226,12 @@ class TestComplexStochasticNetwork(TestCase):
         y, _ = model(input_data)
 
         expected_y = 13.0
-        self.assertAlmostEqual(expected_y, y.numpy()[0][0])
+        self.assertAlmostEqual(expected_y, y.numpy()[0][0], places=2)
 
     def test_network_structure_miso_2(self):
         self.config.n_output = 2
+        is_cuda = True
+
         genome = generate_genome_given_graph(graph=((-1, 2), (-2, 2), (2, 0), (2, 1),
                                                     (-1, 0), (-1, 1), (-2, 1), (-2, 0)),
                                              connection_weights=(1.0, 2.0, 3.0, 4.0,
@@ -238,8 +240,8 @@ class TestComplexStochasticNetwork(TestCase):
         input_data = torch.tensor([[1.0, 1.0]])
         input_data = input_data.view(-1, genome.n_input).repeat(n_samples, 1)
 
-        model = ComplexStochasticNetwork(genome=genome)
-        # print(model.layers[0].weight_mean)
+        model = ComplexStochasticNetwork(genome=genome, is_trainable=True, is_cuda=is_cuda)
+
         self.assertEqual(model.layers[0].input_keys, [2, -2, -1])
         self.assertTrue(torch.allclose(model.layers[0].weight_mean,
                                        torch.tensor([[3.0, 1.0, 0.0],
@@ -248,9 +250,14 @@ class TestComplexStochasticNetwork(TestCase):
         self.assertTrue(torch.allclose(model.layers[1].weight_mean,
                                        torch.tensor([[2.0, 1.0]]), atol=1e-02))
 
+        if is_cuda:
+            input_data = input_data.cuda()
+            model.cuda()
         y, _ = model(input_data)
 
         expected_y = torch.tensor([[10.0, 13.0]])
+        if is_cuda:
+            y = y.cpu()
         self.assertTrue(torch.allclose(y, expected_y, atol=1e-02))
 
     def test_network_structure_miso_3(self):
