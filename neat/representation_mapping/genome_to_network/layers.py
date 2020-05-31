@@ -314,41 +314,6 @@ class ComplexStochasticLinear(nn.Module):
         # assumes 1 sigma for all weights per layer.
         self.log_alpha.data.uniform_(-stdv, stdv)
 
-    # def forward_2(self, x):
-    #     # EQUATION
-    #     # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
-    #     #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
-    #     batch_size = x.shape[0]
-    #
-    #     print(f'x: {x.shape}')
-    #     qw_var = torch.exp(1.0 + self.qw_logvar)
-    #     qb_var = torch.exp(1.0 + self.qb_logvar)
-    #
-    #     w_sample_size = (self.out_features * self.n_samples, self.in_features)
-    #     qw_mean = self.qw_mean.repeat(self.n_samples, 1)
-    #     qw_var = qw_var.repeat(self.n_samples, 1)
-    #     # assert (qw_mean.shape == w_sample_size)
-    #
-    #     w_sample = qw_mean + qw_var * torch.randn(w_sample_size)
-    #     print(f'w-samples: {w_sample.shape}')
-    #     b_sample_size = (self.out_features * self.n_samples, 1)
-    #     b_mean = self.qb_mean.view(-1, 1).repeat(self.n_samples, 1)
-    #     qb_var = qb_var.view(-1, 1).repeat(self.n_samples, 1)
-    #
-    #     b_sample = b_mean + qb_var * torch.randn(b_sample_size)
-    #     print(f'b-samples: {b_sample.shape}')
-    #     y = F.linear(input=x, weight=w_sample, )
-    #     print(f'y: {y.shape}')
-    #     log_q_theta = self._log_q_theta(w_sample=w_sample, b_sample=b_sample,
-    #                                     qw_mean=self.qw_mean, qw_std=qw_var,
-    #                                     qb_mean=self.qb_mean, qb_std=qb_var)
-    #
-    #     log_p_theta = self._log_p_theta(w_sample=w_sample, b_sample=b_sample)
-    #
-    #     # kl_qw_pw = log_p_theta - log_q_theta
-    #     kl_qw_pw = 0
-    #     return y, kl_qw_pw
-
     def forward(self, x):
         # EQUATION
         # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
@@ -364,14 +329,14 @@ class ComplexStochasticLinear(nn.Module):
 
         batch_size = x.shape[0]
 
-        qw_var = torch.exp(1.0 + qw_logvar)
-        qb_var = torch.exp(1.0 + self.qb_logvar)
+        qw_sigma = torch.sqrt(1e-8 + torch.exp(1.0 + qw_logvar))
+        qb_sigma = torch.sqrt(1e-8 + torch.exp(1.0 + self.qb_logvar))
 
         x_w_mu = F.linear(input=x, weight=qw_mean)
-        x_w_var = F.linear(input=x, weight=qw_var)
+        x_w_sigma = F.linear(input=x, weight=qw_sigma)
 
         b_mu = self.qb_mean.repeat(batch_size, 1)
-        b_var = qb_var.repeat(batch_size, 1)
+        b_sigma = qb_sigma.repeat(batch_size, 1)
 
         output_size = x_w_mu.size()
         w_samples = torch.randn(output_size)
@@ -380,11 +345,11 @@ class ComplexStochasticLinear(nn.Module):
             w_samples = w_samples.cuda()
             b_samples = b_samples.cuda()
 
-        output = 1e-8 + x_w_mu + x_w_var * w_samples + \
-                 b_mu + b_var * b_samples
+        output = 1e-8 + x_w_mu + x_w_sigma * w_samples + \
+                 b_mu + b_sigma * b_samples
 
         # calculate KL(q(theta)||p(theta))
-        kl_qw_pw = self.get_kl_qw_pw(torch.sqrt(qb_var), torch.sqrt(qw_var))
+        kl_qw_pw = self.get_kl_qw_pw(qb_sigma, qw_sigma)
         if self.is_cuda:
             kl_qw_pw = kl_qw_pw.cuda()
 
