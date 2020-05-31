@@ -1,14 +1,14 @@
 {
   "parallel_evaluation": true,
-  "n_processes": 10,
+  "n_processes": 14,
   "is_fine_tuning": true,
   "epochs_fine_tuning": 2000,
   "is_discrete": true,
   "is_gpu": false,
-  "train_percentage": 0.9,
+  "train_percentage": 0.75,
   "batch_size": 100000000,
   "beta_type": "other",
-  "beta": 0.000001,
+  "beta": 0.0001,
 
   "fix_std": true,
   "fix_architecture": false,

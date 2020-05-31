@@ -5,10 +5,10 @@
   "epochs_fine_tuning": 2000,
   "is_discrete": false,
   "is_gpu": false,
-  "train_percentage": 0.9,
+  "train_percentage": 0.75,
   "batch_size": 100000000,
   "beta_type": "other",
-  "beta": 0.00,
+  "beta": 0.0001,
 
   "fix_std": false,
   "fix_architecture": false,

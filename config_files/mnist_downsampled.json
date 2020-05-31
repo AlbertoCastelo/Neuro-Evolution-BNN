@@ -1,15 +1,15 @@
 {
   "parallel_evaluation": true,
-  "n_processes": 10,
+  "n_processes": 12,
   "is_fine_tuning": true,
   "epochs_fine_tuning": 2000,
 
   "is_discrete": true,
   "is_gpu": false,
-  "train_percentage": 0.9,
+  "train_percentage": 0.75,
   "batch_size": 100000000,
   "beta_type": "other",
-  "beta": 0.00,
+  "beta": 0.0001,
 
   "fix_std": true,
   "fix_architecture": false,
@@ -19,7 +19,7 @@
   "feed_forward": true,
   "is_initial_fully_connected": false,
   "n_initial_hidden_neurons": 0,
-  "initial_nodes_sample": 50,
+  "initial_nodes_sample": 32,
 
   "dataset": "mnist_downsampled",
   "dataset_random_state": 35,
@@ -98,10 +98,10 @@
   "replace_rate": 0.1,
 
   "architecture_mutation_power": 1,
-  "node_add_prob": 0.5,
+  "node_add_prob": 1.0,
   "node_delete_prob": 0.1,
   "connection_add_prob": 0.5,
-  "connection_delete_prob": 0.25,
+  "connection_delete_prob": 1.0,
 
   "node_aggregation": "sum"
 }
