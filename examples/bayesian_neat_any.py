@@ -10,61 +10,64 @@ from neat.population_engine import EvolutionEngine
 from neat.reporting.reports_pyneat import EvolutionReport
 from neat.utils import timeit, get_slack_channel
 
-# config_file = 'classification-miso'
-# config_file = 'iris'
-# config_file = 'titanic'
+# dataset_name = 'classification-miso'
+# dataset_name = 'iris'
+# dataset_name = 'titanic'
 dataset_name = 'mnist_downsampled'
-# config_file = 'wine'
-# config_file = 'breast_cancer'
+# dataset_name = 'wine'
+# dataset_name = 'breast_cancer'
+
 config = create_configuration(filename=f'/{dataset_name}.json')
 
-config.n_generations = 150
+config.n_generations = 15
 config.epochs_fine_tuning = 4000
+config.beta = 0.0001
 
-config.n_input = 64
-config.is_discrete = False
-config.label_noise = 0.0
-config.is_initial_fully_connected = True
-config.initial_nodes_sample = 32
-config.n_initial_hidden_neurons = 0
+
+# config.n_input = 64
+# config.is_discrete = False
+# config.label_noise = 0.0
+# config.is_initial_fully_connected = True
+# config.initial_nodes_sample = 32
+# config.n_initial_hidden_neurons = 0
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
 
 # TODO: better mechanism for override
-config.pop_size = 50
-config.n_processes = 14
-config.parallel_evaluation = True
-config.train_percentage = 0.75
-config.noise = 0.0
-config.label_noise = 0.0
-
-config.bias_mean_max_value = 10.0
-config.bias_mean_min_value = -10.0
-config.bias_std_max_value = 2.0
-config.bias_std_min_value = 0.000001
-
-config.weight_mean_max_value = 10.0
-config.weight_mean_min_value = -10.0
-config.weight_std_max_value = 2.0
-config.weight_std_min_value = 0.000001
-
-config.node_delete_prob = 0.0
-config.connection_delete_prob = 0.0
-config.node_add_prob = 1.0
-config.connection_add_prob = 1.0
-
-n_species = 5
-architecture_mutation_power = 1
-
-
-config.n_samples = 50
-config.fix_std = False
-
-# config.beta = 0.0
-# config.n_initial_hidden_neurons = 0
-config.fix_architecture = False
-config.beta = 0.005
+# config.pop_size = 50
+# config.n_processes = 14
+# config.parallel_evaluation = True
+# config.train_percentage = 0.75
+# config.noise = 0.0
+# config.label_noise = 0.0
+#
+# config.bias_mean_max_value = 10.0
+# config.bias_mean_min_value = -10.0
+# config.bias_std_max_value = 2.0
+# config.bias_std_min_value = 0.000001
+#
+# config.weight_mean_max_value = 10.0
+# config.weight_mean_min_value = -10.0
+# config.weight_std_max_value = 2.0
+# config.weight_std_min_value = 0.000001
+#
+# config.node_delete_prob = 0.0
+# config.connection_delete_prob = 0.0
+# config.node_add_prob = 1.0
+# config.connection_add_prob = 1.0
+#
+# n_species = 5
+# architecture_mutation_power = 1
+#
+#
+# config.n_samples = 50
+# config.fix_std = False
+#
+# # config.beta = 0.0
+# # config.n_initial_hidden_neurons = 0
+# config.fix_architecture = False
+config.beta = 0.000
 
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = dataset_name

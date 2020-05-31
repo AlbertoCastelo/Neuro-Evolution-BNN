@@ -92,7 +92,7 @@ class StandardTrainer:
 
     def _train_one(self, x_batch, y_batch, kl_qw_pw):
         # TODO: the kl_qw_pw returned by the network gives problems with backprop.
-        output, _ = self.network(x_batch)
+        output, kl_qw_pw = self.network(x_batch)
         output, _ = calculate_multinomial(output, self.n_samples, self.n_output)
 
         loss = self.criterion(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=self.beta)
