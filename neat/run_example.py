@@ -37,7 +37,7 @@ class ExecutionRunner:
                                      correlation_id=correlation_id)
             notifier.send(f'New job using: node_add_prob={config_parameters}')
             print(report.report.execution_id)
-            evolution_engine = EvolutionEngine(report=report, notifier=notifier, is_cuda=False)
+            evolution_engine = EvolutionEngine(report=report, notifier=notifier, is_cuda=is_cuda)
             evolution_engine.run()
         except Exception as e:
             print(e)

@@ -14,3 +14,7 @@ def timeit(func):
             message = f"         Total Time in {func.__name__}: {end_} s"
             logger.time(message)
     return _time_it
+
+
+def get_slack_channel(dataset_name):
+    return f'dataset_{dataset_name}'

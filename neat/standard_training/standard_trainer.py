@@ -9,6 +9,7 @@ from neat.evaluation.utils import _prepare_batch_data
 from neat.fitness.kl_divergence import compute_kl_qw_pw
 from neat.loss.vi_loss import get_loss
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+N_EPOCHS_WITHOUT_IMPROVING = 200
 
 
 class StandardTrainer:
@@ -27,6 +28,7 @@ class StandardTrainer:
         self.criterion = None
         self.optimizer = None
         self.final_loss = None
+        self.last_update = 0
         self.best_loss_val = 10000
         self.best_network_state = None
 
@@ -69,13 +71,17 @@ class StandardTrainer:
         self.network.train()
         for epoch in range(self.n_epochs):
             loss_epoch = self._train_one(x_train, y_train, kl_qw_pw)
-            if epoch % 10 == 0:
-                _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
+            # if epoch % 10 == 0:
+            _, _, _, loss_val = self._evaluate(x_val, y_val, network=self.network)
 
-                if loss_val < self.best_loss_val:
+            if loss_val < self.best_loss_val:
+                self.best_loss_val = loss_val
+                self.best_network_state = copy.deepcopy(self.network.state_dict())
+                self.last_update = epoch
 
-                    self.best_loss_val = loss_val
-                    self.best_network_state = copy.deepcopy(self.network.state_dict())
+            if epoch - self.last_update > N_EPOCHS_WITHOUT_IMPROVING:
+                print(f'Breaking training as not improving for {N_EPOCHS_WITHOUT_IMPROVING} epochs')
+                break
 
             if epoch % 200 == 0:
                 print(f'Epoch = {epoch}. Training Loss: {loss_epoch}. '

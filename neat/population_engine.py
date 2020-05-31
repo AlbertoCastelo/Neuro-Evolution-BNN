@@ -20,8 +20,8 @@ from neat.stagnation import Stagnation
 from neat.utils import timeit
 
 TIMEOUT_SECONDS = 3600
-N_EPOCHS = 30
-LR = 0.01
+N_EPOCHS = 5
+LR = 0.05
 WEIGHT_DECAY = 0.0005
 
 
@@ -70,7 +70,7 @@ class EvolutionEngine:
 
         if self.evolution_configuration.is_fine_tuning:
             fine_tuner = FineTuner(species=self.speciation_engine.species, config=self.evolution_configuration,
-                                   is_cuda=self.is_cuda)
+                                   is_cuda=self.is_cuda, only_best=False)
             fine_tuner.run()
             best_genomes = fine_tuner.species_best_genome
             # best_genomes = self.evaluation_engine.evaluate(population=best_genomes)
