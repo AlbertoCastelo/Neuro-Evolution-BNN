@@ -6,10 +6,11 @@ from neat.dataset.classification_example_3 import ClassificationExample2Dataset
 from neat.dataset.classification_mnist import MNISTDataset
 from neat.dataset.classification_mnist_binary import MNISTBinaryDataset
 from neat.dataset.classification_mnist_downsampled import MNISTDownsampledDataset
-from neat.dataset.classification_titanic import TitanicDataset
+from neat.dataset.classification_titanic import TitanicDataset, Titanic2Dataset
 from neat.dataset.classification_xray_binary import XRayBinary
 from neat.dataset.iris import IrisDataset
 from neat.dataset.regression_example import RegressionExample1Dataset, RegressionExample2Dataset
+from neat.dataset.spambase import SpamBaseDataset
 from neat.dataset.wine import WineDataset
 
 
@@ -48,7 +49,7 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
         dataset = ClassificationExample2Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                                 random_state=random_state, noise=noise)
     elif dataset == 'titanic':
-        dataset = TitanicDataset(train_percentage=train_percentage, dataset_type=dataset_type,
+        dataset = Titanic2Dataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                  random_state=random_state, noise=noise, label_noise=label_noise)
     elif dataset == 'mnist':
         dataset = MNISTDataset(train_percentage=train_percentage, dataset_type=dataset_type,
@@ -74,6 +75,9 @@ def get_dataset(dataset, train_percentage=0.4, testing=False, random_state=42, n
     elif dataset == 'breast_cancer':
         dataset = BreastCancerDataset(train_percentage=train_percentage, dataset_type=dataset_type,
                                       random_state=random_state, noise=noise, label_noise=label_noise)
+    elif dataset == 'spambase':
+        dataset = SpamBaseDataset(train_percentage=train_percentage, dataset_type=dataset_type,
+                                  random_state=random_state, noise=noise, label_noise=label_noise)
     else:
         raise ConfigError(f'Dataset Name is incorrect: {dataset}')
     dataset.generate_data()
