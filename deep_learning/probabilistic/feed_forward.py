@@ -24,7 +24,7 @@ class ProbabilisticFeedForward(nn.Module):
             setattr(self, f'activation_{i}', self.activation)
             in_features = n_neurons_per_layer
 
-        layer = StochasticLinear(in_features=in_features, out_features=n_output, is_cuda=is_cuda)
+        layer = ComplexStochasticLinear(in_features=in_features, out_features=n_output, is_cuda=is_cuda)
         setattr(self, f'layer_0', layer)
 
     def reset_parameters(self):

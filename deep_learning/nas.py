@@ -51,21 +51,14 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
                 params = {'n_hidden_layers': n_hidden_layers,
                           'n_neurons_per_layer': n_neurons_per_layer}
                 best_network = evaluator.network
-    evaluator = EvaluateDL(dataset=dataset,
-                           batch_size=batch_size,
-                           n_samples=config.n_samples,
-                           lr=lr,
-                           weight_decay=weight_decay,
-                           n_epochs=n_epochs,
-                           n_neurons_per_layer=params['n_neurons_per_layer'],
-                           n_hidden_layers=params['n_hidden_layers'],
-                           is_cuda=is_cuda,
-                           beta=config.beta)
-    evaluator._initialize()
-    evaluator.best_network = best_network
-    _, y_true, y_pred = evaluator.evaluate()
-    y_true = y_true.numpy()
-    y_pred = torch.argmax(y_pred, dim=1).numpy()
+    n_neurons_per_layer = params['n_neurons_per_layer']
+    n_hidden_layers = params['n_hidden_layers']
+    y_true, y_pred, y_pred_prob = evaluate_network(batch_size=batch_size, network=best_network, config=config,
+                                                   dataset=dataset,
+                                                   is_cuda=is_cuda,
+                                                   n_neurons_per_layer=n_neurons_per_layer,
+                                                   n_hidden_layers=n_hidden_layers,
+                                                   EvaluateDL=EvaluateDL)
     accuracy = accuracy_score(y_true, y_pred) * 100
     f1 = f1_score(y_true, y_pred, average='weighted')
     precision = precision_score(y_true, y_pred, average='weighted')
@@ -88,3 +81,25 @@ def neural_architecture_search(n_hidden_layers_values, n_neurons_per_layer_value
                   f'Accuracy: {accuracy} %. \n'
                   f'F1: {f1}. \n'
                   f'Confusion-matrix: {confusion_m}')
+    return backprop_report
+
+
+def evaluate_network(batch_size, network, config, dataset, is_cuda, n_neurons_per_layer, n_hidden_layers,
+                     EvaluateDL=EvaluateProbabilisticDL):
+    evaluator = EvaluateDL(dataset=dataset,
+                           batch_size=batch_size,
+                           n_samples=config.n_samples,
+                           lr=0.01,
+                           weight_decay=None,
+                           n_epochs=None,
+                           n_neurons_per_layer=n_neurons_per_layer,
+                           n_hidden_layers=n_hidden_layers,
+                           is_cuda=is_cuda,
+                           beta=config.beta)
+    evaluator._initialize()
+    evaluator.best_network = network
+    _, y_true, y_pred_prob = evaluator.evaluate()
+    y_true = y_true.numpy()
+    y_pred = torch.argmax(y_pred_prob, dim=1).numpy()
+    y_pred_prob = y_pred_prob.numpy()
+    return y_true, y_pred, y_pred_prob

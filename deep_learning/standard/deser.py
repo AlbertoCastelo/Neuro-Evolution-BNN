@@ -1,4 +1,3 @@
-from deep_learning.probabilistic.alternative_network.feed_forward_alternative import ProbabilisticFeedForwardAlternative
 from deep_learning.probabilistic.feed_forward import ProbabilisticFeedForward
 from collections import OrderedDict
 import numpy as np

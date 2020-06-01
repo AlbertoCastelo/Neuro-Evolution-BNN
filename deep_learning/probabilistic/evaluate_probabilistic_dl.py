@@ -43,10 +43,9 @@ class EvaluateProbabilisticDL:
         self.best_network = None
 
     def run(self):
-        self.best_loss_val_rep = 100000
-        self.best_network_rep = None
-
         for i in range(self.n_repetitions):
+            self.best_loss_val_rep = 100000
+            self.best_network_rep = None
             self._run()
             if self.best_loss_val_rep < self.best_loss_val:
                 self.best_loss_val = self.best_loss_val_rep
@@ -107,7 +106,7 @@ class EvaluateProbabilisticDL:
                 print(f'Epoch = {epoch}. Error: {loss_train}')
 
         print(f'Final Train Error: {loss_train}')
-        print(f'Best Val Error: {self.best_loss_val}')
+        print(f'Best Val Error: {self.best_loss_val_rep}')
 
     def _initialize(self):
         if IS_ALTERNATIVE_NETWORK:

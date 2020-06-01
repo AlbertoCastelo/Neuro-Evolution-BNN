@@ -44,10 +44,12 @@ class BackpropReport:
         # if best_network.is_cuda:
         best_network.cpu()
 
-        if isinstance(best_network, ProbabilisticFeedForward) or \
-            isinstance(best_network, ProbabilisticFeedForwardAlternative):
+        if isinstance(best_network, ProbabilisticFeedForward):
             best_nework_dict = ProbabilisticFeedForwardDeser.to_dict(best_network)
             network_type = 'probabilistic'
+        elif isinstance(best_network, ProbabilisticFeedForwardAlternative):
+            best_nework_dict = ProbabilisticFeedForwardDeser.to_dict(best_network)
+            network_type = 'probabilistic-alternative'
         elif isinstance(best_network, FeedForward):
             best_nework_dict = FeedForwardDeser.to_dict(best_network)
             network_type = 'standard'
