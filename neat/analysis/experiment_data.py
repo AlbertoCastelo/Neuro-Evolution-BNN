@@ -1,7 +1,17 @@
 import os
-from sklearn.metrics import accuracy_score, f1_score, mean_squared_error, mean_absolute_error
+
+import jsons
+from sklearn.metrics import accuracy_score, f1_score, mean_squared_error, mean_absolute_error, precision_score, \
+    recall_score
+
+from deep_learning.nas import evaluate_network
+from deep_learning.probabilistic.deser import ProbabilisticFeedForwardDeser
+from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL, IS_ALTERNATIVE_NETWORK
+from deep_learning.standard.deser import FeedForwardDeser
+from deep_learning.standard.evaluate_standard_dl import EvaluateStandardDL
 from experiments.reporting.report_repository import ReportRepository
-from neat.configuration import set_configuration
+from neat.analysis.uncertainty.calibration_error import expected_calibration_error
+from neat.configuration import set_configuration, BaseConfiguration
 from neat.evaluation.evaluate_simple import evaluate_genome
 from neat.evaluation.utils import get_dataset
 from neat.genome import Genome
@@ -12,6 +22,8 @@ import numpy as np
 import torch
 
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
+
+ECE_N_BINS = 5
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -132,18 +144,18 @@ class ExperimentDataNE(ExperimentData):
                                   random_state=config.dataset_random_state, noise=config.noise,
                                   label_noise=config.label_noise)
 
-            x, y_true, y_pred, loss_value = evaluate_genome(genome=genome,
-                                                            dataset=dataset,
-                                                            loss=loss,
-                                                            problem_type=config.problem_type,
-                                                            beta_type=config.beta_type,
-                                                            batch_size=config.batch_size,
-                                                            n_samples=self.n_samples,
-                                                            is_gpu=config.is_gpu,
-                                                            is_testing=True,
-                                                            return_all=True)
+            x, y_true, y_pred_prob, loss_value = evaluate_genome(genome=genome,
+                                                                 dataset=dataset,
+                                                                 loss=loss,
+                                                                 problem_type=config.problem_type,
+                                                                 beta_type=config.beta_type,
+                                                                 batch_size=config.batch_size,
+                                                                 n_samples=self.n_samples,
+                                                                 is_gpu=config.is_gpu,
+                                                                 is_testing=True,
+                                                                 return_all=True)
 
-            y_pred = torch.argmax(y_pred, dim=1)
+            y_pred = torch.argmax(y_pred_prob, dim=1)
 
             train_percentage = config.train_percentage
             noise = config.noise
@@ -176,7 +188,11 @@ class ExperimentDataNE(ExperimentData):
 
             if config.problem_type == 'classification':
                 chunk['accuracy'] = accuracy_score(y_true, y_pred) * 100
+                chunk['precision'] = precision_score(y_true, y_pred, average='weighted')
+                chunk['recall'] = recall_score(y_true, y_pred, average='weighted')
                 chunk['f1'] = f1_score(y_true, y_pred, average='weighted')
+                ece, _ = expected_calibration_error(y_true.numpy(), y_pred_prob.numpy(), n_bins=ECE_N_BINS)
+                chunk['ece'] = ece
             else:
                 chunk['mse'] = mean_squared_error(y_true, y_pred)
                 chunk['mae'] = mean_absolute_error(y_true, y_pred)
@@ -273,11 +289,55 @@ class ExperimentDataNAS(ExperimentData):
         n_output = report.configuration['n_output']
         end_condition = report.end_condition
         duration = report.duration
-        accuracy = report.metrics['accuracy']
-        f1 = report.metrics['f1']
-
         n_hidden_layers = report.best_network_params['n_hidden_layers']
         n_neurons_per_layer = report.best_network_params['n_neurons_per_layer']
+
+
+        accuracy = report.metrics['accuracy']
+        recall = report.metrics['recall']
+        precision = report.metrics['precision']
+        f1 = report.metrics['f1']
+
+        network_type = report.network_type
+        best_network = report.best_network
+        if network_type == 'probabilistic':
+            network = ProbabilisticFeedForwardDeser.from_dict(best_network)
+            IS_ALTERNATIVE_NETWORK = False
+            EvaluateDL = EvaluateProbabilisticDL
+        elif network_type == 'probabilistic-alternative':
+            network = ProbabilisticFeedForwardDeser.from_dict(best_network)
+            IS_ALTERNATIVE_NETWORK = True
+            EvaluateDL = EvaluateProbabilisticDL
+        elif network_type == 'standard':
+            network = FeedForwardDeser.from_dict(best_network)
+            EvaluateDL = EvaluateStandardDL
+        else:
+            raise ValueError
+
+        config = jsons.load(report.configuration, BaseConfiguration)
+        set_configuration(config)
+
+        dataset = get_dataset(dataset=config.dataset, train_percentage=train_percentage,
+                              random_state=config.dataset_random_state, noise=noise, label_noise=label_noise)
+        y_true, y_pred, y_pred_prob = evaluate_network(network=network,
+                                                       batch_size=config.batch_size,
+                                                       config=config,
+                                                       dataset=dataset,
+                                                       is_cuda=False,
+                                                       n_neurons_per_layer=n_neurons_per_layer,
+                                                       n_hidden_layers=n_hidden_layers,
+                                                       EvaluateDL=EvaluateDL)
+
+        if config.problem_type == 'classification':
+            accuracy = accuracy_score(y_true, y_pred) * 100
+            f1 = f1_score(y_true, y_pred, average='weighted')
+            precision = precision_score(y_true, y_pred, average='weighted')
+            recall = recall_score(y_true, y_pred, average='weighted')
+            ece, _ = expected_calibration_error(y_true, y_pred_prob, n_bins=ECE_N_BINS)
+
+        else:
+            mse = mean_squared_error(y_true, y_pred)
+            mae = mean_absolute_error(y_true, y_pred)
 
         n_nodes, n_connections = ExperimentDataNAS._calculate_network_size(n_input, n_output, n_hidden_layers,
                                                                            n_neurons_per_layer)
@@ -296,7 +356,10 @@ class ExperimentDataNAS(ExperimentData):
                                   'n_nodes': n_nodes,
                                   'n_connections': n_connections,
                                   'f1': f1,
+                                  'recall': recall,
+                                  'precision': precision,
                                   'accuracy': accuracy,
+                                  'ece': ece
                                   }, index=[0])
 
         return df_report

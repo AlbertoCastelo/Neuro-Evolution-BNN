@@ -316,8 +316,8 @@ class ComplexStochasticLinear(nn.Module):
 
     def forward(self, x):
         # EQUATION
-        # y = x·(mu_w + exp(log_var_w + 1.0)·N(0,1)) +
-        #     (mu_b + + exp(log_var_b + 1.0)·N(0,1))
+        # y = x·(mu_w + sigma_w·N(0,1)) +
+        #     (mu_b + + sigma_b·N(0,1))
 
         # needed if we apply mask. Otherwise can be removed.
         if self.masks:
@@ -339,11 +339,13 @@ class ComplexStochasticLinear(nn.Module):
         b_sigma = qb_sigma.repeat(batch_size, 1)
 
         output_size = x_w_mu.size()
-        w_samples = torch.randn(output_size)
-        b_samples = torch.randn(output_size)
+
         if self.is_cuda:
-            w_samples = w_samples.cuda()
-            b_samples = b_samples.cuda()
+            w_samples = torch.cuda.FloatTensor(output_size).normal_()
+            b_samples = torch.cuda.FloatTensor(output_size).normal_()
+        else:
+            w_samples = torch.randn(output_size)
+            b_samples = torch.randn(output_size)
 
         output = 1e-8 + x_w_mu + x_w_sigma * w_samples + \
                  b_mu + b_sigma * b_samples

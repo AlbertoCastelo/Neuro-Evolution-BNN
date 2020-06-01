@@ -33,9 +33,9 @@ class FineTuner:
             # genome_to_finetune = specie.representative
             genome_to_finetune = specie.get_fittest()
             self.species_best_genome[specie_key] = self._finetune_genome(genome_to_finetune)
-        self.config.parallel_evaluation = False
-        evaluation_engine = EvaluationStochasticEngine()
-        self.species_best_genome = evaluation_engine.evaluate(population=self.species_best_genome)
+        # self.config.parallel_evaluation = False
+        # evaluation_engine = EvaluationStochasticEngine()
+        # self.species_best_genome = evaluation_engine.evaluate(population=self.species_best_genome)
 
     def _finetune_best(self):
         best_genome = None
