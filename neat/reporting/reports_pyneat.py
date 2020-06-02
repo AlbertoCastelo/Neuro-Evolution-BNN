@@ -102,7 +102,7 @@ class EvolutionReport:
                                                         batch_size=config.batch_size,
                                                         n_samples=config.n_samples,
                                                         is_gpu=config.is_gpu,
-                                                        is_testing=False,
+                                                        is_testing=True,
                                                         return_all=True)
         y_pred = torch.argmax(y_pred, dim=1)
         from sklearn.metrics import confusion_matrix, accuracy_score
