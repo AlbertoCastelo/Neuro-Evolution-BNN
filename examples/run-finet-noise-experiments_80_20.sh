@@ -132,7 +132,7 @@ function run_bneat {
 #  for train_percentage in 0.05 0.1 0.15 0.2 0.3 0.4 0.5 0.7 0.9
 #  for train_percentage in 0.05 0.1 0.15 0.2
 #  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
-  for label_noise in 0.0 0.1 0.2 0.3
+  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
 
   do
 #  for repetition in 1 2 3 4 5

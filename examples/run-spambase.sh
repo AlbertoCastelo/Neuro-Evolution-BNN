@@ -9,24 +9,12 @@ export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 ###################################################################
 # MNIST-DOWNSAMPLED
-#DATASET=spambase
-#noise=0.0
-#label_noise=0.0
-#initial_nodes_sample=32
-#architecture_mutation_power=1
-#is_initial_fully_connected=1
-
-###################################################################
-# MNIST-DOWNSAMPLED
-DATASET=mnist_downsampled
+DATASET=spambase
 noise=0.0
 label_noise=0.0
-initial_nodes_sample=32
+initial_nodes_sample=30
 architecture_mutation_power=1
 is_initial_fully_connected=0
-
-elitism=0
-species_elitism=0
 
 POP_SIZE=50
 N_GENERATIONS=150
@@ -38,7 +26,7 @@ function run_bneat {
   fix_std=$2
   n_samples=$3
 
-  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
   do
   for repetition in $(seq 1 $N_REPETITIONS)
   do
@@ -53,8 +41,6 @@ function run_bneat {
                               'initial_nodes_sample': $initial_nodes_sample,
                               'architecture_mutation_power': $architecture_mutation_power,
                               'is_initial_fully_connected': $is_initial_fully_connected,
-                              'elitism': $elitism,
-                              'species_elitism': $species_elitism,
                               'noise': $noise,
                               'label_noise': $label_noise
         }"

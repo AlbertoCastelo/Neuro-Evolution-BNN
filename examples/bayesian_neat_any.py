@@ -19,10 +19,19 @@ dataset_name = 'mnist_downsampled'
 
 config = create_configuration(filename=f'/{dataset_name}.json')
 
-config.n_generations = 15
+config.pop_size = 50
+config.n_generations = 150
 config.epochs_fine_tuning = 4000
-config.beta = 0.0001
+# config.beta = 0.0001
 
+config.elitism = 0
+config.species_elitism = 0
+
+config.label_noise = 0.5
+
+
+config.beta = 0.0000001
+config.fix_std = False
 
 # config.n_input = 64
 # config.is_discrete = False
@@ -67,7 +76,7 @@ logger = get_neat_logger(path=LOGS_PATH)
 # # config.beta = 0.0
 # # config.n_initial_hidden_neurons = 0
 # config.fix_architecture = False
-config.beta = 0.000
+# config.beta = 0.000
 
 ALGORITHM_VERSION = 'bayes-neat'
 DATASET = dataset_name
