@@ -85,6 +85,18 @@ class ReportRepository:
         for execution in self.object_repository.tree(path):
             yield execution.split('/')[0].split('=')[1]
 
+    def get_correlation_ids(self, algorithm_version, dataset):
+        path = ReportPathFactory.create(algorithm_version=algorithm_version,
+                                        dataset=dataset)\
+            .get_reports_path()
+        correlation_ids = []
+        for execution in self.object_repository.tree(path):
+            correlation_id = execution.split('/')[0].split('=')[1]
+            correlation_ids.append(correlation_id)
+        correlation_ids = list(set(correlation_ids))
+        for correlation_id in correlation_ids:
+            yield correlation_id
+
     def set_table(self, algorithm_version, dataset, execution_id, correlation_id, table_name, table_value):
         path = ReportPathFactory.create(algorithm_version=algorithm_version,
                                         dataset=dataset,
