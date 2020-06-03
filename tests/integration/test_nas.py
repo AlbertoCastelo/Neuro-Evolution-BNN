@@ -62,7 +62,7 @@ class TestNASIntegration(TestCase):
                                                 project=project,
                                                 algorithm_version=ALGORITHM_VERSION,
                                                 keep_top=1.0,
-                                                filter_normal_finish=False)\
+                                                filter_checkpoint_finish=False)\
                 # .process_data()
         reports_all = experiment_data_nas._get_reports()
         reports = {}

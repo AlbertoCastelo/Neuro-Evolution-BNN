@@ -31,6 +31,7 @@ class EvolutionReport:
         self.report.add('dataset', dataset)
 
         self.generation_metrics = dict()
+        self.fine_tuning = {}
         self.best_individual = None
         self.metrics_best = {}
         self.generic_text = None
@@ -53,7 +54,6 @@ class EvolutionReport:
             self.show_metrics_best()
 
     def report_fine_tuning(self, species_best_genome):
-        self.fine_tuning = {}
         self.fine_tuning['best_fitness_before_fine_tuning'] = self.best_individual.fitness
         self.fine_tuning['best_genome_before_fine_tuning'] = self.best_individual.to_dict()
         best_genome_per_specie = {}
@@ -134,6 +134,7 @@ class EvolutionReport:
         self.report.add_data(name='best_individual', value=self.get_best_individual().to_dict())
         self.report.add_data(name='best_individual_graph', value=self.get_best_individual().get_graph())
         self.report.add_data(name='best_individual_fitness', value=self.get_best_individual().fitness)
+        self.report.add_data(name='fine_tuning', value=self.fine_tuning)
         self.report.add_data(name='end_condition', value=end_condition)
 
         self.report.set_finish_time()

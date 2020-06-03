@@ -16,3 +16,8 @@ def read_file(filename) -> str:
     with open(filename, 'rb') as file:
         data = file.read()
     return data
+
+
+def write_file(filename, data):
+    with open(filename, 'w') as file:
+        file.write(data)

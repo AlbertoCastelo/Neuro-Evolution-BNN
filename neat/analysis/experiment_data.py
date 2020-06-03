@@ -31,14 +31,14 @@ logger = get_neat_logger(path=LOGS_PATH)
 
 class ExperimentData:
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_checkpoint_finish=True):
         self.correlation_ids = correlation_ids
         self.dataset_name = dataset_name
         self.n_samples = n_samples
         self.project = project
         self.algorithm_version = algorithm_version
         self.keep_top = keep_top
-        self.filter_normal_finish = filter_normal_finish
+        self.filter_checkpoint_finish = filter_checkpoint_finish
 
         self.reports = None
         self.experiment_data = None
@@ -50,8 +50,8 @@ class ExperimentData:
 
         if self.keep_top < 1.0:
             self.experiment_data = self._drop_worse_executions_per_correlation(self.experiment_data, self.keep_top)
-        if self.filter_normal_finish:
-            self.experiment_data = self.experiment_data.loc[self.experiment_data['end_condition'] == 'normal']
+        if self.filter_checkpoint_finish:
+            self.experiment_data = self.experiment_data.loc[self.experiment_data['end_condition'] != 'checkpoint']
         return self
 
     def get_experiment_data(self):
@@ -113,94 +113,100 @@ class ExperimentData:
 
 class ExperimentDataNE(ExperimentData):
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_checkpoint_finish=True):
 
         self.best_genomes = {}
         super().__init__(correlation_ids=correlation_ids, dataset_name=dataset_name, n_samples=n_samples,
                          project=project, algorithm_version=algorithm_version, keep_top=keep_top,
-                         filter_normal_finish=filter_normal_finish)
+                         filter_checkpoint_finish=filter_checkpoint_finish)
 
     def _process_reports(self, reports):
         data_chunks = []
         for report in reports.values():
-            execution_id = report.execution_id
-            correlation_id = report.correlation_id
-
-            genome_dict = report.data['best_individual']
-            best_individual_fitness = report.data['best_individual_fitness']
-            print(f'Fitness of best individual: {best_individual_fitness}')
-
-            genome = Genome.from_dict(genome_dict)
-            config = genome.genome_config
-            self.configurations[execution_id] = config
-            self.best_genomes[execution_id] = genome
-            set_configuration(config)
-
-            # evaluate genome
-            loss = get_loss(problem_type=config.problem_type)
-            print(f'Train percentage: {config.train_percentage}')
-            print(f'Random state: {config.dataset_random_state}')
-            dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=True,
-                                  random_state=config.dataset_random_state, noise=config.noise,
-                                  label_noise=config.label_noise)
-
-            x, y_true, y_pred_prob, loss_value = evaluate_genome(genome=genome,
-                                                                 dataset=dataset,
-                                                                 loss=loss,
-                                                                 problem_type=config.problem_type,
-                                                                 beta_type=config.beta_type,
-                                                                 batch_size=config.batch_size,
-                                                                 n_samples=self.n_samples,
-                                                                 is_gpu=config.is_gpu,
-                                                                 is_testing=True,
-                                                                 return_all=True)
-
-            y_pred = torch.argmax(y_pred_prob, dim=1)
-
-            train_percentage = config.train_percentage
-            noise = config.noise
-            label_noise = config.label_noise
-            duration = report.duration
-            n_parameters = genome.calculate_number_of_parameters()
-            n_nodes = genome.n_bias_parameters // 2
-            n_connections = genome.n_weight_parameters // 2
-            n_layers = self._get_number_of_layers(genome)
-            mean_genome_std = get_mean_std(genome)
-            end_condition = report.data['end_condition']
-
-            chunk = pd.DataFrame({'correlation_id': correlation_id,
-                                  'execution_id': execution_id,
-                                  'train_percentage': train_percentage,
-                                  'noise': noise,
-                                  'label_noise': label_noise,
-                                  'is_bayesian': False if config.fix_std else True,
-                                  'beta': config.beta,
-                                  'loss_training': -best_individual_fitness,
-                                  'loss_testing': loss_value,
-                                  'duration': duration,
-                                  'end_condition': end_condition,
-                                  'n_parameters': n_parameters,
-                                  'n_nodes': n_nodes,
-                                  'n_connections': n_connections,
-                                  'n_layers': n_layers,
-                                  'mean_genome_std': mean_genome_std,
-                                  }, index=[0])
-
-            if config.problem_type == 'classification':
-                chunk['accuracy'] = accuracy_score(y_true, y_pred) * 100
-                chunk['precision'] = precision_score(y_true, y_pred, average='weighted')
-                chunk['recall'] = recall_score(y_true, y_pred, average='weighted')
-                chunk['f1'] = f1_score(y_true, y_pred, average='weighted')
-                ece, _ = expected_calibration_error(y_true.numpy(), y_pred_prob.numpy(), n_bins=ECE_N_BINS)
-                chunk['ece'] = ece
-            else:
-                chunk['mse'] = mean_squared_error(y_true, y_pred)
-                chunk['mae'] = mean_absolute_error(y_true, y_pred)
-
+            if 'fine_tuning' in report.data and 'best_genome_before_fine_tuning' in report.data['fine_tuning']:
+                absolute_best = False
+                chunk = self._generate_row(report, absolute_best=absolute_best)
+                chunk['absolute_best'] = absolute_best
+                data_chunks.append(chunk)
+            absolute_best = True
+            chunk = self._generate_row(report, absolute_best=absolute_best)
+            chunk['absolute_best'] = absolute_best
             data_chunks.append(chunk)
 
         experiment_data = pd.concat(data_chunks, sort=False)
         return experiment_data
+
+    def _generate_row(self, report, absolute_best=True):
+        execution_id = report.execution_id
+        correlation_id = report.correlation_id
+        if absolute_best:
+            genome_dict = report.data['best_individual']
+            best_individual_fitness = report.data['best_individual_fitness']
+        else:
+            genome_dict = report.data['fine_tuning']['best_genome_before_fine_tuning']
+            best_individual_fitness = report.data['fine_tuning']['best_fitness_before_fine_tuning']
+
+        genome = Genome.from_dict(genome_dict)
+        config = genome.genome_config
+        self.configurations[execution_id] = config
+        self.best_genomes[execution_id] = genome
+        set_configuration(config)
+        # evaluate genome
+        loss = get_loss(problem_type=config.problem_type)
+        print(f'Train percentage: {config.train_percentage}')
+        print(f'Random state: {config.dataset_random_state}')
+        dataset = get_dataset(config.dataset, train_percentage=config.train_percentage, testing=True,
+                              random_state=config.dataset_random_state, noise=config.noise,
+                              label_noise=config.label_noise)
+        x, y_true, y_pred_prob, loss_value = evaluate_genome(genome=genome,
+                                                             dataset=dataset,
+                                                             loss=loss,
+                                                             problem_type=config.problem_type,
+                                                             beta_type=config.beta_type,
+                                                             batch_size=config.batch_size,
+                                                             n_samples=self.n_samples,
+                                                             is_gpu=config.is_gpu,
+                                                             is_testing=True,
+                                                             return_all=True)
+        y_pred = torch.argmax(y_pred_prob, dim=1)
+        train_percentage = config.train_percentage
+        noise = config.noise
+        label_noise = config.label_noise
+        duration = report.duration
+        n_parameters = genome.calculate_number_of_parameters()
+        n_nodes = genome.n_bias_parameters // 2
+        n_connections = genome.n_weight_parameters // 2
+        n_layers = self._get_number_of_layers(genome)
+        mean_genome_std = get_mean_std(genome)
+        end_condition = report.data['end_condition']
+        chunk = pd.DataFrame({'correlation_id': correlation_id,
+                              'execution_id': execution_id,
+                              'train_percentage': train_percentage,
+                              'noise': noise,
+                              'label_noise': label_noise,
+                              'is_bayesian': False if config.fix_std else True,
+                              'beta': config.beta,
+                              'loss_training': -best_individual_fitness,
+                              'loss_testing': loss_value,
+                              'duration': duration,
+                              'end_condition': end_condition,
+                              'n_parameters': n_parameters,
+                              'n_nodes': n_nodes,
+                              'n_connections': n_connections,
+                              'n_layers': n_layers,
+                              'mean_genome_std': mean_genome_std,
+                              }, index=[0])
+        if config.problem_type == 'classification':
+            chunk['accuracy'] = accuracy_score(y_true, y_pred) * 100
+            chunk['precision'] = precision_score(y_true, y_pred, average='weighted')
+            chunk['recall'] = recall_score(y_true, y_pred, average='weighted')
+            chunk['f1'] = f1_score(y_true, y_pred, average='weighted')
+            ece, _ = expected_calibration_error(y_true.numpy(), y_pred_prob.numpy(), n_bins=ECE_N_BINS)
+            chunk['ece'] = ece
+        else:
+            chunk['mse'] = mean_squared_error(y_true, y_pred)
+            chunk['mae'] = mean_absolute_error(y_true, y_pred)
+        return chunk
 
     def generate_evolution_data(self):
         fitness_evolution_chunks = []
@@ -255,11 +261,11 @@ class ExperimentDataNE(ExperimentData):
 
 class ExperimentDataNAS(ExperimentData):
     def __init__(self, correlation_ids: list, dataset_name, n_samples=1000, project='neuro-evolution',
-                 algorithm_version='bayes-neat', keep_top=0.8, filter_normal_finish=True):
+                 algorithm_version='bayes-neat', keep_top=0.8, filter_checkpoint_finish=True):
         self.best_networks = {}
         super().__init__(correlation_ids=correlation_ids, dataset_name=dataset_name, n_samples=n_samples,
                          project=project, algorithm_version=algorithm_version, keep_top=keep_top,
-                         filter_normal_finish=filter_normal_finish)
+                         filter_checkpoint_finish=filter_checkpoint_finish)
 
     def _process_reports(self, reports):
         chunks = []
@@ -294,8 +300,9 @@ class ExperimentDataNAS(ExperimentData):
 
 
         accuracy = report.metrics['accuracy']
-        recall = report.metrics['recall']
-        precision = report.metrics['precision']
+
+        # recall = report.metrics['recall']
+        # precision = report.metrics['precision']
         f1 = report.metrics['f1']
 
         network_type = report.network_type

@@ -1,7 +1,6 @@
 import json
 from os import walk
-
-import jsons
+import os
 
 from experiments.file_utils import read_file
 from experiments.logger import logger
@@ -89,6 +88,7 @@ class ReportRepository:
         path = ReportPathFactory.create(algorithm_version=algorithm_version,
                                         dataset=dataset)\
             .get_reports_path()
+
         correlation_ids = []
         for execution in self.object_repository.tree(path):
             correlation_id = execution.split('/')[0].split('=')[1]
@@ -123,6 +123,38 @@ class ReportRepository:
         data = json.dumps(report.to_dict())
 
         self.object_repository.set(key=key, content=str(data))
+
+    def download_reports_to_dir(self, algorithm_version, dataset, correlation_id, base_dir='./'):
+        executions = self.get_executions(algorithm_version, dataset, correlation_id)
+
+        for execution_id in executions:
+            key = self._get_report_key(algorithm_version, correlation_id, dataset, execution_id)
+            key_without_file = key.replace('report.json', '')
+            dir_ = f'{base_dir}{self.project}/{key_without_file}'
+            if not os.path.exists(dir_):
+                os.makedirs(dir_)
+            dir_ += 'report.json'
+            self.object_repository.get_to_file(key, dir_)
+
+    def upload_reports_from_dir(self, algorithm_version, dataset, correlation_id, new_correlation_id=None, base_dir='./'):
+        if not new_correlation_id:
+            new_correlation_id = correlation_id
+
+        path = ReportPathFactory.create(algorithm_version=algorithm_version,
+                                        dataset=dataset,
+                                        correlation_id=correlation_id,
+                                        execution_id=None) \
+            .get_report_path()
+        dir_ = f'{base_dir}{self.project}/{path}'
+        dir_ = dir_.replace('execution_id=None', '')
+
+        for (dirpaths, dirnames, filenames) in walk(dir_):
+
+            execution_id = dirpaths.split('/')[-1].replace('execution_id=', '')
+            for filename in filenames:
+                data = read_file(filename=f'{dirpaths}/{filename}')
+                key = self._get_report_key(algorithm_version, new_correlation_id, dataset, execution_id)
+                self.object_repository.set(key=key, content=str(data))
 
     def _get_report_key(self, algorithm_version, correlation_id, dataset, execution_id):
         path = ReportPathFactory.create(algorithm_version=algorithm_version,
