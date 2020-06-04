@@ -15,9 +15,9 @@ class ExecutionsPredictionDistributions:
         # TODO: filter those cases when there is a warning calculating F1
         data = self.experiment_data.experiment_data
         if filter_no_bayesian:
-            execution_ids = data.loc[data['is_bayesian'] == 1, 'execution_id'].values.tolist()
+            execution_ids = data.loc[data['is_bayesian'] == 1, 'execution_id'].unique().tolist()
         else:
-            execution_ids = data['execution_id'].values.tolist()
+            execution_ids = data['execution_id'].unique().tolist()
         chunks = []
         for execution_id in execution_ids:
             genome = self.experiment_data.best_genomes[execution_id]

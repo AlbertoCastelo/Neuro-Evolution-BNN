@@ -116,7 +116,10 @@ class EvolutionReport:
         print(f'Accuracy: {acc} %')
 
     def _update_best(self, potential_best_individual):
-        if self.best_individual is None or self.best_individual.fitness < potential_best_individual.fitness:
+        if potential_best_individual.fitness == np.nan:
+            return False
+        if self.best_individual is None or self.best_individual.fitness < potential_best_individual.fitness or \
+                self.best_individual.fitness == np.nan:
             self.best_individual = potential_best_individual
             logger.info(f'    New best individual ({self.best_individual.key}) found '
                         f'with fitness {round(self.best_individual.fitness, 3)}')

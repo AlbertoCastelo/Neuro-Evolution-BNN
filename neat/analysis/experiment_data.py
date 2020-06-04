@@ -71,6 +71,7 @@ class ExperimentData:
             execution_ids = list(report_repository.get_executions(algorithm_version=self.algorithm_version,
                                                                   dataset=self.dataset_name,
                                                                   correlation_id=correlation_id))
+            print(f'{len(execution_ids)} executions')
             for execution_id in execution_ids:
                 report = report_repository.get_report(algorithm_version=self.algorithm_version,
                                                       dataset=self.dataset_name,
@@ -297,7 +298,7 @@ class ExperimentDataNAS(ExperimentData):
         duration = report.duration
         n_hidden_layers = report.best_network_params['n_hidden_layers']
         n_neurons_per_layer = report.best_network_params['n_neurons_per_layer']
-
+        n_layers = n_hidden_layers + 1
 
         accuracy = report.metrics['accuracy']
 
@@ -362,6 +363,7 @@ class ExperimentDataNAS(ExperimentData):
                                   'n_parameters': n_parameters,
                                   'n_nodes': n_nodes,
                                   'n_connections': n_connections,
+                                  'n_layers': n_layers,
                                   'f1': f1,
                                   'recall': recall,
                                   'precision': precision,
