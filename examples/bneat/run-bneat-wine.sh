@@ -8,16 +8,13 @@ export SLACK_API_TOKEN=xoxp-803548304551-788909703698-803912405606-3537f75bda859
 export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 ###################################################################
-# MNIST-DOWNSAMPLED
-DATASET=mnist_downsampled
+# SPAMBASE
+DATASET=wine
 noise=0.0
 label_noise=0.0
-initial_nodes_sample=32
+initial_nodes_sample=30
 architecture_mutation_power=1
-is_initial_fully_connected=0
-
-elitism=0
-species_elitism=0
+is_initial_fully_connected=1
 
 POP_SIZE=50
 N_GENERATIONS=150
@@ -29,8 +26,8 @@ function run_bneat {
   fix_std=$2
   n_samples=$3
 
-  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
-  do
+#  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
+#  do
   for repetition in $(seq 1 $N_REPETITIONS)
   do
     pipenv run python neat/run_example.py run \
@@ -38,46 +35,26 @@ function run_bneat {
         --algorithm_version="bayes-neat"\
         --correlation_id=$correlation_id \
         --config_parameters="{'pop_size': $POP_SIZE,
-                              'beta': $beta,
                               'fix_std': $fix_std,
                               'n_generations': $N_GENERATIONS,
                               'initial_nodes_sample': $initial_nodes_sample,
                               'architecture_mutation_power': $architecture_mutation_power,
                               'is_initial_fully_connected': $is_initial_fully_connected,
-                              'elitism': $elitism,
-                              'species_elitism': $species_elitism,
                               'noise': $noise,
                               'label_noise': $label_noise
         }"
   done
-  done
+#  done
 }
 
-# test
-#correlation_id='test_6'$DATASET
-#fix_std=1
-#n_samples=1
-#run_bneat $correlation_id $fix_std $n_samples
-
-#experiment_name='_ft_2_'
-PREFIX='final_1'
-N_EXTERNAL_REPETITIONS=10
+N_EXTERNAL_REPETITIONS=5
 for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
   do
 
   # RUN Bayesian-Neat
-  correlation_id='bayesian_neat_ft_22_'$PREFIX'_'$DATASET
+  correlation_id='bayesian_neat_ft_final_v1_'$DATASET
   fix_std=0
   n_samples=50
-  beta=0.0000001
-  run_bneat $correlation_id $fix_std $n_samples
-
-  # RUN Neat
-  correlation_id='neat_ft_22_'$PREFIX'_'$DATASET
-  fix_std=1
-  n_samples=1
-  beta=0.0
-  #N_GENERATIONS=100
   run_bneat $correlation_id $fix_std $n_samples
 
 done

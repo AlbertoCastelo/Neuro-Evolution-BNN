@@ -13,6 +13,7 @@ from neat.utils import timeit, get_slack_channel
 # dataset_name = 'classification-miso'
 # dataset_name = 'iris'
 # dataset_name = 'titanic'
+# dataset_name = 'spambase'
 dataset_name = 'mnist_downsampled'
 # dataset_name = 'wine'
 # dataset_name = 'breast_cancer'
@@ -20,17 +21,17 @@ dataset_name = 'mnist_downsampled'
 config = create_configuration(filename=f'/{dataset_name}.json')
 
 config.pop_size = 50
-config.n_generations = 150
+config.n_generations = 15
 config.epochs_fine_tuning = 4000
 # config.beta = 0.0001
 
-config.elitism = 0
-config.species_elitism = 0
+# config.elitism = 0
+# config.species_elitism = 0
 
-config.label_noise = 0.5
+config.label_noise = 0.0
 
 
-config.beta = 0.0000001
+config.beta = 0.00001
 config.fix_std = False
 
 # config.n_input = 64

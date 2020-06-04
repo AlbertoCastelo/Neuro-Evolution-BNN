@@ -8,7 +8,7 @@ export SLACK_API_TOKEN=xoxp-803548304551-788909703698-803912405606-3537f75bda859
 export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
 
 ###################################################################
-# MNIST-DOWNSAMPLED
+# SPAMBASE
 DATASET=spambase
 noise=0.0
 label_noise=0.0
@@ -56,7 +56,7 @@ function run_bneat {
 
 #experiment_name='_ft_2_'
 PREFIX='final_1'
-N_EXTERNAL_REPETITIONS=10
+N_EXTERNAL_REPETITIONS=5
 for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
   do
 
@@ -64,7 +64,7 @@ for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
   correlation_id='bayesian_neat_ft_22_'$PREFIX'_'$DATASET
   fix_std=0
   n_samples=50
-  beta=0.0000001
+  beta=0.0001
   run_bneat $correlation_id $fix_std $n_samples
 
   # RUN Neat
