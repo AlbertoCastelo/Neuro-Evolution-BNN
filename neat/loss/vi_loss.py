@@ -1,5 +1,6 @@
 from torch import nn
 from neat.configuration import get_configuration, ConfigError
+from neat.neat_logger import logger
 
 
 def get_loss(problem_type):
@@ -32,12 +33,12 @@ class VariationalInferenceLoss(nn.Module):
     def forward(self, y_pred, y_true, kl_qw_pw, beta):
         # log likelihood
         logpy = -self.loss(y_pred, y_true)
-        # print(f'kl_qw_pw: {kl_qw_pw}')
-        # print(f'logpy: {logpy}')
+        logger.debug(f'Log-Likelihood: {logpy}')
+        logger.debug(f'KL_QW_PW: {kl_qw_pw}')
+
         ll = logpy - beta * kl_qw_pw  # ELBO
-        # print(f'ELBO: {ll}')
+        logger.debug(f'ELBO: {ll}')
         loss = -ll
-        # print(f'loss: {loss}')
         return loss
 
 

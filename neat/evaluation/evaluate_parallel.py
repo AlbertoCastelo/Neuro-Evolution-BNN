@@ -37,9 +37,9 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type, is_
     Uses the VariationalInferenceLoss class (not the alternative)
     '''
 
-    kl_posterior = 0
-
-    kl_qw_pw = compute_kl_qw_pw(genome=genome)
+    # kl_posterior = 0
+    #
+    # kl_qw_pw = compute_kl_qw_pw(genome=genome)
 
     # setup network
     network = ComplexStochasticNetwork(genome=genome)
@@ -63,11 +63,11 @@ def _evaluate_genome_parallel(genome: Genome, loss, beta_type, problem_type, is_
 
     with torch.no_grad():
         # forward pass
-        output, _ = network(x_batch)
+        output, kl_qw_pw = network(x_batch)
         output, _, y_batch = _process_output_data(output, y_true=y_batch, n_samples=n_samples,
                                                   n_output=genome.n_output, problem_type=problem_type, is_pass=True)
         beta = get_beta(beta_type=beta_type, m=m, batch_idx=0, epoch=1, n_epochs=1)
-        kl_posterior += loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
+        kl_posterior = loss(y_pred=output, y_true=y_batch, kl_qw_pw=kl_qw_pw, beta=beta)
 
     loss_value = kl_posterior.item()
     return loss_value
