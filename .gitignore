@@ -123,3 +123,10 @@ executions/*.json
 
 # logs
 .log*
+
+.bash_history
+.config
+.ipython
+.ipynb_checkpoints
+.jupyter
+.local
