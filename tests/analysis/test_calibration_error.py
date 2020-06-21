@@ -12,3 +12,14 @@ class TestCalibrationError(TestCase):
         ece, calibration_data = expected_calibration_error(y_true=y_true, y_pred_prob=y_pred_prob, n_bins=2)
 
         self.assertAlmostEqual(ece, 0.03028, places=2)
+
+    def test_expected_calibration_error_by_percentiles(self):
+        y_true = np.array(fixtures.y_true)
+
+        y_pred_prob = np.array(fixtures.y_pred_prob)
+        ece, calibration_data = expected_calibration_error(y_true=y_true,
+                                                           y_pred_prob=y_pred_prob,
+                                                           n_bins=2,
+                                                           uniform_binning=False)
+
+        self.assertAlmostEqual(ece, 0.0360, places=2)
