@@ -147,14 +147,13 @@ class ReportRepository:
             .get_report_path()
         dir_ = f'{base_dir}{self.project}/{path}'
         dir_ = dir_.replace('execution_id=None', '')
-
         for (dirpaths, dirnames, filenames) in walk(dir_):
 
             execution_id = dirpaths.split('/')[-1].replace('execution_id=', '')
             for filename in filenames:
                 data = read_file(filename=f'{dirpaths}/{filename}')
                 key = self._get_report_key(algorithm_version, new_correlation_id, dataset, execution_id)
-                self.object_repository.set(key=key, content=str(data))
+                self.object_repository.set(key=key, content=data)
 
     def _get_report_key(self, algorithm_version, correlation_id, dataset, execution_id):
         path = ReportPathFactory.create(algorithm_version=algorithm_version,

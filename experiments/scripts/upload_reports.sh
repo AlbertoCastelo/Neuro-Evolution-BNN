@@ -9,11 +9,13 @@ export AWS_REGION=eu-west-1
 
 PROJECT="neuro-evolution"
 ALGORITHM_VERSION="bayes-neat"
+##
+#PROJECT="nas"
+#ALGORITHM_VERSION="nas"
 
-
-DATASET="breast_cancer"
-CORRELATION_ID="bayesian_neat_ft_20_breast_cancer"
-NEW_CORRELATION_ID="test_upload"
+DATASET="mnist_downsampled"
+CORRELATION_ID="neat_ft_final_v1_label_noise_mnist_downsampled"
+NEW_CORRELATION_ID="neat_ft_final_v1_label_noise_mnist_downsampled"
 
 BASE_DIR="/home/alberto/Downloads/"
 
