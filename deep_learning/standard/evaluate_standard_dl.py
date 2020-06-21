@@ -5,6 +5,7 @@ import torch
 import os
 
 from sklearn.model_selection import train_test_split
+from torch.nn import Softmax
 from torch.optim import Adam
 
 from neat.configuration import get_configuration
@@ -157,6 +158,9 @@ class EvaluateStandardDL:
             output = network(x_batch)
             loss = self.criterion(output, y_batch)
             loss_eval = loss.data.item()
+
+            m = Softmax(dim=1)
+            output = m(output)
 
             chunks_x.append(x_batch)
             chunks_y_pred.append(output)
