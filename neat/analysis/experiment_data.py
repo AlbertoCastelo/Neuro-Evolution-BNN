@@ -24,6 +24,7 @@ import torch
 from neat.representation_mapping.genome_to_network.complex_stochastic_network import ComplexStochasticNetwork
 
 ECE_N_BINS = 5
+UNIFORM_BINNING = False
 
 LOGS_PATH = f'{os.getcwd()}/'
 logger = get_neat_logger(path=LOGS_PATH)
@@ -43,6 +44,7 @@ class ExperimentData:
         self.reports = None
         self.experiment_data = None
         self.configurations = {}
+        self.best_networks = {}
 
     def process_data(self):
         reports = self.get_reports()
@@ -151,6 +153,8 @@ class ExperimentDataNE(ExperimentData):
         config = genome.genome_config
         self.configurations[execution_id] = config
         self.best_genomes[execution_id] = genome
+        self.best_networks[execution_id] = ComplexStochasticNetwork(genome=genome)
+
         set_configuration(config)
         # evaluate genome
         loss = get_loss(problem_type=config.problem_type)
@@ -202,7 +206,8 @@ class ExperimentDataNE(ExperimentData):
             chunk['precision'] = precision_score(y_true, y_pred, average='weighted')
             chunk['recall'] = recall_score(y_true, y_pred, average='weighted')
             chunk['f1'] = f1_score(y_true, y_pred, average='weighted')
-            ece, _ = expected_calibration_error(y_true.numpy(), y_pred_prob.numpy(), n_bins=ECE_N_BINS)
+            ece, _ = expected_calibration_error(y_true.numpy(), y_pred_prob.numpy(), n_bins=ECE_N_BINS,
+                                                uniform_binning=UNIFORM_BINNING)
             chunk['ece'] = ece
         else:
             chunk['mse'] = mean_squared_error(y_true, y_pred)
@@ -284,8 +289,7 @@ class ExperimentDataNAS(ExperimentData):
         n_connections += n_neurons_per_layer * n_output
         return n_nodes, n_connections
 
-    @staticmethod
-    def _process_nas_execution(report):
+    def _process_nas_execution(self, report):
         correlation_id = report.correlation_id
         execution_id = report.execution_id
         train_percentage = report.configuration['train_percentage']
@@ -302,8 +306,6 @@ class ExperimentDataNAS(ExperimentData):
 
         accuracy = report.metrics['accuracy']
 
-        # recall = report.metrics['recall']
-        # precision = report.metrics['precision']
         f1 = report.metrics['f1']
 
         network_type = report.network_type
@@ -322,8 +324,11 @@ class ExperimentDataNAS(ExperimentData):
         else:
             raise ValueError
 
+        self.best_networks[execution_id] = network
+
         config = jsons.load(report.configuration, BaseConfiguration)
         set_configuration(config)
+        self.configurations[execution_id] = config
 
         dataset = get_dataset(dataset=config.dataset, train_percentage=train_percentage,
                               random_state=config.dataset_random_state, noise=noise, label_noise=label_noise)
@@ -341,7 +346,8 @@ class ExperimentDataNAS(ExperimentData):
             f1 = f1_score(y_true, y_pred, average='weighted')
             precision = precision_score(y_true, y_pred, average='weighted')
             recall = recall_score(y_true, y_pred, average='weighted')
-            ece, _ = expected_calibration_error(y_true, y_pred_prob, n_bins=ECE_N_BINS)
+            ece, _ = expected_calibration_error(y_true, y_pred_prob, n_bins=ECE_N_BINS,
+                                                uniform_binning=UNIFORM_BINNING)
 
         else:
             mse = mean_squared_error(y_true, y_pred)

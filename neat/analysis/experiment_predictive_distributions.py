@@ -1,8 +1,7 @@
 import pandas as pd
 
 from neat.analysis.experiment_data import ExperimentData
-from neat.analysis.uncertainty.predictive_distribution import PredictionDistributionEstimator, \
-    PredictionDistributionEstimatorGenome
+from neat.analysis.uncertainty.predictive_distribution import PredictionDistributionEstimatorNetwork
 
 
 class ExecutionsPredictionDistributions:
@@ -20,9 +19,9 @@ class ExecutionsPredictionDistributions:
             execution_ids = data['execution_id'].unique().tolist()
         chunks = []
         for execution_id in execution_ids:
-            genome = self.experiment_data.best_genomes[execution_id]
+            network = self.experiment_data.best_networks[execution_id]
             config = self.experiment_data.configurations[execution_id]
-            predictor = PredictionDistributionEstimatorGenome(genome=genome, config=config, testing=testing) \
+            predictor = PredictionDistributionEstimatorNetwork(network=network, config=config, testing=testing) \
                 .estimate() \
                 .enrich_with_dispersion_quantile() \
                 .calculate_metrics_by_dispersion_quantile(log=False)

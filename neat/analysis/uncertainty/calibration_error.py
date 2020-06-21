@@ -2,18 +2,14 @@ import numpy as np
 import pandas as pd
 
 
-def expected_calibration_error(y_true, y_pred_prob, n_bins):
-    # n_bins_width = 1 / n_bins
-    bins = [i / n_bins for i in range(1, n_bins + 1)]
-    # bins_confidence = [i / n_bins + n_bins_width / 2 for i in range(n_bins)]
-
+def expected_calibration_error(y_true, y_pred_prob, n_bins, uniform_binning=True):
     classes = np.unique(y_true)
 
     calibration_data_chunks = []
     ece = 0.0
     for class_ in classes:
         class_weight = np.mean(np.where(y_true == class_, 1, 0))
-        ece_class, calibration_data_class = confidence_calibration(bins, class_, n_bins, y_pred_prob, y_true)
+        ece_class, calibration_data_class = confidence_calibration(class_, n_bins, y_pred_prob, y_true, uniform_binning)
         ece += ece_class * class_weight
 
         calibration_data_class['class'] = class_
@@ -22,19 +18,18 @@ def expected_calibration_error(y_true, y_pred_prob, n_bins):
     return ece, calibration_data
 
 
-def confidence_calibration(bins, class_, n_bins, y_pred_prob, y_true):
+def confidence_calibration(class_, n_bins, y_pred_prob, y_true, uniform_binning):
     y_true_class = np.where(y_true == class_, 1, 0)
     y_pred_prob_class = y_pred_prob[:, class_]
-    # fraction_of_positives, mean_predicted_value = calibration_curve(y_true=y_true_class, y_prob=y_pred_prob_class,
-    #                                                                 n_bins=n_bins)
-    # ece_class = abs(fraction_of_positives - mean_predicted_value)
-    # # indices = np.where(y_true == class_)[0]
-    # # probs = np.take(y_pred_prob, indices)
+
     probs = y_pred_prob[:, class_]
+    bins = [i / n_bins for i in range(1, n_bins + 1)]
+    if not uniform_binning:
+        quantiles = bins
+        bins = np.quantile(probs, q=quantiles)
     bin_index = np.digitize(probs, bins)
     chunks = []
     for bin in range(n_bins):
-        # probs_bin = np.take(y_true_class, indices)
         indices_prob = np.where(bin_index == bin)[0]
         y_true_class_bin = np.take(y_true_class, indices_prob)
         y_pred_prob_class_bin = np.take(y_pred_prob_class, indices_prob)
