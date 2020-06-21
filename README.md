@@ -1,2 +1,7 @@
-# Neuro-Evolution-BNN
-Using Neuro Evolution to train and architecture-search for Bayesian Neural Networks
+# Neuroevolution of Bayesian Neural Networks
+Using Neuro Evolution to train and architecture-search in Bayesian Neural Networks for Supervised Learning tasks: 
+Regression and Classification.
+
+## Spin up environment
+
+`make jupyter`
