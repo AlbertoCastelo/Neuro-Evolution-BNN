@@ -3,10 +3,11 @@ import torch
 from config_files.configuration_utils import create_configuration
 from deep_learning.probabilistic.evaluate_probabilistic_dl import EvaluateProbabilisticDL
 from neat.evaluation.utils import get_dataset
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 # dataset_name = 'classification-miso'
-dataset_name = 'iris'
-# dataset_name = 'mnist_downsampled'
+# dataset_name = 'iris'
+dataset_name = 'mnist_downsampled'
 
 config = create_configuration(filename=f'/{dataset_name}.json')
 config.label_noise = 0.0
@@ -40,13 +41,12 @@ evaluator = EvaluateProbabilisticDL(dataset=dataset,
                                     lr=lr,
                                     weight_decay=weight_decay,
                                     n_epochs=n_epochs,
-                                    n_neurons_per_layer=10,
+                                    n_neurons_per_layer=20,
                                     n_hidden_layers=1,
                                     is_cuda=is_cuda,
                                     beta=config.beta)
 evaluator.run()
 
-# evaluator.save_network(network_filename)
 
 # predict
 print('Evaluating results')
@@ -56,24 +56,10 @@ if is_cuda:
     x = x.cpu()
     y_true = y_true.cpu()
     y_pred = y_pred.cpu()
-# x = dataset.input_scaler.inverse_transform(x)
 y_true = y_true.numpy()
 y_pred = torch.argmax(y_pred, dim=1).numpy()
 
-# plot results
-#
-# y_pred = np.argmax(y_pred.numpy(), 1)
-# df = pd.DataFrame(x, columns=['x1', 'x2'])
-# df['y'] = y_pred
-#
-# x1_limit, x2_limit = dataset.get_separation_line()
-#
-# plt.figure()
-# ax = sns.scatterplot(x='x1', y='x2', hue='y', data=df)
-# ax.plot(x1_limit, x2_limit, 'g-', linewidth=2.5)
-# plt.show()
 
-from sklearn.metrics import confusion_matrix, accuracy_score
 print('Confusion Matrix:')
 print(confusion_matrix(y_true, y_pred))
 
