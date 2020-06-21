@@ -47,10 +47,19 @@ RUN conda update -n base conda && \
 COPY requirements.txt /tmp/neat/requirements.txt
 RUN pip install -r /tmp/neat/requirements.txt
 
-RUN pip install pyarrow && \
-    pip install pytest
+#RUN conda install -c conda-forge pyarrow && \
+#    conda install -c anaconda pytest
 
-USER $NB_UID
+
+
+COPY docker/scripts/install-final-dependencies.sh /tmp/scripts/install-final-dependencies.sh
+RUN bash /tmp/scripts/install-final-dependencies.sh
+
+#USER $NB_UID
+#RUN pip install --user pyarrow==0.17.1 && \
+#    pip install --user pytest
+
+
 
 
 # R pre-requisites
