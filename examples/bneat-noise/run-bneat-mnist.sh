@@ -16,7 +16,7 @@ initial_nodes_sample=30
 architecture_mutation_power=1
 is_initial_fully_connected=0
 
-n_output=5
+#n_output=5
 
 POP_SIZE=50
 N_GENERATIONS=150
@@ -28,8 +28,8 @@ function run_bneat {
   fix_std=$2
   n_samples=$3
 
-#  for label_noise in 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
-#  do
+  for label_noise in 0.95
+  do
   for repetition in $(seq 1 $N_REPETITIONS)
   do
     pipenv run python neat/run_example.py run \
@@ -44,10 +44,9 @@ function run_bneat {
                               'is_initial_fully_connected': $is_initial_fully_connected,
                               'noise': $noise,
                               'label_noise': $label_noise,
-                              'n_output': $n_output
         }"
   done
-#  done
+  done
 }
 
 N_EXTERNAL_REPETITIONS=5
@@ -56,7 +55,7 @@ for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
 
   # RUN Bayesian-Neat
 #  correlation_id='bayesian_neat_ft_final_v1_'$DATASET
-  correlation_id='bayesian_neat_ft_final_v1_5_classes'$DATASET
+  correlation_id='bayesian_neat_ft_22_lenovo_final_1_mnist_downsampled'
 
   fix_std=0
   n_samples=50

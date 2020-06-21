@@ -17,6 +17,8 @@ architecture_mutation_power=1
 is_initial_fully_connected=0
 beta=0.0
 
+n_output=5
+
 POP_SIZE=50
 N_GENERATIONS=150
 
@@ -43,7 +45,8 @@ function run_bneat {
                               'is_initial_fully_connected': $is_initial_fully_connected,
                               'beta': $beta,
                               'noise': $noise,
-                              'label_noise': $label_noise
+                              'label_noise': $label_noise,
+                              'n_output': $n_output
         }"
   done
 #  done
@@ -54,7 +57,9 @@ for rep in $(seq 1 $N_EXTERNAL_REPETITIONS)
   do
 
   # RUN Bayesian-Neat
-  correlation_id='neat_ft_final_v1_'$DATASET
+#  correlation_id='neat_ft_final_v1_'$DATASET
+  correlation_id='neat_ft_final_v1_5_classes'$DATASET
+
   fix_std=1
   n_samples=1
   run_bneat $correlation_id $fix_std $n_samples
