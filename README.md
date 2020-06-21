@@ -5,3 +5,8 @@ Regression and Classification.
 ## Spin up environment
 
 `make jupyter`
+
+
+## Run test
+
+`make test`
