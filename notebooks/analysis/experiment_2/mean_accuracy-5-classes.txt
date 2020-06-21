@@ -1,0 +1,7 @@
+\begin{tabular}{lrrrr}
+\toprule
+           dataset &     MLP &  Bayesian-MLP &    NEAT &  Bayesian-NEAT \\
+\midrule
+ mnist\_downsampled &  98.384 &        94.224 &  93.968 &         90.128 \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,13 @@
+\begin{tabular}{lrrrrrrrr}
+\toprule
+           dataset & \multicolumn{2}{l}{Bayesian-MLP} & \multicolumn{2}{l}{Bayesian-NEAT} & \multicolumn{2}{l}{MLP} & \multicolumn{2}{l}{NEAT} \\
+                   &     accuracy &        f1 &      accuracy &        f1 &   accuracy &        f1 &   accuracy &        f1 \\
+\midrule
+     breast\_cancer &    98.741259 &  0.987396 &     96.363636 &  0.963626 &  97.622378 &  0.976140 &  95.804196 &  0.957703 \\
+              iris &    94.736842 &  0.947172 &     94.736842 &  0.947556 &  94.736842 &  0.947235 &  94.210526 &  0.941770 \\
+ mnist\_downsampled &    76.208000 &  0.755965 &     64.416000 &  0.620213 &  95.800000 &  0.957968 &        NaN &       NaN \\
+          spambase &    90.894874 &  0.908192 &     88.213148 &  0.880798 &  92.988705 &  0.929950 &  91.963510 &  0.919338 \\
+           titanic &    78.396947 &  0.779852 &     78.702290 &  0.781418 &  78.511450 &  0.780609 &  79.669211 &  0.791214 \\
+              wine &          NaN &       NaN &     96.888889 &  0.969041 &        NaN &       NaN &        NaN &       NaN \\
+\bottomrule
+\end{tabular}

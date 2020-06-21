@@ -1,0 +1,12 @@
+\begin{tabular}{lrrrr}
+\toprule
+           dataset &  MLP &  Bayesian-MLP &  NEAT &  Bayesian-NEAT \\
+\midrule
+              iris &  2.6 &           2.4 &   5.6 &       4.000000 \\
+              wine &  2.5 &           2.6 &   8.4 &      12.400000 \\
+     breast\_cancer &  2.7 &           2.6 &   7.6 &      11.800000 \\
+           titanic &  2.5 &           2.0 &  12.6 &      10.400000 \\
+          spambase &  2.7 &           2.4 &   8.5 &      13.833333 \\
+ mnist\_downsampled &  2.6 &           2.8 &   3.6 &       4.400000 \\
+\bottomrule
+\end{tabular}

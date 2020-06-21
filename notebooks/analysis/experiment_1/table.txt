@@ -1,0 +1,12 @@
+\begin{tabular}{llrr}
+\toprule
+Version &            dataset &  Without Fine-Tuning &  With Fine-Tuning \\
+\midrule
+0 &      breast\_cancer &             0.386794 &          0.369603 \\
+1 &               iris &             0.885162 &          0.599088 \\
+2 &  mnist\_downsampled &             2.181421 &          1.908603 \\
+3 &           spambase &             0.496322 &          0.488217 \\
+4 &            titanic &             0.530425 &          0.499358 \\
+5 &               wine &             0.676358 &          0.642262 \\
+\bottomrule
+\end{tabular}
