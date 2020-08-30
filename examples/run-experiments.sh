@@ -5,8 +5,7 @@ export AWS_S3_HOST=http://localhost:9000
 export AWS_ACCESS_KEY_ID=minioKey
 export AWS_SECRET_ACCESS_KEY=minioSecret
 export AWS_REGION=eu-west-1
-export SLACK_API_TOKEN=xoxp-803548304551-788909703698-803912405606-3537f75bda859d01dafc0bffcb200ade
-export JULIA_BASE_PATH=/home/alberto/Desktop/repos/master_thesis/Neat-Julieta
+export SLACK_API_TOKEN=$SLACK_API_TOKEN
 
 ###################################################################
 # Regression-Siso
